@@ -4,7 +4,30 @@
   "name": "Eden Chrome Extension",
   "description": "Chrome extension for Eden",
   "action": {
-      "default_popup": "js/index.html",
-      "default_title": "React Chrome Extension"
-  }
+    "default_popup": "js/index.html",
+    "default_title": "React Chrome Extension"
+  },
+  "icons": {
+    "128": "icon-128.png",
+    "34": "icon-34.png"
+  },
+  "background": {
+    "service_worker": "js/background.bundle.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["js/content.bundle.js"]
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
 }

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -11,8 +12,10 @@
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.14",
     "@types/tailwindcss": "^3.1.0",
+    "classnames": "^2.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.47.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
@@ -43,6 +46,7 @@
     ]
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.248",
     "autoprefixer": "^10.4.16",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",

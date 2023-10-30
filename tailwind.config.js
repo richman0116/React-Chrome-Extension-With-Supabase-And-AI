@@ -2,7 +2,18 @@
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      backgroundColor: {
+        'cream': '#FAF3E0',
+        'gold': '#F0C808',
+      },
+      textColor: {
+        'gold': '#F0C808',
+      },
+      hoverBackgroundColor: {
+        'gold-dark': '#DAB307',
+      },
+    },
   },
   plugins: [],
 }

@@ -23,28 +23,32 @@ const Login = () => {
 
   const handleSignIn = useCallback(
     (data: LoginFormData) => {
-      setIsSubmitting(true);
-      const { email, password } = data;
-      chrome.runtime.sendMessage(
-        extensionId,
-        {
-          action: "loginWithEmailPassword",
-          email,
-          password,
-        },
-        (response) => {
-          console.log("We are here");
-          if (response.error) {
-            console.log("response.error", response.error);
-            setIsLoggedIn(false);
-            setIsSubmitting(false);
-          } else {
-            console.log("response", response);
-            setIsLoggedIn(response);
-            setIsSubmitting(false);
+      try {
+        setIsSubmitting(true);
+        const { email, password } = data;
+        chrome.runtime.sendMessage(
+          extensionId,
+          {
+            action: "loginWithEmailPassword",
+            email,
+            password,
+          },
+          (response) => {
+            console.log("We are here ======");
+            if (response.error) {
+              console.log("response.error", response.error);
+              setIsLoggedIn(false);
+              setIsSubmitting(false);
+            } else {
+              console.log("response", response);
+              setIsLoggedIn(response);
+              setIsSubmitting(false);
+            }
           }
-        }
-      );
+        );
+      } catch (ex) {
+        console.log(ex, "kkkkkkkk");
+      }
     },
     [setIsLoggedIn]
   );

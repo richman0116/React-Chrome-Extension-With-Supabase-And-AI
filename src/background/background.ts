@@ -2,6 +2,8 @@
 import supabase from '../utils/supabase'
 import { Session, AuthError } from '@supabase/supabase-js';
 
+console.log("Background.js is running")
+
 interface SupabaseUserDataInterface {
   data?: {
     user?: {

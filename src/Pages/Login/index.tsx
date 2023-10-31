@@ -37,19 +37,20 @@ const Login = () => {
           if (response.error) {
             console.log("response.error", response.error);
             setIsLoggedIn(false);
+            setIsSubmitting(false);
           } else {
             console.log("response", response);
             setIsLoggedIn(response);
+            setIsSubmitting(false);
           }
         }
       );
-      setIsSubmitting(false);
     },
     [setIsLoggedIn]
   );
 
   return (
-    <div className="max-w-md mx-auto bg-cream p-8 rounded-lg shadow-md">
+    <div className=" w-5/6 bg-cream p-8 rounded-lg shadow-md">
       <div className="flex flex-col items-center">
         <p className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</p>
         <p className="text-lg text-gray-700">Please log in</p>

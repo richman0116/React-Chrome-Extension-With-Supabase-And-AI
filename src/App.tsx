@@ -37,7 +37,7 @@ const App = () => {
       (response) => {
         if (chrome.runtime.lastError) {
           // Handle error
-          console.error(chrome.runtime.lastError);
+          // console.error(chrome.runtime.lastError);
         } else {
           if (response === true) {
             setIsLoggedIn(true);
@@ -45,7 +45,7 @@ const App = () => {
             // get the current url
             // and the text content
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              const url = tabs[0].url;
+              // const url = tabs[0].url;
               chrome.runtime.sendMessage(
                 { action: "getPageContent", tabId: tabs[0].id },
                 (response) => {

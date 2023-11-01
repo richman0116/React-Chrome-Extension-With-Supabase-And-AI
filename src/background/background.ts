@@ -219,9 +219,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   if (request.action === "createCircle") {
     console.log("background.js: Creating circle with name: ", request.circleName, " and url: ", request.url)
-    supabase.rpc('circles_checkpoint_add_new_record', {
+    supabase.rpc('circles_checkpoint_add_new', {
       p_circlename: request.circleName,
       p_url: request.url,
+      p_circle_description: request.circleDescription,
     }).then(result => {
       console.log("background.js: Result of creating circle: ", result)
       sendResponse(result)

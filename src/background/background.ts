@@ -40,7 +40,7 @@ function getFromStorage(key: string): Promise<{
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError as string));
       } else {
-        resolve(result[key]);
+        resolve(JSON.parse(result[key]));
       }
     });
   });

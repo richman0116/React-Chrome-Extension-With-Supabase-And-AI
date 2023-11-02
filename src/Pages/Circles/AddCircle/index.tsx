@@ -25,9 +25,14 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
   const handleCreateCircle = useCallback(
     (data: CircleFormData) => {
       setIsSaving(true);
-      const { name } = data;
+      const { name, description } = data;
       chrome.runtime.sendMessage(
-        { action: "createCircle", circleName: name, url: url },
+        {
+          action: "createCircle",
+          circleName: name,
+          circleDescription: description,
+          url,
+        },
         (response) => {
           if (response.error) {
             console.log(
@@ -38,12 +43,13 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
           } else {
             console.log("CirclesView: createCircle response: ", response);
             setIsSaving(false);
+            setShowList(true);
             // now we want to load circles again just to make sure the result went through
           }
         }
       );
     },
-    [url]
+    [url, setShowList]
   );
 
   return (

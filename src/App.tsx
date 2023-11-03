@@ -5,9 +5,11 @@ import Circles from "./Pages/Circles";
 import Login from "./Pages/Login";
 
 import { extensionId } from "./utils/constants";
+import Loading from "./components/Loading";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isChecking, setIsChecking] = useState<boolean>(true);
 
   const [username, setUsername] = useState<string>("");
 
@@ -41,6 +43,7 @@ const App = () => {
         } else {
           if (response === true) {
             setIsLoggedIn(true);
+            setIsChecking(false);
             getUsername();
             // get the current url
             // and the text content
@@ -55,6 +58,7 @@ const App = () => {
             });
           } else {
             setIsLoggedIn(false);
+            setIsChecking(false);
             // Set up the listener
             // const messageListener = (message: any) => {
             //   if (message.loggedIn !== undefined) {
@@ -79,8 +83,6 @@ const App = () => {
     checkIfLoggedIn();
   }, [checkIfLoggedIn]);
 
-  console.log(isLoggedIn, "kkkk");
-
   return (
     <AuthContext.Provider
       value={{
@@ -88,8 +90,14 @@ const App = () => {
         setIsLoggedIn,
       }}
     >
-      <div className="w-full h-full flex flex-col items-center justify-center">
-        {isLoggedIn ? <Circles /> : <Login />}
+      <div className="w-full h-full py-5 flex flex-col items-center justify-center overflow-y-scroll">
+        {isChecking ? (
+          <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4 ">
+            <Loading />
+          </div>
+        ) : (
+          <>{isLoggedIn ? <Circles /> : <Login />}</>
+        )}
       </div>
     </AuthContext.Provider>
   );

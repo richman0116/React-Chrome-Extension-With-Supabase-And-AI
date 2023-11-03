@@ -55,7 +55,7 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
         )}
       </div>
       {isLoading && (
-        <div className="absolute left-1/2 right-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
           <Loading />
         </div>
       )}

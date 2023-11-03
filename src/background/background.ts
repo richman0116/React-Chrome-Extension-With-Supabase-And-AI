@@ -40,7 +40,7 @@ function getFromStorage(key: string): Promise<{
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError as string));
       } else {
-        resolve(JSON.parse(result[key]));
+        resolve(JSON.parse(result[key] || "{}"));
       }
     });
   });
@@ -207,7 +207,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "getCircles") {
     console.log("background.js: Getting circles")
     if (supabaseUser) {
-      supabase.rpc('circles_get_circle_names_by_url', { p_url: request.url }).then(result => {
+      supabase.rpc('circles_get_circles_by_url', { p_url: request.url }).then(result => {
         console.log('background.js: result of getting circles: ', result)
         sendResponse(result)
       })

@@ -53,7 +53,7 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
   );
 
   return (
-    <div className="w-full h-full p-5 bg-gray-100 shadow-lg rounded-lg">
+    <div className="w-full h-full p-5">
       <div className="flex justify-between items-center mb-4">
         <p className="text-xl font-semibold">Create a new circle</p>
         <button
@@ -87,11 +87,11 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
           required
         />
 
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full pt-10">
           <button
             type="submit"
             disabled={isSaving}
-            className="p-2 px-4 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
+            className="w-full p-2 px-4 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
           >
             {isSaving ? "Saving" : "Save"}
           </button>

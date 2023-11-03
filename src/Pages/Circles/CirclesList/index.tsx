@@ -41,28 +41,36 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
   }, [getCircles]);
 
   return (
-    <div className="p-5 px-4">
-      <div className="text-xl font-bold mb-4">Circles on this page</div>
+    <div className="flex flex-col justify-between h-full w-full">
+      <div className="text-base leading-normal font-bold px-5">
+        <h1>Eden</h1>
+        {!isLoading && circles.length > 0 && (
+          <p>We found circles for you on this page</p>
+        )}
+        {!isLoading && circles.length === 0 && (
+          <p>There are no circles on this page</p>
+        )}
+      </div>
       {isLoading && (
-        <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4 ">
+        <div className="absolute left-1/2 right-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
           <Loading />
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2 h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none px-5">
         {circles.map((item, index) => (
           <div
             key={index}
-            className="circles-item p-4 rounded-md bg-gray-100 shadow-md transition-transform transform hover:scale-105"
+            className="circles-item p-4 rounded-md bg-gray-100 shadow-md transition-transform transform hover:scale-105 hover:cursor-pointer"
           >
             <p className="circles-item-text text-sm text-gray-700">{item}</p>
           </div>
         ))}
       </div>
-      <div className="flex justify-end my-4">
+      <div className="flex justify-end my-2 sticky bottom-5 px-5 w-full">
         <button
           onClick={() => setShowList(false)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
           Add New
         </button>

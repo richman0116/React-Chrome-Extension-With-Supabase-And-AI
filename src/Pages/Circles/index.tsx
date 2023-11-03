@@ -29,7 +29,7 @@ const Circles = () => {
   }, [getURL]);
 
   return (
-    <div className="h-full w-5/6">
+    <div className="h-full w-full">
       {showList ? (
         <CirclList setShowList={setShowList} url={currentUrl} />
       ) : (

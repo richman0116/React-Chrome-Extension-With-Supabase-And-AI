@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   Dispatch,
+  useMemo,
 } from "react";
 
 import CircleItem from "../../../components/CircleItem";
@@ -43,15 +44,22 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
     getCircles();
   }, [getCircles]);
 
+  const resultText = useMemo(() => {
+    if (!isLoading && circles.length > 0) {
+      if (circles.length > 1) {
+        return "We found these circles for you on this page";
+      } else {
+        return "We found this circle for you on this page";
+      }
+    }
+  }, [isLoading, circles]);
+
   return (
     <div className="flex flex-col justify-between h-full w-full">
-      <div className="text-base leading-normal font-bold px-5">
-        <h1>Eden</h1>
+      <div className="px-5">
+        <h1 className="text-xl font-bold leading-normal">Eden</h1>
         {!isLoading && circles.length > 0 && (
-          <p>We found circles for you on this page</p>
-        )}
-        {!isLoading && circles.length === 0 && (
-          <p>There are no circles on this page</p>
+          <p className="text-base leading-normal font-bold ">{resultText}</p>
         )}
       </div>
       {isLoading && (
@@ -60,11 +68,21 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
         </div>
       )}
 
-      <div className="space-y-2 h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none px-5">
-        {circles.map((circle, index) => (
-          <CircleItem key={index} circle={circle} />
-        ))}
-      </div>
+      {!isLoading && circles.length === 0 && (
+        <div className="w-full h-[70%] flex items-center justify-center">
+          <p className="text-base leading-normal font-bold">
+            There are no circles on this page
+          </p>
+        </div>
+      )}
+
+      {!isLoading && circles.length > 0 && (
+        <div className="space-y-2 h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none px-5">
+          {circles.map((circle, index) => (
+            <CircleItem key={index} circle={circle} />
+          ))}
+        </div>
+      )}
       <div className="flex justify-end my-2 sticky bottom-5 px-5 w-full">
         <button
           onClick={() => setShowList(false)}

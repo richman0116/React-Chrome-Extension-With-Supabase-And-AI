@@ -91,7 +91,7 @@ const App = () => {
         setIsLoggedIn,
       }}
     >
-      <div className="w-full h-full py-5 flex flex-col items-center justify-center">
+      <div className="w-full h-full pt-10 pb-5 flex flex-col items-center justify-center">
         {isChecking ? (
           <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4 ">
             <Loading />

@@ -7,7 +7,7 @@ interface CircleItemInterface {
 const CircleItem = ({ circle }: CircleItemInterface) => {
   return (
     <a
-      href={`https://eden-web-v3.vercel.app/circle/${circle.id}`}
+      href={`https://edenzero.vercel.app/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
       className="circles-item px-4 my-2 h-20 transition-transform transform hover:scale-105 hover:cursor-pointer flex gap-5 items-center group"

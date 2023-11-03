@@ -38,6 +38,7 @@ const App = () => {
       { action: "checkLoggedIn" },
       (response) => {
         if (chrome.runtime.lastError) {
+          setIsChecking(false);
           // Handle error
           // console.error(chrome.runtime.lastError);
         } else {

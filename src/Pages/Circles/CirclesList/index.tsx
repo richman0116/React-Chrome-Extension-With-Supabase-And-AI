@@ -5,7 +5,10 @@ import {
   useState,
   Dispatch,
 } from "react";
+
+import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
+import { CircleInterface } from "../../../types/circle";
 
 interface ICircleList {
   setShowList: Dispatch<SetStateAction<boolean>>;
@@ -13,7 +16,7 @@ interface ICircleList {
 }
 
 const CirclList = ({ setShowList, url }: ICircleList) => {
-  const [circles, setCircles] = useState<string[]>([]);
+  const [circles, setCircles] = useState<CircleInterface[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getCircles = useCallback(async () => {
@@ -58,13 +61,8 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
       )}
 
       <div className="space-y-2 h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none px-5">
-        {circles.map((item, index) => (
-          <div
-            key={index}
-            className="circles-item p-4 rounded-md bg-gray-100 shadow-md transition-transform transform hover:scale-105 hover:cursor-pointer"
-          >
-            <p className="circles-item-text text-sm text-gray-700">{item}</p>
-          </div>
+        {circles.map((circle, index) => (
+          <CircleItem key={index} circle={circle} />
         ))}
       </div>
       <div className="flex justify-end my-2 sticky bottom-5 px-5 w-full">

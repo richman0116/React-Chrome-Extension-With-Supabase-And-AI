@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import AuthContext from "../../contexts/AuthContext";
 import FormLine from "../../components/FormLine";
 
-import { extensionId } from "../../utils/constants";
-
 interface LoginFormData {
   email: string;
   password: string;
@@ -27,7 +25,6 @@ const Login = () => {
         setIsSubmitting(true);
         const { email, password } = data;
         chrome.runtime.sendMessage(
-          extensionId,
           {
             action: "loginWithEmailPassword",
             email,

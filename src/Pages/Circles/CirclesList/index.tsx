@@ -10,6 +10,7 @@ import {
 import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
+import { isMainURL } from "../../../utils/helpers";
 
 interface ICircleList {
   setShowList: Dispatch<SetStateAction<boolean>>;
@@ -54,6 +55,8 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
     }
   }, [isLoading, circles]);
 
+  const isMainUrl = isMainURL(url);
+
   return (
     <div className="flex flex-col justify-between h-full w-full">
       <div className="px-5">
@@ -84,12 +87,14 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
         </div>
       )}
       <div className="flex justify-end my-2 sticky bottom-5 px-5 w-full">
-        <button
-          onClick={() => setShowList(false)}
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
-          Add New
-        </button>
+        {!isMainUrl ? (
+          <button
+            onClick={() => setShowList(false)}
+            className="w-full px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Add New
+          </button>
+        ) : null}
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import AuthContext from "./contexts/AuthContext";
 import Circles from "./Pages/Circles";
 import Login from "./Pages/Login";
 
-import { extensionId } from "./utils/constants";
 import Loading from "./components/Loading";
 
 const App = () => {
@@ -18,7 +17,6 @@ const App = () => {
       // do nothing
     } else {
       chrome.runtime.sendMessage(
-        extensionId,
         { action: "getUsername" },
         (response) => {
           if (chrome.runtime.lastError) {
@@ -34,7 +32,6 @@ const App = () => {
 
   const checkIfLoggedIn = useCallback(() => {
     chrome.runtime.sendMessage(
-      extensionId,
       { action: "checkLoggedIn" },
       (response) => {
         if (chrome.runtime.lastError) {

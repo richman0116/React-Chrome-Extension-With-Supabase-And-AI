@@ -58,24 +58,24 @@ const App = () => {
             setIsLoggedIn(false);
             setIsChecking(false);
             // Set up the listener
-            // const messageListener = (message: any) => {
-            //   if (message.loggedIn !== undefined) {
-            //     setIsLoggedIn(message.loggedIn);
-            //     if (message.loggedIn) {
-            //       getUsername();
-            //     }
-            //   }
-            // };
-            // chrome.runtime.onMessage.addListener(messageListener);
-            // // Cleanup listener on unmount
-            // return () => {
-            //   chrome.runtime.onMessage.removeListener(messageListener);
-            // };
+            const messageListener = (message: any) => {
+              if (message.loggedIn !== undefined) {
+                setIsLoggedIn(message.loggedIn);
+                if (message.loggedIn) {
+                  getUsername();
+                }
+              }
+            };
+            chrome.runtime.onMessage.addListener(messageListener);
+            // Cleanup listener on unmount
+            return () => {
+              chrome.runtime.onMessage.removeListener(messageListener);
+            };
           }
         }
       }
     );
-  }, [getUsername, setIsLoggedIn]);
+  }, [getUsername]);
 
   useEffect(() => {
     checkIfLoggedIn();

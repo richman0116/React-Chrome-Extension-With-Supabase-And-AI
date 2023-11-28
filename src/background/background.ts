@@ -14,9 +14,9 @@ interface SupabaseUserDataInterface {
   }
 }
 
-var userLoaded = false; // check if we are loading the user
-var supabaseUser: SupabaseUserDataInterface = {}; // store the user
-var supabaseUsername: string = ""; // store the username
+let userLoaded = false; // check if we are loading the user
+let supabaseUser: SupabaseUserDataInterface = {}; // store the user
+let supabaseUsername: string = ""; // store the username
 
 // function to get a value from storage
 function getFromStorage(key: string): Promise<{
@@ -80,7 +80,7 @@ async function loginUserWithSession() {
   const session = await getFromStorage('supabaseSession');
   if (session) {
     console.log("background.js: Session exists, logging in with session: ", session);
-    if (session?.data?.session?.access_token && session?.data?.session?.access_token) {
+    if (session?.data?.session?.access_token && session?.data?.session?.refresh_token) {
       await supabase.auth.setSession({ access_token: session.data.session.access_token, refresh_token: session.data.session.refresh_token })
     }
     const newSession = await supabase.auth.getSession()

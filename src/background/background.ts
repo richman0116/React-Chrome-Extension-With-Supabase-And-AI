@@ -139,8 +139,8 @@ async function getUser() {
 const showCircleCount = async (url: string) => {
   if (supabaseUser && url) {
     supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(result => {
-      if (result.data) {
-        chrome.action.setBadgeText({ text: result.data?.length?.toString() })
+      if (result.data?.length > 0) {
+        chrome.action.setBadgeText({ text: result.data.length.toString() })
       } else {
         chrome.action.setBadgeText({ text: '' })
       }

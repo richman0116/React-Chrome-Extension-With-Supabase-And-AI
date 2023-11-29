@@ -14,9 +14,9 @@ interface SupabaseUserDataInterface {
   }
 }
 
-var userLoaded = false; // check if we are loading the user
-var supabaseUser: SupabaseUserDataInterface = {}; // store the user
-var supabaseUsername: string = ""; // store the username
+let userLoaded = false; // check if we are loading the user
+let supabaseUser: SupabaseUserDataInterface = {}; // store the user
+let supabaseUsername: string = ""; // store the username
 
 // function to get a value from storage
 function getFromStorage(key: string): Promise<{
@@ -80,7 +80,7 @@ async function loginUserWithSession() {
   const session = await getFromStorage('supabaseSession');
   if (session) {
     console.log("background.js: Session exists, logging in with session: ", session);
-    if (session?.data?.session?.access_token && session?.data?.session?.access_token) {
+    if (session?.data?.session?.access_token && session?.data?.session?.refresh_token) {
       await supabase.auth.setSession({ access_token: session.data.session.access_token, refresh_token: session.data.session.refresh_token })
     }
     const newSession = await supabase.auth.getSession()
@@ -134,6 +134,18 @@ async function getUser() {
     userLoaded = true;
   }
   return supabaseUser;
+}
+
+const showCircleCount = async (url: string) => {
+  if (supabaseUser && url) {
+    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(result => {
+      if (result.data?.length > 0) {
+        chrome.action.setBadgeText({ text: result.data.length.toString() })
+      } else {
+        chrome.action.setBadgeText({ text: '' })
+      }
+    })
+  }
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -242,7 +254,7 @@ chrome.runtime.onStartup.addListener(async () => {
 })
 
 // whenever we update a tab, log the url
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener( async (tabId, changeInfo, tab) => {
   if (changeInfo.url === undefined) return;
   // check if the url starts with https or http
   if (!changeInfo.url.startsWith('https://') && !changeInfo.url.startsWith('http://')) {
@@ -254,27 +266,38 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log("background.js: URL does not have a path.");
     return;
   }
-  // // execute a content script to get the text content of the page
-  // if (supabaseUser) {
-  //     chrome.scripting.executeScript({
-  //         target: { tabId: tab.id },
-  //         func: () => {
-  //             const texts = (document.body.innerText);
-  //             return texts;
-  //         }
-  //     }).then((result) => {
-  //         tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
-  //         // it's not needed right now but maybe later we will need to look at the content
-  //         const hash = CryptoJS.SHA256(result[0].result).toString();
-  //         console.log(changeInfo.url)
-  //         console.log(hash);
-  //     }).catch((err) => {
-  //         console.error(`Error executing script: ${err}`);
-  //     });
-  // }
+  // execute a content script to get the text content of the page
+  if (supabaseUser && changeInfo.url) {
+    await showCircleCount(changeInfo.url)
+      // chrome.scripting.executeScript({
+      //     target: { tabId: tab.id },
+      //     func: () => {
+      //         const texts = (document.body.innerText);
+      //         return texts;
+      //     }
+      // }).then((result) => {
+      //     tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
+      //     // it's not needed right now but maybe later we will need to look at the content
+      //     const hash = CryptoJS.SHA256(result[0].result).toString();
+      //     console.log(changeInfo.url)
+      //     console.log(hash);
+      // }).catch((err) => {
+      //     console.error(`Error executing script: ${err}`);
+      // });
+  }
 });
 
 // whenever we create a new tab, log the url
 chrome.tabs.onCreated.addListener((tab) => {
   console.log(`New tab created. URL: ${tab.url}`);
 });
+
+// whenever new tab is activated
+chrome.tabs.onActivated.addListener((actveInfo) => {
+  chrome.tabs.get(actveInfo.tabId, async (tab) => {
+    const url = tab.url
+    if (url) {
+      await showCircleCount(url)
+    }
+  })
+})

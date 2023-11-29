@@ -243,6 +243,8 @@ chrome.runtime.onStartup.addListener(async () => {
 
 // whenever we update a tab, log the url
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC')
+  chrome.action.setBadgeText({ text: '' })
   if (changeInfo.url === undefined) return;
   // check if the url starts with https or http
   if (!changeInfo.url.startsWith('https://') && !changeInfo.url.startsWith('http://')) {
@@ -254,27 +256,49 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log("background.js: URL does not have a path.");
     return;
   }
-  // // execute a content script to get the text content of the page
-  // if (supabaseUser) {
-  //     chrome.scripting.executeScript({
-  //         target: { tabId: tab.id },
-  //         func: () => {
-  //             const texts = (document.body.innerText);
-  //             return texts;
-  //         }
-  //     }).then((result) => {
-  //         tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
-  //         // it's not needed right now but maybe later we will need to look at the content
-  //         const hash = CryptoJS.SHA256(result[0].result).toString();
-  //         console.log(changeInfo.url)
-  //         console.log(hash);
-  //     }).catch((err) => {
-  //         console.error(`Error executing script: ${err}`);
-  //     });
-  // }
+  // execute a content script to get the text content of the page
+  console.log(changeInfo.url, '******************* url url')
+  if (supabaseUser) {
+    supabase.rpc('circles_get_circles_by_url', { p_url: changeInfo.url }).then(result => {
+      if (result.data) {
+        chrome.action.setBadgeText({ text: result.data?.length?.toString() })
+      }
+    })
+      // chrome.scripting.executeScript({
+      //     target: { tabId: tab.id },
+      //     func: () => {
+      //         const texts = (document.body.innerText);
+      //         return texts;
+      //     }
+      // }).then((result) => {
+      //     tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
+      //     // it's not needed right now but maybe later we will need to look at the content
+      //     const hash = CryptoJS.SHA256(result[0].result).toString();
+      //     console.log(changeInfo.url)
+      //     console.log(hash);
+      // }).catch((err) => {
+      //     console.error(`Error executing script: ${err}`);
+      // });
+  }
 });
 
 // whenever we create a new tab, log the url
 chrome.tabs.onCreated.addListener((tab) => {
+  console.log('BBBBBBBBBBBBBBBBBBB')
   console.log(`New tab created. URL: ${tab.url}`);
 });
+
+// // whenever the url has been changed
+// chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//   console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+//   chrome.action.setBadgeText({ text: '' })
+//   console.log("CirclesView: getURL: tabs[0].url: ", tabs[0].url);
+//   const url = tabs[0].url;
+//   if (supabaseUser) {
+//     supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(result => {
+//       if (result.data) {
+//         chrome.action.setBadgeText({ text: result.data?.length?.toString() })
+//       }
+//     })
+//   }
+// });

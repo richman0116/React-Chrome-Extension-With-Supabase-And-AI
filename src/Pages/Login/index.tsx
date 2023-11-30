@@ -52,6 +52,9 @@ const Login = () => {
 
   return (
     <div className=" w-5/6 bg-cream p-8 rounded-lg shadow-md">
+      <div className="w-full flex justify-end pb-4">
+        <a href="https://edenzero.vercel.app/signup" target="_blank" rel="noreferrer" className="text-base">{'Sign up >>'}</a>
+      </div>
       <div className="flex flex-col items-center">
         <p className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</p>
         <p className="text-lg text-gray-700">Please log in</p>

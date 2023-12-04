@@ -148,6 +148,15 @@ const showCircleCount = async (url: string) => {
   }
 }
 
+const checkIfUserJoinedCircle = async (circleId: string) => {
+  console.log("background.js: checkIfUserJoinedCircle function")
+  const { data, error } = await supabase.rpc('check_auth_user_is_in_the_circle', {
+    circleid: circleId
+  })
+  if (error) console.log("An error occurred on check_auth_user_is_in_the_circle function calling")
+  return data
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkLoggedIn") {
     // This is an example async function, replace with your own
@@ -240,6 +249,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(result)
     })
     return true;
+  }
+
+  if (request.action === "checkIfUserJoinedCircle") {
+    checkIfUserJoinedCircle(request.circleId).then((result) => {
+      sendResponse(result)
+    })
+    return true
   }
 });
 

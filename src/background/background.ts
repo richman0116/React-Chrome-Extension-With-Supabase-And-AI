@@ -91,6 +91,16 @@ async function loginUserWithSession() {
   }
 }
 
+async function logout() {
+  console.log('Supabase log out')
+  const { error } = await supabase.auth.signOut()
+  if (error) console.log("An error occurred on log out")
+  setToStorage('supabaseSession', '');
+  supabaseUser = {}
+  supabaseUsername = ''
+  userLoaded = false
+}
+
 // get user name from saved supabaseUser variable
 async function getUsername() {
   console.log("background.js: Getting username with id: ", supabaseUser?.data?.user?.id);
@@ -137,7 +147,7 @@ async function getUser() {
 }
 
 const showCircleCount = async (url: string) => {
-  if (supabaseUser && url) {
+  if (url) {
     supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(result => {
       if (result.data?.length > 0) {
         chrome.action.setBadgeText({ text: result.data.length.toString() })
@@ -157,7 +167,7 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
   return data
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.action === "checkLoggedIn") {
     // This is an example async function, replace with your own
     getUser().then(result => {
@@ -257,6 +267,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })
     return true
   }
+
+  if (request.action === 'logout') {
+    logout().then(() => {
+      sendResponse(true)
+    })
+    return true
+  }
+
+  if (request.action === 'showCircleCount') {
+    showCircleCount(request.url).then(() => {})
+    return true
+  }
+
 });
 
 chrome.runtime.onStartup.addListener(async () => {

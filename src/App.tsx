@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import AuthContext from "./contexts/AuthContext";
 import Circles from "./Pages/Circles";
 import Login from "./Pages/Login";
-
 import Loading from "./components/Loading";
 
 const App = () => {
@@ -82,22 +80,15 @@ const App = () => {
   }, [checkIfLoggedIn]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        isLoggedIn,
-        setIsLoggedIn,
-      }}
-    >
-      <div className="w-full h-full pt-10 pb-5 flex flex-col items-center justify-center">
-        {isChecking ? (
-          <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4 ">
-            <Loading />
-          </div>
-        ) : (
-          <>{isLoggedIn ? <Circles /> : <Login />}</>
+    <div className="w-full h-full pt-10 pb-5 flex flex-col items-center justify-center">
+      {isChecking ? (
+        <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4 ">
+          <Loading />
+        </div>
+      ) : (
+          <>{isLoggedIn ? <Circles setIsLoggedIn={setIsLoggedIn} /> : <Login />}</>
         )}
       </div>
-    </AuthContext.Provider>
   );
 };
 

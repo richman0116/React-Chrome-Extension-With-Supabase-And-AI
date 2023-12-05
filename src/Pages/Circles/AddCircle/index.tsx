@@ -53,7 +53,7 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
   );
 
   return (
-    <div className="w-full h-full p-5">
+    <div className="w-full h-full py-5">
       <div className="flex justify-between items-center mb-4">
         <p className="text-xl font-semibold">Create a new circle</p>
         <button

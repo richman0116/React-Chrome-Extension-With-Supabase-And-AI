@@ -53,12 +53,12 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
   );
 
   return (
-    <div className="w-full h-full p-5">
+    <div className="w-full h-full py-5">
       <div className="flex justify-between items-center mb-4">
         <p className="text-xl font-semibold">Create a new circle</p>
         <button
           onClick={() => setShowList(true)}
-          className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+          className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
         >
           Back
         </button>

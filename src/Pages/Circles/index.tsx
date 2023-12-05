@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 import AddNewCircle from "./AddCircle";
 import CirclList from "./CirclesList";
+import LogoutButton from "../../components/LogoutButton";
 
-const Circles = () => {
+interface CirclesInterface {
+  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
+}
+
+const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
   const [showList, setShowList] = useState<boolean>(true);
   const [currentUrl, setCurrentUrl] = useState<string>("");
 
@@ -29,7 +34,10 @@ const Circles = () => {
   }, [getURL]);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full px-5">
+      <div className="w-full flex flex-row-reverse items-center justify-between">
+        <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+      </div>
       {showList ? (
         <CirclList setShowList={setShowList} url={currentUrl} />
       ) : (

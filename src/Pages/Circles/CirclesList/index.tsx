@@ -59,7 +59,7 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
 
   return (
     <div className="flex flex-col justify-between h-full w-full">
-      <div className="px-5">
+      <div className="w-full">
         <h1 className="text-xl font-bold leading-normal">Eden</h1>
         {!isLoading && circles.length > 0 && (
           <p className="text-base leading-normal font-bold ">{resultText}</p>
@@ -80,13 +80,13 @@ const CirclList = ({ setShowList, url }: ICircleList) => {
       )}
 
       {!isLoading && circles.length > 0 && (
-        <div className="space-y-2 h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none px-5">
+        <div className="h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none">
           {circles.map((circle, index) => (
             <CircleItem key={index} circle={circle} />
           ))}
         </div>
       )}
-      <div className="flex justify-end my-2 sticky bottom-5 px-5 w-full">
+      <div className="flex justify-end my-2 sticky bottom-5 w-full">
         {!isMainUrl ? (
           <button
             onClick={() => setShowList(false)}

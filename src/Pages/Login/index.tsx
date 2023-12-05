@@ -1,7 +1,6 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import AuthContext from "../../contexts/AuthContext";
 import FormLine from "../../components/FormLine";
 
 interface LoginFormData {
@@ -10,7 +9,6 @@ interface LoginFormData {
 }
 
 const Login = () => {
-  const { setIsLoggedIn } = useContext(AuthContext);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -34,11 +32,9 @@ const Login = () => {
             console.log("We are here ======");
             if (response.error) {
               console.log("response.error", response.error);
-              setIsLoggedIn(false);
               setIsSubmitting(false);
             } else {
               console.log("response", response);
-              setIsLoggedIn(response);
               setIsSubmitting(false);
             }
           }
@@ -47,7 +43,7 @@ const Login = () => {
         console.log(ex, "kkkkkkkk");
       }
     },
-    [setIsLoggedIn]
+    []
   );
 
   return (

@@ -3,13 +3,14 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "reac
 import AddNewCircle from "./AddCircle";
 import CirclList from "./CirclesList";
 import LogoutButton from "../../components/LogoutButton";
+import { circlePageStatus } from "../../utils/constants";
 
 interface CirclesInterface {
   setIsLoggedIn: Dispatch<SetStateAction<boolean>>
 }
 
 const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
-  const [showList, setShowList] = useState<boolean>(true);
+  const [pageStatus, setPageStatus] = useState<number>(circlePageStatus.CIRCLE_LIST);
   const [currentUrl, setCurrentUrl] = useState<string>("");
 
   const getURLPromise: () => Promise<string> = useCallback(() => {
@@ -38,11 +39,8 @@ const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
       <div className="w-full flex flex-row-reverse items-center justify-between">
         <LogoutButton setIsLoggedIn={setIsLoggedIn} />
       </div>
-      {showList ? (
-        <CirclList setShowList={setShowList} url={currentUrl} />
-      ) : (
-        <AddNewCircle setShowList={setShowList} url={currentUrl} />
-      )}
+      { pageStatus === circlePageStatus.CIRCLE_LIST && <CirclList setPageStatus={setPageStatus} url={currentUrl} /> }
+      { pageStatus === circlePageStatus.ADD_CIRCLE && <AddNewCircle setPageStatus={setPageStatus} url={currentUrl} /> }
     </div>
   );
 };

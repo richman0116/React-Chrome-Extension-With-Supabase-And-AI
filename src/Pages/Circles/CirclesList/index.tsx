@@ -47,6 +47,18 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
     getCircles();
   }, [getCircles]);
 
+  useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const url = tabs[0].url;
+      chrome.runtime.sendMessage(
+        { action: "showCircleCount", url },
+        (response) => {
+          console.log('circle bagdge number has been updated')
+        }
+      );
+    });
+  }, [])
+
   const resultText = useMemo(() => {
     if (!isLoading && circles.length > 0) {
       if (circles.length > 1) {

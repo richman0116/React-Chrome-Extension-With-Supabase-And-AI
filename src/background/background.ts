@@ -248,6 +248,19 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     }
     return true;
   }
+  if (request.action === "getUserCircles") {
+    console.log("background.js: Getting User circles")
+    if (supabaseUser) {
+      supabase.rpc('get_user_circles', { userid: supabaseUser.data?.user?.id }).then(result => {
+        console.log('background.js: result of getting user circles: ', result)
+        sendResponse(result)
+      })
+    } else {
+      console.error("background.js: User not logged in when calling getUserCircles")
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
+  }
   if (request.action === "createCircle") {
     console.log("background.js: Creating circle with name: ", request.circleName, " and url: ", request.url)
     supabase.rpc('circles_checkpoint_add_new', {
@@ -259,6 +272,17 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       sendResponse(result)
     })
     return true;
+  }
+
+  if (request.action === 'claimCircle') {
+    console.log("background.js: Claiming the circle: ", request.circleId, " and url: ", request.url)
+    supabase.rpc('circles_claim_circle', {
+      p_url: request.url,
+      circle_id: request.circleId
+    }).then(result => {
+      sendResponse(true)
+    })
+    return true
   }
 
   if (request.action === "checkIfUserJoinedCircle") {

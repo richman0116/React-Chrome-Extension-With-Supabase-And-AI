@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import classNames from "classnames";
+
 import { CircleInterface } from "../../types/circle";
+import { circlePageStatus } from "../../utils/constants";
 
 interface CircleItemInterface {
   circle: CircleInterface;
   url: string;
   isOnClaimPage?: boolean;
-  onClaim?: (circleId: string) => void
+  setPageStatus?: Dispatch<SetStateAction<number>>
 }
 
-const CircleItem = ({ circle, isOnClaimPage, onClaim }: CircleItemInterface) => {
+const CircleItem = ({ circle, isOnClaimPage, setPageStatus, url }: CircleItemInterface) => {
   const [isJoined, setIsJoined] = useState<boolean>(false)
+  const [isClaiming, setIsClaiming] = useState<boolean>(false)
 
   const checkIfJoined = useCallback(async () => {
     chrome.runtime.sendMessage({ action: "checkIfUserJoinedCircle", circleId: circle.id }, (response) => {
@@ -22,6 +26,16 @@ const CircleItem = ({ circle, isOnClaimPage, onClaim }: CircleItemInterface) => 
   useEffect(() => {
     checkIfJoined()
   }, [checkIfJoined]);
+
+  const handleClaim = useCallback((circleId: string) => {
+    setIsClaiming(true)
+    chrome.runtime.sendMessage({ action: "claimCircle", circleId, url }, (response) => {
+      setIsClaiming(false)
+      if (response) {
+        setPageStatus?.(circlePageStatus.CIRCLE_LIST)
+      }
+    });
+  }, [setPageStatus, url])
 
   return (
     <a
@@ -41,14 +55,17 @@ const CircleItem = ({ circle, isOnClaimPage, onClaim }: CircleItemInterface) => 
         </div>
         {isOnClaimPage && 
           <button
+            disabled={isClaiming}
             onClick={(e) =>{
               e.stopPropagation()
               e.preventDefault()
-              onClaim?.(circle.id)
+              handleClaim?.(circle.id)
             }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className={classNames("px-4 py-2  focus:ring-opacity-50 text-white focus:outline-none focus:ring-2 rounded-full bg-blue-500  hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-500", {
+              ' bg-gray-500 hover:bg-gray-600 active:bg-gray-700 focus:ring-gray-500': isClaiming
+            })}
           >
-            Claim
+            {isClaiming ? 'Claiming': 'Claim'}
           </button>}
       </div>
     </a>

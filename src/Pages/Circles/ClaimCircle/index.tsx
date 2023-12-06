@@ -46,25 +46,17 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
     getUserCircles();
   }, [getUserCircles]);
 
-  const claimPossibleCircles = useMemo(() => userCircles.filter((userCircle) => !currentPageCircleIds.includes(userCircle.id) ), [currentPageCircleIds, userCircles])
+  const claimAvailableCircles = useMemo(() => userCircles.filter((userCircle) => !currentPageCircleIds.includes(userCircle.id) ), [currentPageCircleIds, userCircles])
 
   const resultText = useMemo(() => {
-    if (!isLoading && claimPossibleCircles.length > 0) {
-      if (claimPossibleCircles.length > 1) {
+    if (!isLoading && claimAvailableCircles.length > 0) {
+      if (claimAvailableCircles.length > 1) {
         return "We found these circles that you can claim";
       } else {
         return "We found this circle that you can claim";
       }
     }
-  }, [isLoading, claimPossibleCircles]);
-
-  const handleClaim = useCallback((circleId: string) => {
-    chrome.runtime.sendMessage({ action: "claimCircle", circleId, url }, (response) => {
-      if (response) {
-        setPageStatus(circlePageStatus.CIRCLE_LIST)
-      }
-    });
-  }, [setPageStatus, url])
+  }, [isLoading, claimAvailableCircles]);
 
   return (
     <div className="h-full w-full py-5 flex flex-col justify-between">
@@ -78,7 +70,7 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
             Back
           </button>
         </div>
-        {!isLoading && claimPossibleCircles.length > 0 && (
+        {!isLoading && claimAvailableCircles.length > 0 && (
           <p className="text-base leading-normal font-bold ">{resultText}</p>
         )}
       </div>
@@ -88,7 +80,7 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
         </div>
       )}
 
-      {!isLoading && claimPossibleCircles.length === 0 && (
+      {!isLoading && claimAvailableCircles.length === 0 && (
         <div className="w-full flex items-center justify-center">
           <p className="text-base leading-normal font-bold">
             There are no circles that you can claim
@@ -96,10 +88,10 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
         </div>
       )}
 
-      {!isLoading && claimPossibleCircles.length > 0 && (
+      {!isLoading && claimAvailableCircles.length > 0 && (
         <div className="h-[85%] overflow-y-auto overflow-x-hidden scrollbar-none">
-          {claimPossibleCircles.map((userCircle, index) => (
-            <CircleItem key={index} circle={userCircle} isOnClaimPage url={url} onClaim={handleClaim} />
+          {claimAvailableCircles.map((userCircle, index) => (
+            <CircleItem key={index} circle={userCircle} isOnClaimPage url={url} setPageStatus={setPageStatus} />
           ))}
         </div>
       )}

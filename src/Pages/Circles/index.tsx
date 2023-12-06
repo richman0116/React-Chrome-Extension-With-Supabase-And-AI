@@ -1,16 +1,22 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 
 import AddNewCircle from "./AddCircle";
 import CirclList from "./CirclesList";
 import LogoutButton from "../../components/LogoutButton";
+import ClaimCircle from "./ClaimCircle";
+import { CircleInterface } from "../../types/circle";
+import { circlePageStatus } from "../../utils/constants";
 
 interface CirclesInterface {
   setIsLoggedIn: Dispatch<SetStateAction<boolean>>
 }
 
 const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
-  const [showList, setShowList] = useState<boolean>(true);
+  const [pageStatus, setPageStatus] = useState<number>(circlePageStatus.CIRCLE_LIST);
+  const [circles, setCircles] = useState<CircleInterface[]>([]);
   const [currentUrl, setCurrentUrl] = useState<string>("");
+
+  const currentPageCircleIds = useMemo(() => circles.map((circle) => circle.id), [circles])
 
   const getURLPromise: () => Promise<string> = useCallback(() => {
     return new Promise((resolve, reject) => {
@@ -38,11 +44,9 @@ const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
       <div className="w-full flex flex-row-reverse items-center justify-between">
         <LogoutButton setIsLoggedIn={setIsLoggedIn} />
       </div>
-      {showList ? (
-        <CirclList setShowList={setShowList} url={currentUrl} />
-      ) : (
-        <AddNewCircle setShowList={setShowList} url={currentUrl} />
-      )}
+      { pageStatus === circlePageStatus.CIRCLE_LIST && <CirclList setPageStatus={setPageStatus} url={currentUrl} circles={circles} setCircles={setCircles} /> }
+      { pageStatus === circlePageStatus.ADD_CIRCLE && <AddNewCircle setPageStatus={setPageStatus} url={currentUrl} /> }
+      { pageStatus === circlePageStatus.CLAIM_CIRCLE && <ClaimCircle setPageStatus={setPageStatus} url={currentUrl} currentPageCircleIds={currentPageCircleIds} /> }
     </div>
   );
 };

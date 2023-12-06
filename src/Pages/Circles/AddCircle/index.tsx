@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../../components/FormLine";
+import { circlePageStatus } from "../../../utils/constants";
 
 interface CircleFormData {
   name: string;
@@ -9,11 +10,11 @@ interface CircleFormData {
 }
 
 interface IAddNewCircle {
-  setShowList: Dispatch<SetStateAction<boolean>>;
+  setPageStatus: Dispatch<SetStateAction<number>>;
   url: string;
 }
 
-export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
+export const AddNewCircle = ({ setPageStatus, url }: IAddNewCircle) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const {
@@ -43,13 +44,13 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
           } else {
             console.log("CirclesView: createCircle response: ", response);
             setIsSaving(false);
-            setShowList(true);
+            setPageStatus(circlePageStatus.CIRCLE_LIST);
             // now we want to load circles again just to make sure the result went through
           }
         }
       );
     },
-    [url, setShowList]
+    [url, setPageStatus]
   );
 
   return (
@@ -57,7 +58,7 @@ export const AddNewCircle = ({ setShowList, url }: IAddNewCircle) => {
       <div className="flex justify-between items-center mb-4">
         <p className="text-xl font-semibold">Create a new circle</p>
         <button
-          onClick={() => setShowList(true)}
+          onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
           className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
         >
           Back

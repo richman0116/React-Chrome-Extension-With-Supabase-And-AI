@@ -41,17 +41,6 @@ const App = () => {
             setIsLoggedIn(true);
             setIsChecking(false);
             getUsername();
-            // get the current url
-            // and the text content
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              // const url = tabs[0].url;
-              chrome.runtime.sendMessage(
-                { action: "getPageContent", tabId: tabs[0].id },
-                (response) => {
-                  // setPageContent(response.substring(0, 100));
-                }
-              );
-            });
           } else {
             setIsLoggedIn(false);
             setIsChecking(false);
@@ -86,7 +75,7 @@ const App = () => {
           <Loading />
         </div>
       ) : (
-          <>{isLoggedIn ? <Circles setIsLoggedIn={setIsLoggedIn} /> : <Login />}</>
+          <>{isLoggedIn ? <Circles setIsLoggedIn={setIsLoggedIn} /> : <Login setIsLoggedIn={setIsLoggedIn} />}</>
         )}
       </div>
   );

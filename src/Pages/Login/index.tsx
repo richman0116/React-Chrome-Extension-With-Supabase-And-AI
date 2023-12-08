@@ -1,14 +1,19 @@
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
+import { Button } from "../../components/GeneralButton";
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-const Login = () => {
+interface LoginInterface {
+  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
+}
+
+const Login = ({ setIsLoggedIn }: LoginInterface) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -36,6 +41,7 @@ const Login = () => {
             } else {
               console.log("response", response);
               setIsSubmitting(false);
+              setIsLoggedIn(true)
             }
           }
         );
@@ -43,7 +49,7 @@ const Login = () => {
         console.log(ex, "kkkkkkkk");
       }
     },
-    []
+    [setIsLoggedIn]
   );
 
   return (
@@ -77,13 +83,12 @@ const Login = () => {
           className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
         />
         <div className="flex justify-center">
-          <button
+          <Button
             type="submit"
-            className="px-6 py-2 rounded-lg font-semibold text-white bg-gold hover:bg-gold-dark transition duration-300 ease-in-out"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Login"}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

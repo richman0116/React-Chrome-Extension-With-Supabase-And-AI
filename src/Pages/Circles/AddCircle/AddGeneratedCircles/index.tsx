@@ -2,8 +2,8 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "reac
 import { addCirclePageStatus } from "../../../../utils/constants";
 import { CircleInterface } from "../../../../types/circle";
 import Loading from "../../../../components/Loading";
-import CircleItem from "../../../../components/CircleItem";
 import { Button } from "../../../../components/GeneralButton";
+import AutoCircleItem from "../../../../components/AutoCircleItem";
 
 interface AddGeneratedCirclesInterface {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -65,7 +65,7 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
       {!isLoading && circles.length > 0 && (
         <div className="h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none">
           {circles.map((circle, index) => (
-            <CircleItem key={index} circle={circle} url={url} />
+            <AutoCircleItem key={index} circle={circle} url={url} setPageStatus={setPageStatus} />
           ))}
         </div>
       )}

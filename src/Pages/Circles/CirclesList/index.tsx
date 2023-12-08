@@ -105,13 +105,13 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
           <div className="flex w-full justify-evenly">
             <button
               onClick={() => setPageStatus(circlePageStatus.ADD_CIRCLE)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="px-5 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Add New
             </button>
             <button
               onClick={() => setPageStatus(circlePageStatus.CLAIM_CIRCLE)}
-              className=" px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="px-5 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Claim For My Circles
             </button>

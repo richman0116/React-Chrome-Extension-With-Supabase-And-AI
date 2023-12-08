@@ -1,13 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-
-import FormLine from "../../../components/FormLine";
-import { circlePageStatus } from "../../../utils/constants";
-
-interface CircleFormData {
-  name: string;
-  description: string;
-}
+import AddManualCircle from "./AddManualCircle";
+import { addCirclePageStatus, circlePageStatus } from "../../../utils/constants";
+import AddGeneratedCircles from "./AddGeneratedCircles";
 
 interface IAddNewCircle {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -15,91 +9,41 @@ interface IAddNewCircle {
 }
 
 export const AddNewCircle = ({ setPageStatus, url }: IAddNewCircle) => {
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-  } = useForm<CircleFormData>();
-
-  const handleCreateCircle = useCallback(
-    (data: CircleFormData) => {
-      setIsSaving(true);
-      const { name, description } = data;
-      chrome.runtime.sendMessage(
-        {
-          action: "createCircle",
-          circleName: name,
-          circleDescription: description,
-          url,
-        },
-        (response) => {
-          if (response.error) {
-            console.log(
-              "CirclesView: createCircle response.error: ",
-              response.error
-            );
-            setIsSaving(false);
-          } else {
-            console.log("CirclesView: createCircle response: ", response);
-            setIsSaving(false);
-            setPageStatus(circlePageStatus.CIRCLE_LIST);
-            // now we want to load circles again just to make sure the result went through
-          }
-        }
-      );
-    },
-    [url, setPageStatus]
-  );
-
+  const [addPageStatus, setAddPageStatus ] = useState<number>(addCirclePageStatus.SELECT_OPTION)
   return (
-    <div className="w-full h-full py-5">
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-xl font-semibold">Create a new circle</p>
-        <button
-          onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
-          className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-        >
-          Back
-        </button>
-      </div>
-
-      <form
-        onSubmit={handleSubmit(handleCreateCircle)}
-        className="space-y-6 w-full"
-      >
-        <FormLine
-          title="Name:"
-          id="name"
-          type="text"
-          error={errors.name?.message}
-          {...register("name")}
-          placeholder="Add circle name"
-          required
-        />
-        <FormLine
-          title="Description:"
-          id="description"
-          type="text"
-          error={errors.description?.message}
-          {...register("description")}
-          placeholder="Add circle description"
-          required
-        />
-
-        <div className="flex justify-center w-full pt-10">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="w-full p-2 px-4 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
-          >
-            {isSaving ? "Saving" : "Save"}
-          </button>
+      <>
+      {addPageStatus === addCirclePageStatus.SELECT_OPTION && (
+        <div className="w-full h-full py-5 flex flex-col gap-10">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-xl font-semibold">Choose an option</p>
+            <button
+              onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
+              className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+            >
+              Back
+            </button>
+          </div>
+          <p className=" text-lg">You can add new circles manually or by choosing one of the auto-generated circles by ChatGPT</p>
+          <div className="flex flex-col gap-10">
+            <button
+              onClick={() => setAddPageStatus(addCirclePageStatus.ADD_AUTOMATICALLY)}
+              className="w-full p-5 rounded-md bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
+            >
+              Choose From Auto-generated Circles
+            </button>
+            <button
+              onClick={() => setAddPageStatus(addCirclePageStatus.ADD_MANUALLY)}
+              className="w-full p-5 rounded-md bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
+            >
+              Add Manually
+            </button>
+          </div>
         </div>
-      </form>
-    </div>
-  );
+      )}
+      {addPageStatus === addCirclePageStatus.ADD_AUTOMATICALLY && <AddGeneratedCircles />}
+      {addPageStatus === addCirclePageStatus.ADD_MANUALLY && <AddManualCircle setPageStatus={setPageStatus} setAddPageStatus={setAddPageStatus} url={url} />}
+    </>
+  )
 };
 
 export default AddNewCircle;

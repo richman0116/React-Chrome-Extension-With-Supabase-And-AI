@@ -41,22 +41,6 @@ const App = () => {
             setIsLoggedIn(true);
             setIsChecking(false);
             getUsername();
-            // get the current url
-            // and the text content
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              const url = tabs[0].url;
-              chrome.runtime.sendMessage(
-                { action: "getPageContent", tabId: tabs[0].id },
-                (response) => {
-                  chrome.runtime.sendMessage(
-                    {action: 'getGeneratedCircles', pageUrl: url, pageContent: response},
-                    (res) => {
-                      console.log(res, 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
-                    }
-                  )
-                }
-              );
-            });
           } else {
             setIsLoggedIn(false);
             setIsChecking(false);

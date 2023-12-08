@@ -44,11 +44,16 @@ const App = () => {
             // get the current url
             // and the text content
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              // const url = tabs[0].url;
+              const url = tabs[0].url;
               chrome.runtime.sendMessage(
                 { action: "getPageContent", tabId: tabs[0].id },
                 (response) => {
-                  // setPageContent(response.substring(0, 100));
+                  chrome.runtime.sendMessage(
+                    {action: 'getGeneratedCircles', pageUrl: url, pageContent: response},
+                    (res) => {
+                      console.log(res, 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+                    }
+                  )
                 }
               );
             });

@@ -290,8 +290,12 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 
   if (request.action === 'getGeneratedCircles') {
     console.log("background.js: Getting generated circles from the Edge function")
-    getGeneratedCircles(request.pageUrl, request.pageContent).then((circles) => {
+    getGeneratedCircles(request.pageUrl, request.pageContent)
+    .then((circles) => {
       sendResponse(circles)
+    })
+    .catch((error) => {
+      sendResponse([])
     })
     return true
   }

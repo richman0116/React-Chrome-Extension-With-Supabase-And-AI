@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 
 import FormLine from "../../../../components/FormLine";
 import { addCirclePageStatus, circlePageStatus } from "../../../../utils/constants";
+import { Button } from "../../../../components/GeneralButton";
 
 interface CircleFormData {
   name: string;
@@ -90,13 +91,12 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
         />
 
         <div className="flex justify-center w-full pt-10">
-          <button
+          <Button
             type="submit"
             disabled={isSaving}
-            className="w-full p-2 px-4 rounded-full bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
           >
-            {isSaving ? "Saving" : "Save"}
-          </button>
+            {isSaving ? "Adding" : "Add"}
+          </Button>
         </div>
       </form>
     </div>

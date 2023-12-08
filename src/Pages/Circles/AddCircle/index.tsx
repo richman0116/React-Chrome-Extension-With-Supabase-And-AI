@@ -1,7 +1,8 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import AddManualCircle from "./AddManualCircle";
 import { addCirclePageStatus, circlePageStatus } from "../../../utils/constants";
 import AddGeneratedCircles from "./AddGeneratedCircles";
+import { Button } from "../../../components/GeneralButton";
 
 interface IAddNewCircle {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -25,22 +26,20 @@ export const AddNewCircle = ({ setPageStatus, url }: IAddNewCircle) => {
           </div>
           <p className=" text-lg">You can add new circles manually or by choosing one of the auto-generated circles by ChatGPT</p>
           <div className="flex flex-col gap-10">
-            <button
+            <Button
               onClick={() => setAddPageStatus(addCirclePageStatus.ADD_AUTOMATICALLY)}
-              className="w-full p-5 rounded-md bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
             >
               Choose From Auto-generated Circles
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setAddPageStatus(addCirclePageStatus.ADD_MANUALLY)}
-              className="w-full p-5 rounded-md bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
             >
               Add Manually
-            </button>
+            </Button>
           </div>
         </div>
       )}
-      {addPageStatus === addCirclePageStatus.ADD_AUTOMATICALLY && <AddGeneratedCircles />}
+      {addPageStatus === addCirclePageStatus.ADD_AUTOMATICALLY && <AddGeneratedCircles setPageStatus={setPageStatus} setAddPageStatus={setAddPageStatus} url={url} />}
       {addPageStatus === addCirclePageStatus.ADD_MANUALLY && <AddManualCircle setPageStatus={setPageStatus} setAddPageStatus={setAddPageStatus} url={url} />}
     </>
   )

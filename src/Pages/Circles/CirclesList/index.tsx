@@ -13,6 +13,7 @@ import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
 import { isMainURL } from "../../../utils/helpers";
 import { circlePageStatus } from "../../../utils/constants";
+import { Button } from "../../../components/GeneralButton";
 
 interface ICircleList {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -102,19 +103,17 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
       )}
       <div className="flex justify-end my-2 sticky bottom-5 w-full">
         {!isMainUrl ? (
-          <div className="flex w-full justify-evenly">
-            <button
+          <div className="flex w-full justify-evenly gap-2">
+            <Button
               onClick={() => setPageStatus(circlePageStatus.ADD_CIRCLE)}
-              className="px-5 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Add New
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setPageStatus(circlePageStatus.CLAIM_CIRCLE)}
-              className="px-5 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Claim For My Circles
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>

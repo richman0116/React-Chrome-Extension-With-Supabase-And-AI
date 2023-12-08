@@ -86,7 +86,7 @@ const App = () => {
           <Loading />
         </div>
       ) : (
-          <>{isLoggedIn ? <Circles setIsLoggedIn={setIsLoggedIn} /> : <Login />}</>
+          <>{isLoggedIn ? <Circles setIsLoggedIn={setIsLoggedIn} /> : <Login setIsLoggedIn={setIsLoggedIn} />}</>
         )}
       </div>
   );

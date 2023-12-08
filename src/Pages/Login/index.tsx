@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
@@ -8,7 +8,11 @@ interface LoginFormData {
   password: string;
 }
 
-const Login = () => {
+interface LoginInterface {
+  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
+}
+
+const Login = ({ setIsLoggedIn }: LoginInterface) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -36,6 +40,7 @@ const Login = () => {
             } else {
               console.log("response", response);
               setIsSubmitting(false);
+              setIsLoggedIn(true)
             }
           }
         );
@@ -43,7 +48,7 @@ const Login = () => {
         console.log(ex, "kkkkkkkk");
       }
     },
-    []
+    [setIsLoggedIn]
   );
 
   return (

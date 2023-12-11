@@ -4,6 +4,7 @@ import { CircleInterface } from "../../../../types/circle";
 import Loading from "../../../../components/Loading";
 import { Button } from "../../../../components/GeneralButton";
 import AutoCircleItem from "../../../../components/AutoCircleItem";
+import { getSpecificNumberOfWords } from "../../../../utils/helpers";
 
 interface AddGeneratedCirclesInterface {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -25,8 +26,20 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
             {action: 'getGeneratedCircles', pageUrl: url, pageContent: response},
             (res) => {
               console.log('Generated circles: ', res)
-              setCircles(res)
-              setIsLoading(false)
+              if (res?.error && res?.error === "context_length_exceeded") {
+                const limitedWords = getSpecificNumberOfWords(response, 5000)
+                chrome.runtime.sendMessage(
+                  {action: 'getGeneratedCircles', pageUrl: url, pageContent: limitedWords},
+                  (res) => {
+                    console.log('Generated circles with limited words: ', res)
+                    setCircles(res)
+                    setIsLoading(false)
+                  }
+                )
+              } else {
+                setCircles(res)
+                setIsLoading(false)
+              }
             }
           )
         }

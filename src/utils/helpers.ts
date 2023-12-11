@@ -7,3 +7,8 @@ export const isMainURL = (urlString: string) => {
     return false;
   }
 }
+
+export const getSpecificNumberOfWords = (sentences: string, number: number) => {
+  const words = sentences.split(' ')
+  return words.slice(0, number).join(' ')
+}

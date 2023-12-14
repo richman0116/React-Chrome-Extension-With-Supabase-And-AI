@@ -265,11 +265,13 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true;
   }
   if (request.action === "createCircle") {
-    console.log("background.js: Creating circle with name: ", request.circleName, " and url: ", request.url)
-    supabase.rpc('circles_checkpoint_add_new', {
+    console.log("background.js: Creating circle with name: ", request.circleName, " and rl: ", request.url)
+    console.log(request.circleName, request.url, request.circleDescription, request.tags, '============================')
+    supabase.rpc('circles_checkpoint_add_new_with_tags', {
       p_circlename: request.circleName,
       p_url: request.url,
       p_circle_description: request.circleDescription,
+      circle_tags: request.tags
     }).then(result => {
       console.log("background.js: Result of creating circle: ", result)
       sendResponse(result)
@@ -298,6 +300,31 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       sendResponse([])
     })
     return true
+  }
+
+  if (request.action === "addTags") {
+    console.log("background.js: Adding tags")
+    supabase.rpc('tags_add_new', {
+      tag_names: request.names
+    }).then(result => {
+      console.log("background.js: Result of adding tags: ", result)
+      sendResponse(result)
+    })
+    return true;
+  }
+
+  if (request.action === "getTags") {
+    console.log("background.js: Getting Tags")
+    if (supabaseUser) {
+      supabase.rpc('get_all_tags').then(result => {
+        console.log('background.js: result of getting all tags: ', result)
+        sendResponse(result)
+      })
+    } else {
+      console.error("background.js: User not logged in when calling getUserCircles")
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
   }
 
   if (request.action === "checkIfUserJoinedCircle") {

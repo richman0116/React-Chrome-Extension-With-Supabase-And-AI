@@ -1,9 +1,11 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import Select, { MultiValue } from "react-select";
 
 import FormLine from "../../../../components/FormLine";
 import { addCirclePageStatus, circlePageStatus } from "../../../../utils/constants";
 import { Button } from "../../../../components/GeneralButton";
+import { TagInterface } from "../../../../types/tag";
 
 interface CircleFormData {
   name: string;
@@ -16,14 +18,48 @@ interface AddManualCircleInterface {
   url: string;
 }
 
+export interface TagOptionInterface {
+  value: string
+  label: string
+}
+
 export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddManualCircleInterface) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [tagOptions, setTagOptions] = useState<TagOptionInterface[]>([])
+  const [selectedTags, setSelectedTags] = useState<TagOptionInterface[]>([])
+
 
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm<CircleFormData>();
+
+  useEffect(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: "getTags",
+      },
+      (response) => {
+        if (response.error) {
+          console.log(
+            "Get Tags: get tags response.error: ",
+            response.error
+          );
+        } else {
+          const generatedOptions = response.data?.map((tagItem: TagInterface) => ({ label: tagItem.tag_name, value: tagItem.id }))
+          setTagOptions(generatedOptions)
+        }
+      }
+    );
+  }, [])
+
+  const handleTagChange = useCallback((newTags: MultiValue<TagOptionInterface>) => {
+    if (newTags) {
+      setSelectedTags([...newTags])
+      
+    }
+  }, [])
 
   const handleCreateCircle = useCallback(
     (data: CircleFormData) => {
@@ -35,6 +71,7 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
           circleName: name,
           circleDescription: description,
           url,
+          tags: selectedTags.map((tag) => tag.value)
         },
         (response) => {
           if (response.error) {
@@ -52,7 +89,7 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
         }
       );
     },
-    [url, setPageStatus]
+    [url, selectedTags, setPageStatus]
   );
 
   return (
@@ -89,6 +126,15 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
           placeholder="Add circle description"
           required
         />
+        {/* <div className="flex flex-col gap-y-1">
+          <span className="text-black/60 text-sm font-semibold leading-4">Select Tags here</span>
+          <Select
+            onChange={(value) => handleTagChange(value)}
+            options={tagOptions}
+            className=" text-black/90 bg-black/5"
+            isMulti
+          />
+        </div> */}
 
         <div className="flex justify-center w-full pt-10">
           <Button

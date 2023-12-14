@@ -15,29 +15,44 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
 
   const handleAdd = useCallback(() => {
     setIsAdding(true);
-    const { name, description } = circle
+    const { name, description, tags } = circle
     chrome.runtime.sendMessage(
       {
-        action: "createCircle",
-        circleName: name,
-        circleDescription: description,
-        url,
+        action: 'addTags',
+        names: tags
       },
-      (response) => {
-        if (response.error) {
-          console.log(
-            "CirclesView: createCircle response.error: ",
-            response.error
-          );
-          setIsAdding(false);
+      (res) => {
+        if (res.error) {
+          console.log("An error occured while adding tags")
+          setIsAdding(false)
         } else {
-          console.log("CirclesView: createCircle response: ", response);
-          setIsAdding(false);
-          setPageStatus(circlePageStatus.CIRCLE_LIST);
-          // now we want to load circles again just to make sure the result went through
+          chrome.runtime.sendMessage(
+            {
+              action: "createCircle",
+              circleName: name,
+              circleDescription: description,
+              url,
+              tags: res.data || []
+            },
+            (response) => {
+              if (response.error) {
+                console.log(
+                  "CirclesView: createCircle response.error: ",
+                  response.error
+                );
+                setIsAdding(false);
+              } else {
+                console.log("CirclesView: createCircle response: ", response);
+                setIsAdding(false);
+                setPageStatus(circlePageStatus.CIRCLE_LIST);
+                // now we want to load circles again just to make sure the result went through
+              }
+            }
+          );
         }
       }
-    );
+    )
+
   }, [circle, setPageStatus, url])
 
   return (
@@ -54,7 +69,7 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
         </div>
         <button
           disabled={isAdding}
-          onClick={(e) =>{
+          onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
             handleAdd()
@@ -63,7 +78,7 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
             ' bg-gray-500 hover:bg-gray-600 active:bg-gray-700 focus:ring-gray-500': isAdding
           })}
         >
-          {isAdding ? 'Adding': 'Add'}
+          {isAdding ? 'Adding' : 'Add'}
         </button>
       </div>
     </div>

@@ -32,14 +32,14 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
                   {action: 'getGeneratedCircles', pageUrl: url, pageContent: limitedWords},
                   (res2) => {
                     console.log('Generated circles with limited words: ', res2)
-                    if (res2?.length !== 1 && res2[0] !== "I'm sorry") {
+                    if (res2[0] !== "I'm sorry") {
                       setCircles(res2)
                     }
                     setIsLoading(false)
                   }
                 )
               } else {
-                if (res1?.length !== 1 && res1[0] !== "I'm sorry") {
+                if (res1[0] !== "I'm sorry") {
                   setCircles(res1)
                 }
                 setIsLoading(false)

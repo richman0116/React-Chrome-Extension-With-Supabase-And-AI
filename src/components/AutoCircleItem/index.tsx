@@ -1,8 +1,9 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import classNames from "classnames";
 
 import { CircleInterface } from "../../types/circle";
 import { circlePageStatus } from "../../utils/constants";
+import Loading from "../Loading";
 
 interface AutoCircleItemInterface {
   circle: CircleInterface;
@@ -12,10 +13,32 @@ interface AutoCircleItemInterface {
 
 const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface) => {
   const [isAdding, setIsAdding] = useState<boolean>(false)
+  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(true)
+  const [circleImageUrl, setCircleImageUrl] = useState<string>('')
+
+  const { name, description, tags } = circle
+
+  const getGeneratedCirlceImage = useCallback(() => {
+    chrome.runtime.sendMessage({ action: "getCircleImage", name, description }, (response) => {
+      if (response?.error) {
+        setIsGeneratingImage(false);
+      } else {
+        if (response) {
+          setCircleImageUrl(response);
+          setIsGeneratingImage(false);
+        } else {
+          setIsGeneratingImage(false);
+        }
+      }
+    });
+  }, [description, name])
+  useEffect(() => {
+    getGeneratedCirlceImage()
+  }, [getGeneratedCirlceImage])
+  console.log(circleImageUrl, '======== circle image url')
 
   const handleAdd = useCallback(() => {
     setIsAdding(true);
-    const { name, description, tags } = circle
     chrome.runtime.sendMessage(
       {
         action: 'addTags',
@@ -32,7 +55,8 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
               circleName: name,
               circleDescription: description,
               url,
-              tags: res.data || []
+              tags: res.data || [],
+              circleImageUrl
             },
             (response) => {
               if (response.error) {
@@ -53,13 +77,25 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
       }
     )
 
-  }, [circle, setPageStatus, url])
+  }, [circleImageUrl, description, name, setPageStatus, tags, url])
 
   return (
     <div
       className="circles-item px-4 py-2 hover:h-auto transition-transform transform hover:cursor-pointer hover:bg-slate-50 flex gap-5 items-center rounded-lg group delay-300"
     >
-      <div className="rounded-full min-w-[64px] h-16 bg-gray-300" />
+      { isGeneratingImage ?
+        <div className="rounded-full min-w-[64px] h-16 bg-gray-300 flex items-center justify-center">
+          <Loading />
+        </div>
+          :
+          <a
+            href={circleImageUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <img src={circleImageUrl} alt="circle logo" className=" rounded-full min-w-[64px] h-16" />
+          </a>
+      }
       <div className="w-full flex justify-between items-center">
         <div className="flex flex-col justify-between gap-2 text-sm text-gray-700 group-hover:text-gray-900 w-full">
           <div className="flex justify-between items-center w-full">
@@ -67,7 +103,7 @@ const AutoCircleItem = ({ circle, setPageStatus, url }: AutoCircleItemInterface)
           </div>
           <p>{circle.description}</p>
         </div>
-        <button
+        <button  
           disabled={isAdding}
           onClick={(e) => {
             e.stopPropagation()

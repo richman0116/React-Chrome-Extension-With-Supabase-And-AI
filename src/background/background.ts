@@ -2,7 +2,7 @@
 import supabase from '../utils/supabase'
 import { Session, AuthError } from '@supabase/supabase-js';
 
-import { getGeneratedCircles } from '../utils/edgeFunctions';
+import { getGeneratedCircleImage, getGeneratedCircles } from '../utils/edgeFunctions';
 
 
 console.log("Background.js is running")
@@ -264,6 +264,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     }
     return true;
   }
+
   if (request.action === "createCircle") {
     console.log("background.js: Creating circle with name: ", request.circleName, " and rl: ", request.url)
     console.log(request.circleName, request.url, request.circleDescription, request.tags, '============================')
@@ -271,7 +272,8 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       p_circlename: request.circleName,
       p_url: request.url,
       p_circle_description: request.circleDescription,
-      circle_tags: request.tags
+      circle_tags: request.tags,
+      circle_logo_image: request.circleImageUrl
     }).then(result => {
       console.log("background.js: Result of creating circle: ", result)
       sendResponse(result)
@@ -286,6 +288,18 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       circle_id: request.circleId
     }).then(result => {
       sendResponse(true)
+    })
+    return true
+  }
+
+  if (request.action === 'getCircleImage') {
+    console.log("background.js: Getting generated circle image from the Edge function")
+    getGeneratedCircleImage(request.name, request.description)
+    .then((imageUrl) => {
+      sendResponse(imageUrl)
+    })
+    .catch((error) => {
+      sendResponse('')
     })
     return true
   }

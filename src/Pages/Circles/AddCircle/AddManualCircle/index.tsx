@@ -71,7 +71,8 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
           circleName: name,
           circleDescription: description,
           url,
-          tags: selectedTags.map((tag) => tag.value)
+          tags: selectedTags.map((tag) => tag.value),
+          circleImageUrl: 'https://fysmrdbevwxphtrsevkn.supabase.co/storage/v1/object/public/media_bucket/avatars/ed24123d-f7d3-46f1-ac19-2c55fb4a3937.JPG' // will be replaced future
         },
         (response) => {
           if (response.error) {

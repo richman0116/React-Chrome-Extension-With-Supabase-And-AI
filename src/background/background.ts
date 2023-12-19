@@ -4,6 +4,29 @@ import { Session, AuthError } from '@supabase/supabase-js';
 
 import { getGeneratedCircleImage, getGeneratedCircles } from '../utils/edgeFunctions';
 
+const bannedURLList: string[] = [
+  "https://twitter.com/home",
+  "https://www.facebook.com/",
+  "https://www.quora.com/",
+  "https://www.reddit.com/",
+  "https://www.youtube.com/",
+  "https://www.google.com/maps",
+  "https://www.google.com/",
+  "https://drive.google.com/",
+  "https://mail.google.com/mail/u/0/#inbox",
+  "https://www.microsoft.com/en-us/microsoft-365/outlook/email-and-calendar-software-microsoft-outlook",
+  "https://www.instagram.com/",
+  "https://www.netflix.com/browse",
+  "https://www.wikipedia.org/",
+  "https://www.amazon.com/",
+  "https://www.microsoft.com/en-us/microsoft-365/onedrive/online-cloud-storage",
+  "https://www.tiktok.com/",
+  "https://www.bing.com/",
+  "https://www.linkedin.com/feed/",
+  "https://docs.google.com/",
+  "https://www.bilibili.com/",
+];
+
 
 console.log("Background.js is running")
 
@@ -281,6 +304,12 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === "checkIsInBanList") {
+    console.log("background.js: Checking if the url is in the ban list with url:", request.url);
+    sendResponse(bannedURLList.includes(request.url.toLowerCase()));
+    return true;
+  }
+
   if (request.action === 'claimCircle') {
     console.log("background.js: Claiming the circle: ", request.circleId, " and url: ", request.url)
     supabase.rpc('circles_claim_circle', {
@@ -376,13 +405,15 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.tabs.onUpdated.addListener( async (tabId, changeInfo, tab) => {
   if (changeInfo.url === undefined) return;
   // check if the url starts with https or http
+  console.log("URL BEFORE CHECKING: ", changeInfo.url)
   if (!changeInfo.url.startsWith('https://') && !changeInfo.url.startsWith('http://')) {
     console.log('URL does not start with https or http.');
     return;
   }
   const url = new URL(changeInfo.url);
-  if (url.pathname.length <= 1) {
-    console.log("background.js: URL does not have a path.");
+  console.log(url.href);
+  if (bannedURLList.includes(url.href)) {
+    console.log("background.js: URL is in the list of sites that we don't support.");
     return;
   }
   // execute a content script to get the text content of the page

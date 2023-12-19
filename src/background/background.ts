@@ -2,7 +2,7 @@
 import supabase from '../utils/supabase'
 import { Session, AuthError } from '@supabase/supabase-js';
 
-import { getGeneratedCircleImage, getGeneratedCircles } from '../utils/edgeFunctions';
+import { getGeneratedCircles, generateCircleImage } from '../utils/edgeFunctions';
 
 const bannedURLList: string[] = [
   "https://twitter.com/home",
@@ -291,14 +291,16 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.action === "createCircle") {
     console.log("background.js: Creating circle with name: ", request.circleName, " and rl: ", request.url)
     console.log(request.circleName, request.url, request.circleDescription, request.tags, '============================')
-    supabase.rpc('circles_checkpoint_add_new_with_tags', {
-      p_circlename: request.circleName,
+    supabase.rpc('circles_checkpoint_add_new_with_tags_return_id', {
+      p_circle_name: request.circleName,
       p_url: request.url,
       p_circle_description: request.circleDescription,
       circle_tags: request.tags,
-      circle_logo_image: request.circleImageUrl
     }).then(result => {
-      console.log("background.js: Result of creating circle: ", result)
+      console.log("background.js: Result of creating circle with tags: ", result);
+      // here we will generate the circle image by sending the edge function
+      // we dont even need to await this
+      generateCircleImage(result.data);
       sendResponse(result)
     })
     return true;
@@ -322,14 +324,14 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   }
 
   if (request.action === 'getCircleImage') {
-    console.log("background.js: Getting generated circle image from the Edge function")
-    getGeneratedCircleImage(request.name, request.description)
-    .then((imageUrl) => {
-      sendResponse(imageUrl)
-    })
-    .catch((error) => {
-      sendResponse('')
-    })
+    // console.log("background.js: Getting generated circle image from the Edge function")
+    // getGeneratedCircleImage(request.name, request.description)
+    // .then((imageUrl) => {
+    //   sendResponse(imageUrl)
+    // })
+    // .catch((error) => {
+    //   sendResponse('')
+    // })
     return true
   }
 

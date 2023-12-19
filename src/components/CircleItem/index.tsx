@@ -39,7 +39,7 @@ const CircleItem = ({ circle, isOnClaimPage, setPageStatus, url }: CircleItemInt
 
   return (
     <a
-      href={`https://edenzero.vercel.app/circle/${circle.id}`}
+      href={`https://0xeden.com/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
       className="circles-item px-4 py-2 h-20 transition-transform transform hover:cursor-pointer hover:bg-slate-50 flex gap-5 items-center rounded-lg"

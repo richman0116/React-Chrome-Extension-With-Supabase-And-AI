@@ -1,4 +1,4 @@
-// Please later on replace this token
+// Kazuo: Please later on replace this token
 // it is unsafe since chrome extension's code is exposed to public
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5c21yZGJldnd4cGh0cnNldmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTUxNzkxNzMsImV4cCI6MjAxMDc1NTE3M30.gstQlVVRP6quLuDyM7pmtSY9HUoW8Igt3_ymgN3tZcA'
 

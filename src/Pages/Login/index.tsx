@@ -40,8 +40,16 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
               setIsSubmitting(false);
             } else {
               console.log("response", response);
-              setIsSubmitting(false);
-              setIsLoggedIn(true)
+              if (response){
+                // Kazuo: please have some notification system
+                // so that when the password is wrong or anything
+                // that make the response false, show a warning
+                setIsSubmitting(false);
+                setIsLoggedIn(true)
+              }else{
+                // something is wrong that made the response falses
+                setIsSubmitting(false);
+              }
             }
           }
         );

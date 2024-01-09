@@ -15,6 +15,7 @@ interface LoginInterface {
 
 const Login = ({ setIsLoggedIn }: LoginInterface) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>('')
 
   const {
     handleSubmit,
@@ -34,9 +35,9 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
             password,
           },
           (response) => {
-            console.log("We are here ======");
             if (response.error) {
               console.log("response.error", response.error);
+              setErrorMsg(response.error)
               setIsSubmitting(false);
             } else {
               console.log("response", response);
@@ -44,10 +45,12 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
                 // Kazuo: please have some notification system
                 // so that when the password is wrong or anything
                 // that make the response false, show a warning
+                setErrorMsg('')
                 setIsSubmitting(false);
                 setIsLoggedIn(true)
               }else{
                 // something is wrong that made the response falses
+                setErrorMsg('Invalid login credentials')
                 setIsSubmitting(false);
               }
             }
@@ -90,6 +93,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
           required
           className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
         />
+        <p className="text-base text-red-700">{errorMsg}</p>
         <div className="flex justify-center">
           <Button
             type="submit"

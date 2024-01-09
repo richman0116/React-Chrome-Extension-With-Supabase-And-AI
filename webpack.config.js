@@ -71,6 +71,15 @@ module.exports = {
         },
       ],
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/assets/duck.jpg',
+          to: path.join(__dirname, 'dist'),
+          force: true,
+        },
+      ],
+    }),
     ...getHtmlPlugins(["index"]),
   ],
   resolve: {

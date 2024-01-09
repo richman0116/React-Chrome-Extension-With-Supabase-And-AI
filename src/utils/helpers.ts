@@ -26,7 +26,6 @@ export const isMainURL = (urlString: string) => {
       return true;
     }
     return bannedURLList.includes(urlString.toLowerCase());
-    return false;
   } catch (e) {
     console.error("Invalid URL provided:", e);
     return false;

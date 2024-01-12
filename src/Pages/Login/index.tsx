@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
 import { Button } from "../../components/GeneralButton";
+import ArrowBack from "../../components/ArrowBack.tsx";
+import { Paths } from "../../utils/constants";
 
 interface LoginFormData {
   email: string;
@@ -64,9 +66,17 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
   );
 
   return (
-    <div className=" w-5/6 bg-cream p-8 rounded-lg shadow-md">
+    <div className=" w-5/6 p-8">
       <div className="w-full flex justify-end pb-4">
-        <a href="https://0xeden.com/signup" target="_blank" rel="noreferrer" className="text-base">{'Sign up >>'}</a>
+        <a
+          href={Paths.SIGNUP}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1 rounded-xl bg-black/10 p-2 text-sm font-bold text-black/90"
+        >
+          Register
+          <ArrowBack className="rotate-180" />
+        </a>
       </div>
       <div className="flex flex-col items-center">
         <p className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</p>

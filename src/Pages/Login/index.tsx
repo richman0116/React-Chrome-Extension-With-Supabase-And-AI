@@ -66,53 +66,55 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
   );
 
   return (
-    <div className=" w-5/6 p-8">
-      <div className="w-full flex justify-end pb-4">
+    <div className="w-full h-full flex flex-col">
+      <div className="w-full flex justify-end pb-8">
         <a
           href={Paths.SIGNUP}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1 rounded-xl bg-black/10 p-2 text-sm font-bold text-black/90"
+          className="flex w-25.5 justify-center border border-gray-300 rounded-md bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-600 transition-all duration-300 gap-1 hover:gap-1.5 py-2"
         >
           Register
           <ArrowBack className="rotate-180" />
         </a>
       </div>
-      <div className="flex flex-col items-center">
-        <p className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</p>
-        <p className="text-lg text-gray-700">Please log in</p>
-      </div>
-      <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
-        <FormLine
-          title="Email:"
-          id="email"
-          type="email"
-          error={errors.email?.message}
-          {...register("email")}
-          placeholder="Your email address here"
-          required
-          className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
-        />
-        <FormLine
-          title="Password:"
-          id="password"
-          type="password"
-          error={errors.password?.message}
-          {...register("password")}
-          placeholder="Your password here"
-          required
-          className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
-        />
-        <p className="text-base text-red-700">{errorMsg}</p>
-        <div className="flex justify-center">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Login"}
-          </Button>
+      <div className="flex flex-col gap-4 w-full border border-gray-600 shadow-md hover:shadow-lg rounded-md px-4 py-8">
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</h2>
+          <p className="text-lg font-semibold text-gray-500">Please log in</p>
         </div>
-      </form>
+        <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
+          <FormLine
+            title="Email:"
+            id="email"
+            type="email"
+            error={errors.email?.message}
+            {...register("email")}
+            placeholder="Your email address here"
+            required
+            className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
+          />
+          <FormLine
+            title="Password:"
+            id="password"
+            type="password"
+            error={errors.password?.message}
+            {...register("password")}
+            placeholder="Your password here"
+            required
+            className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
+          />
+          <p className="text-base text-red-700">{errorMsg}</p>
+          <div className="flex justify-center">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Login"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

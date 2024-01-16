@@ -42,7 +42,7 @@ const CircleItem = ({ circle, isOnClaimPage, setPageStatus, url }: CircleItemInt
       href={`https://0xeden.com/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
-      className="circles-item px-4 py-2 h-20 transition-transform transform hover:cursor-pointer hover:bg-slate-50 flex gap-5 items-center rounded-lg"
+      className="circles-item px-4 py-2 h-20 transition-transform transform hover:cursor-pointer hover:bg-gray-100 flex gap-4 items-center rounded-lg"
     >
       <img src={circle.circle_logo_image || `../duck.jpg`} alt="circle logo" className=" rounded-full min-w-[64px] h-16" />
       <div className="w-full flex justify-between items-center">

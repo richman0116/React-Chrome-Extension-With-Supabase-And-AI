@@ -73,21 +73,22 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
   const isMainUrl = isMainURL(url);
 
   return (
-    <div className="flex flex-col justify-between h-full w-full py-5">
+    <div className="flex flex-col justify-between h-full w-full gap-2">
       <div className="w-full">
-        <h1 className="text-xl font-bold leading-normal">Eden</h1>
+        <h2 className="text-2xl font-bold text-gray-800">Eden</h2>
         {!isLoading && circles.length > 0 && (
-          <p className="text-base leading-normal font-bold ">{resultText}</p>
+          <p className="text-base leading-normal font-semibold text-gray-600 pt-1">{resultText}</p>
         )}
       </div>
+
       {isLoading && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 py-4 ">
           <Loading />
         </div>
       )}
 
       {!isLoading && circles.length === 0 && (
-        <div className="w-full h-[70%] flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center">
           <p className="text-base leading-normal font-bold">
             There are no circles on this page
           </p>
@@ -95,13 +96,13 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
       )}
 
       {!isLoading && circles.length > 0 && (
-        <div className="h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none">
+        <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-none">
           {circles.map((circle, index) => (
             <CircleItem key={index} circle={circle} url={url} />
           ))}
         </div>
       )}
-      <div className="flex justify-end my-2 sticky bottom-5 w-full">
+      <div className="flex justify-end sticky bottom-5 w-full">
         {!isMainUrl ? (
           <div className="flex w-full justify-evenly gap-2">
             <Button

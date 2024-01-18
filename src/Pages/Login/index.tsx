@@ -78,7 +78,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
           <ArrowBack className="rotate-180" />
         </a>
       </div>
-      <div className="flex flex-col gap-4 w-full border border-gray-600 shadow-md hover:shadow-lg rounded-md px-4 py-8">
+      <div className="flex flex-col gap-4 w-full border border-black/10 shadow-md hover:shadow-lg rounded-md px-4 py-8">
         <div className="flex flex-col items-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</h2>
           <p className="text-lg font-semibold text-gray-500">Please log in</p>

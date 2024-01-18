@@ -60,7 +60,7 @@ const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
       <input
         {...restProps}
         id={id}
-        className="rounded-md bg-gray-100 transition-colors duration-300 border group-focus-within:border-gray-600 border-gray-200 px-3 py-2.5 text-base leading-5 text-gray-800 placeholder-gray-400 outline-none autofill:bg-gray-100"
+        className="rounded-md bg-gray-100 transition-colors duration-300 border group-focus-within:border-gray-600 border-gray-200 px-3 pb-2 pt-3 text-base leading-5 text-gray-800 placeholder-gray-400 outline-none autofill:bg-gray-100"
         ref={ref}
         type={type}
         placeholder={placeholder}

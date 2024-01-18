@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
 import { Button } from "../../components/GeneralButton";
-import ArrowBack from "../../components/ArrowBack.tsx";
+// import ArrowBack from "../../components/ArrowBack.tsx";
 import { Paths } from "../../utils/constants";
 
 interface LoginFormData {
@@ -43,14 +43,14 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
               setIsSubmitting(false);
             } else {
               console.log("response", response);
-              if (response){
+              if (response) {
                 // Kazuo: please have some notification system
                 // so that when the password is wrong or anything
                 // that make the response false, show a warning
                 setErrorMsg('')
                 setIsSubmitting(false);
                 setIsLoggedIn(true)
-              }else{
+              } else {
                 // something is wrong that made the response falses
                 setErrorMsg('Invalid login credentials')
                 setIsSubmitting(false);
@@ -66,18 +66,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="w-full flex justify-end pb-8">
-        <a
-          href={Paths.SIGNUP}
-          target="_blank"
-          rel="noreferrer"
-          className="flex w-25.5 justify-center border border-gray-300 rounded-md bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-600 transition-all duration-300 gap-1 hover:gap-1.5 py-2"
-        >
-          Register
-          <ArrowBack className="rotate-180" />
-        </a>
-      </div>
+    <div className="w-full h-full flex flex-col justify-center">
       <div className="flex flex-col gap-4 w-full border border-black/10 shadow-md hover:shadow-lg rounded-md px-4 py-8">
         <div className="flex flex-col items-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</h2>
@@ -112,6 +101,17 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
             >
               {isSubmitting ? "Submitting..." : "Login"}
             </Button>
+          </div>
+          <div className="w-full flex justify-center items-center">
+            <p className="text-base">{`Don't have an account?`}</p>
+            <a
+              href={Paths.SIGNUP}
+              target="_blank"
+              rel="noreferrer"
+              className="text-base text-blue-500 hover:text-blue-800 ml-2"
+            >
+              {`Register here`}
+            </a>
           </div>
         </form>
       </div>

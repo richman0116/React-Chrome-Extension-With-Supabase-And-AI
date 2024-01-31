@@ -56,9 +56,9 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
   }, [getCircles])
 
   return (
-    <div className="w-full h-full py-5 flex flex-col justify-between">
+    <div className="w-full h-full pt-5 flex flex-col justify-between">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-xl font-semibold">Choose a circle</p>
+        <p className="text-2xl font-semibold">Choose a circle</p>
         <button
           onClick={() => setAddPageStatus(addCirclePageStatus.SELECT_OPTION)}
           className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
@@ -72,7 +72,7 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
         </div>
       )}
       {!isLoading && circles.length === 0 && (
-        <div className="w-full h-[70%] flex items-center justify-center">
+        <div className="w-full flex items-center justify-center">
           <p className="text-base leading-normal font-bold">
             There are no generated circles for this page
           </p>
@@ -86,7 +86,9 @@ const AddGeneratedCircles = ({ setPageStatus, setAddPageStatus, url }: AddGenera
           ))}
         </div>
       )}
-      <Button onClick={getCircles} disabled={isLoading}>{isLoading ? 'Generating' : 'Generate New'}</Button>
+      <div className="flex justify-end sticky bottom-5 w-full">
+        <Button onClick={getCircles} disabled={isLoading}>{isLoading ? 'Generating' : 'Generate New'}</Button>
+      </div>
     </div>
   )
 }

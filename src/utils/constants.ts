@@ -9,3 +9,7 @@ export const addCirclePageStatus = {
   ADD_MANUALLY: 1,
   ADD_AUTOMATICALLY: 2
 }
+
+export const Paths = {
+  SIGNUP: 'https://0xeden.com/signup'
+}

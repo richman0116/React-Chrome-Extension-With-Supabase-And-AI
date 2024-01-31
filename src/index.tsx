@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 
 const root = document.createElement("div");
-root.className = "container";
+root.className = "container bg-white";
 document.body.appendChild(root);
 const rootDiv = ReactDOM.createRoot(root);
 rootDiv.render(

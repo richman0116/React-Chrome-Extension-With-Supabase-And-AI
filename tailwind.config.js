@@ -10,9 +10,15 @@ module.exports = {
       textColor: {
         'gold': '#F0C808',
       },
+      width: {
+        25.5: '6.375rem', // 102px
+      },
       hoverBackgroundColor: {
         'gold-dark': '#DAB307',
       },
+      fontFamily: {
+        sans: ['Axiforma', 'sans-serif'],
+      }
     },
   },
   plugins: [

@@ -40,7 +40,7 @@ const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
   }, [getURL]);
 
   return (
-    <div className="h-full w-full px-5">
+    <div className="w-full h-full flex flex-col">
       <div className="w-full flex flex-row-reverse items-center justify-between">
         <LogoutButton setIsLoggedIn={setIsLoggedIn} />
       </div>

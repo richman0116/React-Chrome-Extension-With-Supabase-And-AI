@@ -80,6 +80,42 @@ module.exports = {
         },
       ],
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts/Axiforma-Regular.ttf',
+          to: path.join(__dirname, 'dist/fonts/'),
+          force: true,
+        },
+      ],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts/Axiforma-Medium.ttf',
+          to: path.join(__dirname, 'dist/fonts/'),
+          force: true,
+        },
+      ],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts/Axiforma-SemiBold.ttf',
+          to: path.join(__dirname, 'dist/fonts/'),
+          force: true,
+        },
+      ],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/assets/fonts/Axiforma-Bold.ttf',
+          to: path.join(__dirname, 'dist/fonts/'),
+          force: true,
+        },
+      ],
+    }),
     ...getHtmlPlugins(["index"]),
   ],
   resolve: {

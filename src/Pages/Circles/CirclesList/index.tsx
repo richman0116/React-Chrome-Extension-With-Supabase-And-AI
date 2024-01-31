@@ -89,7 +89,7 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
 
       {!isLoading && circles.length === 0 && (
         <div className="w-full h-full flex items-center justify-center">
-          <p className="text-base leading-normal font-bold">
+          <p className="text-base leading-normal font-semibold text-gray-600 pt-1">
             There are no circles on this page
           </p>
         </div>

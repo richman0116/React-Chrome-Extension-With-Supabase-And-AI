@@ -62,7 +62,7 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
     <div className="h-full w-full py-5 flex flex-col justify-between">
       <div className="w-full">
         <div className="w-full flex items-center justify-between">
-          <h1 className="text-xl font-bold leading-normal">Eden</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Eden</h1>
           <button
             onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
             className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
@@ -71,7 +71,7 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
           </button>
         </div>
         {!isLoading && claimAvailableCircles.length > 0 && (
-          <p className="text-base leading-normal font-bold ">{resultText}</p>
+          <p className="text-base leading-normal font-semibold text-gray-600 pt-1">{resultText}</p>
         )}
       </div>
       {isLoading && (
@@ -82,14 +82,14 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
 
       {!isLoading && claimAvailableCircles.length === 0 && (
         <div className="w-full flex items-center justify-center">
-          <p className="text-base leading-normal font-bold">
+          <p className="text-base leading-normal font-semibold text-gray-600 pt-1">
             There are no circles that you can claim
           </p>
         </div>
       )}
 
       {!isLoading && claimAvailableCircles.length > 0 && (
-        <div className="h-[85%] overflow-y-auto overflow-x-hidden scrollbar-none">
+        <div className="h-[85%] overflow-y-auto overflow-x-hidden scrollbar-none my-5">
           {claimAvailableCircles.map((userCircle, index) => (
             <CircleItem key={index} circle={userCircle} isOnClaimPage url={url} setPageStatus={setPageStatus} />
           ))}

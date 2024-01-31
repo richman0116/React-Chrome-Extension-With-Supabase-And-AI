@@ -12,6 +12,8 @@
 .container {
   width: 400px;
   height: 600px;
+  overflow: hidden;
+  scrollbar-width: none;
 }
 
 @font-face {

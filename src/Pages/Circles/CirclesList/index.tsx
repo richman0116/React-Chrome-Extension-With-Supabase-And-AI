@@ -96,7 +96,7 @@ const CirclList = ({ setPageStatus, url, circles, setCircles }: ICircleList) => 
       )}
 
       {!isLoading && circles.length > 0 && (
-        <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-none">
+        <div className="h-[70%] overflow-y-auto overflow-x-hidden scrollbar-none">
           {circles.map((circle, index) => (
             <CircleItem key={index} circle={circle} url={url} />
           ))}

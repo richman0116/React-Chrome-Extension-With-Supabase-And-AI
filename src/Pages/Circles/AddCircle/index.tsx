@@ -14,9 +14,9 @@ export const AddNewCircle = ({ setPageStatus, url }: IAddNewCircle) => {
   return (
       <>
       {addPageStatus === addCirclePageStatus.SELECT_OPTION && (
-        <div className="w-full h-full py-5 flex flex-col gap-10">
+        <div className="w-full h-full pt-5 flex flex-col gap-10">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-xl font-semibold">Choose an option</p>
+            <p className="text-2xl font-semibold">Choose an option</p>
             <button
               onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
               className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"

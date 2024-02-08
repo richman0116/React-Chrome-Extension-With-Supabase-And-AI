@@ -81,7 +81,7 @@ const ClaimCircle = ({ setPageStatus, url, currentPageCircleIds }: ClaimCircleIn
       )}
 
       {!isLoading && claimAvailableCircles.length === 0 && (
-        <div className="w-full flex items-center justify-center">
+        <div className="w-full flex items-center justify-center absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center">
           <p className="text-base leading-normal font-semibold text-gray-600 pt-1">
             There are no circles that you can claim
           </p>

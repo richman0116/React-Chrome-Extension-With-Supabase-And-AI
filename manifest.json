@@ -1,6 +1,6 @@
 {
   "version": "1.0.4",
-  "manifest_version": 4,
+  "manifest_version": 3,
   "name": "Eden - Build Circles Anywhere",
   "description": "Chrome extension for Eden",
   "action": {

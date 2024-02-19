@@ -94,7 +94,7 @@ const AddGeneratedCircles = ({
         tags,
       },
       (response) => {
-        setRecommendedCircles(response);
+        setRecommendedCircles(response || []);
         setIsGettingRecommendedCircles(false);
       }
     );

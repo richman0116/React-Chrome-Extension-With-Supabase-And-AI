@@ -291,7 +291,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.action === "getRecommendedCircles") {
     console.log("background.js: Getting Recommended Circles")
     if (supabaseUser) {
-      supabase.rpc('get_top_circles_by_tags', { tag_names: request.tags }).then(result => {
+      supabase.rpc('get_similar_circles_from_tags', { tag_names: request.tags }).then(result => {
         console.log('background.js: result of getting recommended circles: ', result)
         sendResponse(result.data)
       })

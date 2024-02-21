@@ -8,6 +8,8 @@ import { getSpecificNumberOfWords } from "../../../../utils/helpers";
 import { circlePageStatus } from "../../../../utils/constants";
 import AutoCircleItem from "../../../../components/AutoCircleItem";
 import CreationHeader from "../../../../components/CreationHeader";
+import GenerateButton from "../../../../components/Buttons/GenerateButton";
+import Refresh from "../../../../components/SVGIcons/Refresh";
 
 const AddGeneratedCircles = () => {
   const [circles, setCircles] = useState<CircleInterface[]>([]);
@@ -63,12 +65,15 @@ const AddGeneratedCircles = () => {
   }, [getCircles]);
 
   const handleManualClick = useCallback(() => {
-    setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [setPageStatus])
+    setPageStatus(circlePageStatus.ADD_MANUALLY);
+  }, [setPageStatus]);
 
   return (
     <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
-      <CreationHeader title="Create Circle" onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} />
+      <CreationHeader
+        title="Create Circle"
+        onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
+      />
       <div className="w-full mb-20">
         <div className="w-full flex flex-col gap-2">
           {isLoading && (
@@ -84,9 +89,17 @@ const AddGeneratedCircles = () => {
               ))}
             </div>
           )}
+          {!isLoading && (
+            <div className="w-full flex justify-center">
+              <GenerateButton type="button" onClick={getCircles}>
+                <Refresh />
+                <p>Generate New</p>
+              </GenerateButton>
+            </div>
+          )}
         </div>
       </div>
-      <div className="fixed bottom-6 w-fit justify-center">
+      <div className="fixed bottom-6 w-fit justify-center flex flex-col gap-5">
         <Button onClick={handleManualClick}>Create manually</Button>
       </div>
     </div>

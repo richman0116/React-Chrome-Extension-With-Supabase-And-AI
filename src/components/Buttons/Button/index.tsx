@@ -16,13 +16,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type={type || 'button'}
         disabled={disabled}
         {...props}
-        className={classNames("w-full py-2.5 text-base capitalize font-semibold rounded-md bg-gray-700 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50", {
-          'bg-gray-500 hover:bg-gray-600 active:bg-gray-700 focus:ring-gray-500 cursor-not-allowed': disabled
+        className={classNames("w-fit px-5 py-3 rounded-2xl bg-brand hover:bg-green-900 text-white text-base font-bold leading-normal", {
+          'cursor-not-allowed bg-brand/70': disabled
         })}
       />
     )
   }
 )
 
-Button.displayName = 'Button'
-export { Button }
+export default Button

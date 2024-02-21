@@ -10,31 +10,31 @@
 }
 
 .container {
-  width: 400px;
-  height: 600px;
+  width: 373px;
+  height: 560px;
   overflow: hidden;
   scrollbar-width: none;
 }
 
 @font-face {
-  font-family: 'Axiforma';
-  src: url('/src/assets/fonts/Axiforma-Regular.ttf');
+  font-family: 'HKGrotesk';
+  src: url('/src/assets/fonts/HKGrotesk-Regular.ttf');
 }
 
 @font-face {
-  font-family: 'Axiforma';
+  font-family: 'HKGrotesk';
   font-weight: 500;
-  src: url('/src/assets/fonts/Axiforma-Medium.ttf');
+  src: url('/src/assets/fonts/HKGrotesk-Medium.ttf');
 }
 
 @font-face {
-  font-family: 'Axiforma';
+  font-family: 'HKGrotesk';
   font-weight: 600;
-  src: url('/src/assets/fonts/Axiforma-SemiBold.ttf');
+  src: url('/src/assets/fonts/HKGrotesk-SemiBold.ttf');
 }
 
 @font-face {
-  font-family: 'Axiforma';
+  font-family: 'HKGrotesk';
   font-weight: 700;
-  src: url('/src/assets/fonts/Axiforma-Bold.ttf');
+  src: url('/src/assets/fonts/HKGrotesk-Bold.ttf');
 }

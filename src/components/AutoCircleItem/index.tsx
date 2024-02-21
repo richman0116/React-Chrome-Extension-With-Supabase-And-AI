@@ -1,22 +1,23 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import classNames from "classnames";
+import { useCallback, useState } from "react";
 
 import { CircleInterface } from "../../types/circle";
 import { circlePageStatus } from "../../utils/constants";
+import RoundedButton from "../Buttons/RoundedButton";
+import { useCircleContext } from "../../context/CircleContext";
 
 interface AutoCircleItemInterface {
   circle: CircleInterface;
   url: string;
-  setPageStatus: Dispatch<SetStateAction<number>>;
 }
 
 const AutoCircleItem = ({
   circle,
-  setPageStatus,
   url,
 }: AutoCircleItemInterface) => {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const { name, description, tags } = circle;
+
+  const { setPageStatus } = useCircleContext()
 
   const handleAdd = useCallback(() => {
     setIsAdding(true);
@@ -48,8 +49,8 @@ const AutoCircleItem = ({
               } else {
                 console.log("CirclesView: createCircle response: ", response);
                 setIsAdding(false);
-                setPageStatus(circlePageStatus.CIRCLE_LIST);
                 // now we want to load circles again just to make sure the result went through
+                setPageStatus(circlePageStatus.CIRCLE_LIST)
               }
             }
           );
@@ -59,38 +60,34 @@ const AutoCircleItem = ({
   }, [description, name, setPageStatus, tags, url]);
 
   return (
-    <div className="circles-item px-4 py-2 hover:h-auto transition-transform transform hover:cursor-pointer hover:bg-slate-50 flex gap-5 items-center rounded-lg group delay-300">
+    <div className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">
       <img
         src="../duck.jpg"
         alt="circle logo"
-        className=" rounded-full min-w-[64px] h-16"
+        className=" rounded-full min-w-[48px] h-12"
       />
-      <div className="w-full flex justify-between items-center">
-        <div className="flex flex-col justify-between gap-2 text-sm text-gray-700 group-hover:text-gray-900 w-full relative">
-          <div className="flex justify-between items-center w-full">
-            <p className="font-semibold">{circle.name}</p>
-          </div>
-          <p>{circle.description}</p>
-          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-            <button
-              disabled={isAdding}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                handleAdd();
-              }}
-              className={classNames(
-                "px-6 py-3 rounded-full hidden group-hover:block bg-gray-400 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50",
-                {
-                  " bg-gray-500 hover:bg-gray-600 active:bg-gray-700 focus:ring-gray-500 cursor-not-allowed":
-                    isAdding,
-                }
-              )}
-            >
-              {isAdding ? "Adding" : "Add"}
-            </button>
+      <div className="w-full flex items-center">
+        <div className="relative">
+          <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
+            <p className="text-xs font-bold text-primary">{circle.name}</p>
+            <p className="text-ellipsis line-clamp-2 text-xs font-medium text-tertiary">
+              {circle.description}
+            </p>
           </div>
         </div>
+      </div>
+
+      <div className="hidden group-hover:block">
+        <RoundedButton
+          disabled={isAdding}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleAdd();
+          }}
+        >
+          {isAdding ? "Adding" : "Add"}
+        </RoundedButton>
       </div>
     </div>
   );

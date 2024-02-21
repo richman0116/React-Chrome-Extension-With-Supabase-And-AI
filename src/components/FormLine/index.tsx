@@ -45,22 +45,21 @@ const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
   ref
 ) => {
   return (
-    <div className="relative mt-6 flex flex-col gap-y-1 group">
+    <div className="relative flex flex-col gap-y-1 group w-full">
       <label
         title={title}
         htmlFor={id}
-        className={classNames("text-sm transition-all duration-300 font-semibold leading-4 group-focus-within:font-bold", {
+        className={classNames("text-sm transition-all duration-300 font-bold leading-4 group-focus-within:font-extrabold", {
           "text-red": error,
-          "text-gray-600": !error,
+          "text-black/60 group-focus-within:text-black/70": !error,
         })}
       >
         {title}
-        {required && " *"}
       </label>
       <input
         {...restProps}
         id={id}
-        className="rounded-md bg-gray-100 transition-colors duration-300 border group-focus-within:border-gray-600 border-gray-200 px-3 pb-2 pt-3 text-base leading-5 text-gray-800 placeholder-gray-400 outline-none autofill:bg-gray-100"
+        className="rounded-2xl bg-secondary transition-colors duration-300 border border-secondary group-focus-within:border-gray-500 px-3 pb-2 pt-3 text-base font-medium leading-5 text-primary placeholder-fourth outline-none autofill:bg-secondary"
         ref={ref}
         type={type}
         placeholder={placeholder}

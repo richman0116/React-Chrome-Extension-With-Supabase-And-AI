@@ -7,8 +7,20 @@ module.exports = {
         'cream': '#FAF3E0',
         'gold': '#F0C808',
       },
-      textColor: {
+      colors: {
         'gold': '#F0C808',
+        'primary': '#131719',
+        'secondary': '#F3F3F3',
+        'fourth': '#D0D1D1',
+        'brand': '#134D2E',
+        'stroke': '#E7E8E8',
+        'tertiary': '#A1A2A3'
+      },
+      fontSize: {
+        '3.5xl': '2rem', //32px
+      },
+      spacing: {
+        3.725: '0.9375rem', //15px
       },
       width: {
         25.5: '6.375rem', // 102px
@@ -17,7 +29,7 @@ module.exports = {
         'gold-dark': '#DAB307',
       },
       fontFamily: {
-        sans: ['Axiforma', 'sans-serif'],
+        sans: ['HKGrotesk', 'sans-serif'],
       }
     },
   },

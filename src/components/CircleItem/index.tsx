@@ -5,10 +5,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import classNames from "classnames";
 
 import { CircleInterface } from "../../types/circle";
-import { circlePageStatus } from "../../utils/constants";
+import RoundedButton from "../Buttons/RoundedButton";
 
 interface CircleItemInterface {
   circle: CircleInterface;
@@ -24,7 +23,7 @@ const CircleItem = ({
   url,
 }: CircleItemInterface) => {
   const [isJoined, setIsJoined] = useState<boolean>(false);
-  const [isClaiming, setIsClaiming] = useState<boolean>(false);
+  const [isJoining, setIsJoining] = useState<boolean>(false);
 
   const checkIfJoined = useCallback(async () => {
     chrome.runtime.sendMessage(
@@ -41,20 +40,20 @@ const CircleItem = ({
     checkIfJoined();
   }, [checkIfJoined]);
 
-  const handleClaim = useCallback(
+  const handleJoin = useCallback(
     (circleId: string) => {
-      setIsClaiming(true);
+      setIsJoining(true);
       chrome.runtime.sendMessage(
-        { action: "claimCircle", circleId, url },
+        { action: "joinCircle", circleId, url },
         (response) => {
-          setIsClaiming(false);
-          if (response) {
-            setPageStatus?.(circlePageStatus.CIRCLE_LIST);
+          if (response === true) {
+            checkIfJoined();
           }
+          setIsJoining(false);
         }
       );
     },
-    [setPageStatus, url]
+    [checkIfJoined, url]
   );
 
   return (
@@ -62,47 +61,43 @@ const CircleItem = ({
       href={`https://0xeden.com/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
-      className="circles-item px-4 py-2 h-20 transition-transform transform hover:cursor-pointer hover:bg-gray-100 flex gap-4 items-center rounded-lg group"
+      className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group"
     >
       <img
         src={circle.circle_logo_image || `../duck.jpg`}
         alt="circle logo"
-        className=" rounded-full min-w-[64px] h-16"
+        className=" rounded-full min-w-[48px] h-12"
       />
       <div className="w-full flex items-center">
         <div className="relative">
-          <div className="flex flex-col justify-between gap-2 text-sm text-gray-700 group-hover:text-gray-900 w-full">
+          <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
             <div className="flex justify-between items-center w-full">
-              <p className="font-semibold">{circle.name}</p>
+              <p className="text-xs font-bold text-primary">{circle.name}</p>
               {isOnClaimPage ? null : (
                 <p className="italic">{isJoined ? "Joined" : ""}</p>
               )}
             </div>
-            <p className="text-ellipsis line-clamp-2">{circle.description}</p>
+            <p className="text-ellipsis line-clamp-2 text-xs font-medium text-tertiary">
+              {circle.description}
+            </p>
           </div>
-          {isOnClaimPage && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-              <button
-                disabled={isClaiming}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleClaim?.(circle.id);
-                }}
-                className={classNames(
-                  "px-6 py-3 rounded-full hidden group-hover:block bg-gray-400 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50",
-                  {
-                    " bg-gray-500 hover:bg-gray-600 active:bg-gray-700 focus:ring-gray-500 cursor-not-allowed":
-                      isClaiming,
-                  }
-                )}
-              >
-                {isClaiming ? "Claiming" : "Claim"}
-              </button>
-            </div>
-          )}
         </div>
       </div>
+
+      {!isJoined ? (
+        <div className="hidden group-hover:block">
+        <RoundedButton
+          disabled={isJoining}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleJoin(circle.id)
+          }}
+          >
+          {isJoining ? "Joining" : "Join"}
+        </RoundedButton>
+          </div>
+      ) : null}
     </a>
   );
 };

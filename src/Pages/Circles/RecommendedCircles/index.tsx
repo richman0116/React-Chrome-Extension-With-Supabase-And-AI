@@ -4,13 +4,12 @@ import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
 import classNames from "classnames";
+import { useCircleContext } from "../../../context/CircleContext";
 
-interface IRecommendedCircles {
-  url: string;
-  currentPageCircleIds: string[];
-}
+const RecommendedCircles = () => {
 
-const RecommendedCircles = ({ url, currentPageCircleIds }: IRecommendedCircles) => {
+  const {currentPageCircleIds, currentUrl: url} = useCircleContext()
+
   const [recommendedCircles, setRecommendedCircles] = useState<CircleInterface[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 

@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 
-import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
 import classNames from "classnames";
+import LinkCircleItem from "../../../components/LinkCircleItem";
+import { useCircleContext } from "../../../context/CircleContext";
 
-interface IMyCircles {
-  url: string;
-  currentPageCircleIds: string[];
-}
-
-const MyCircles = ({ url, currentPageCircleIds }: IMyCircles) => {
+const MyCircles = () => {
   const [userCircles, setUserCircles] = useState<CircleInterface[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const {currentUrl: url, currentPageCircleIds } = useCircleContext()
 
   const getUserCircles = useCallback(async () => {
     if (url !== "") {
@@ -71,12 +69,11 @@ const MyCircles = ({ url, currentPageCircleIds }: IMyCircles) => {
       )}
 
       {!isLoading && claimAvailableCircles.length > 0 && (
-        <div className="w-full">
+        <div className="w-full gap-2 grid grid-cols-2">
           {claimAvailableCircles.map((userCircle, index) => (
-            <CircleItem
+            <LinkCircleItem
               key={index}
               circle={userCircle}
-              isOnClaimPage
               url={url}
             />
           ))}

@@ -3,16 +3,11 @@ import { useEffect } from "react";
 import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 
-import { CircleInterface } from "../../../types/circle";
 import classNames from "classnames";
+import { useCircleContext } from "../../../context/CircleContext";
 
-interface ICircleList {
-  circles: CircleInterface[];
-  isLoading: boolean;
-  url: string;
-}
-
-const CirclList = ({ url, circles, isLoading }: ICircleList) => {
+const CirclList = () => {
+  const { circles, isLoading, currentUrl: url} = useCircleContext()
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0].url;

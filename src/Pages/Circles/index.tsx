@@ -1,61 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import CirclList from "./CirclesList";
-import { CircleInterface } from "../../types/circle";
 import Header from "../../components/Header";
 import MyCircles from "./MyCircles";
 import RecommendedCircles from "./RecommendedCircles";
+import { useCircleContext } from "../../context/CircleContext";
 
 const Circles = () => {
-  const [circles, setCircles] = useState<CircleInterface[]>([]);
-  const [currentUrl, setCurrentUrl] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const currentPageCircleIds = useMemo(
-    () => circles.map((circle) => circle.id),
-    [circles]
-  );
-
-  const getURLPromise: () => Promise<string> = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const url = tabs[0].url;
-        resolve(url || "");
-      });
-    });
-  }, []);
-
-  const getURL = useCallback(async () => {
-    const urlResult = await getURLPromise();
-    setCurrentUrl(urlResult);
-  }, [getURLPromise]);
-
-  useEffect(() => {
-    getURL();
-  }, [getURL]);
-
-  const getCircles = useCallback(async () => {
-    if (currentUrl) {
-      chrome.runtime.sendMessage({ action: "getCircles", url: currentUrl }, (response) => {
-        if (response.error) {
-          setCircles([]);
-          setIsLoading(false);
-        } else {
-          if (response.data) {
-            setCircles(response.data);
-            setIsLoading(false);
-          } else {
-            setCircles([]);
-            setIsLoading(false);
-          }
-        }
-      });
-    }
-  }, [currentUrl]);
-
-  useEffect(() => {
-    getCircles();
-  }, [getCircles]);
+  const { isLoading, circles } = useCircleContext();
 
   const resultText = useMemo(() => {
     if (!isLoading) {
@@ -75,12 +27,9 @@ const Circles = () => {
           {resultText}
         </p>
       </div>
-      <CirclList url={currentUrl} circles={circles} isLoading={isLoading} />
-      <RecommendedCircles url={currentUrl} currentPageCircleIds={currentPageCircleIds} />
-      <MyCircles
-        url={currentUrl}
-        currentPageCircleIds={currentPageCircleIds}
-      />
+      <CirclList />
+      <RecommendedCircles />
+      <MyCircles />
     </div>
   );
 };

@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
-import CircleItem from "../../../components/CircleItem";
-import Loading from "../../../components/Loading";
+import CircleItem from "../../../../components/CircleItem";
+import Loading from "../../../../components/Loading";
 
 import classNames from "classnames";
-import { useCircleContext } from "../../../context/CircleContext";
+import { useCircleContext } from "../../../../context/CircleContext";
 
-const CirclList = () => {
+const PageCirclList = () => {
   const { circles, isLoading, currentUrl: url} = useCircleContext()
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -43,4 +43,4 @@ const CirclList = () => {
   );
 };
 
-export default CirclList;
+export default PageCirclList;

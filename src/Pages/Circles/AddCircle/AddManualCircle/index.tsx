@@ -1,21 +1,17 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Select, { MultiValue } from "react-select";
 
 import FormLine from "../../../../components/FormLine";
-import { addCirclePageStatus, circlePageStatus } from "../../../../utils/constants";
-import LargeButton from "../../../../components/Buttons/LargeButton";
 import { TagInterface } from "../../../../types/tag";
+import { useCircleContext } from "../../../../context/CircleContext";
+import CreationHeader from "../../../../components/CreationHeader";
+import Button from "../../../../components/Buttons/Button";
+import { circlePageStatus } from "../../../../utils/constants";
 
 interface CircleFormData {
   name: string;
   description: string;
-}
-
-interface AddManualCircleInterface {
-  setPageStatus: Dispatch<SetStateAction<number>>;
-  setAddPageStatus: Dispatch<SetStateAction<number>>;
-  url: string;
 }
 
 export interface TagOptionInterface {
@@ -23,10 +19,12 @@ export interface TagOptionInterface {
   label: string
 }
 
-export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddManualCircleInterface) => {
+export const AddManualCircle = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [tagOptions, setTagOptions] = useState<TagOptionInterface[]>([])
   const [selectedTags, setSelectedTags] = useState<TagOptionInterface[]>([])
+
+  const { currentUrl: url, setPageStatus } = useCircleContext()
 
 
   const {
@@ -94,16 +92,7 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
 
   return (
     <div className="w-full h-full py-5">
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-xl font-semibold">Create a new circle</p>
-        <button
-          onClick={() => setAddPageStatus(addCirclePageStatus.SELECT_OPTION)}
-          className="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-        >
-          Back
-        </button>
-      </div>
-
+      <CreationHeader title="Create Manually" onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} />
       <form
         onSubmit={handleSubmit(handleCreateCircle)}
         className="space-y-6 w-full"
@@ -137,12 +126,12 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
         </div> */}
 
         <div className="flex justify-center w-full pt-10">
-          <LargeButton
+          <Button
             type="submit"
             disabled={isSaving}
           >
-            {isSaving ? "Adding" : "Add"}
-          </LargeButton>
+            {isSaving ? "Completing" : "Complete"}
+          </Button>
         </div>
       </form>
     </div>

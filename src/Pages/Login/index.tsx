@@ -7,7 +7,7 @@ import Header from "../../components/Header";
 // import ArrowBack from "../../components/ArrowBack.tsx";
 import { Paths } from "../../utils/constants";
 import Button from "../../components/Buttons/Button";
-import GoogleIcon from "../../components/GoogleIcon";
+import GoogleIcon from "../../components/SVGIcons/GoogleIcon";
 import { useAuthContext } from "../../context/AuthContext";
 
 interface LoginFormData {

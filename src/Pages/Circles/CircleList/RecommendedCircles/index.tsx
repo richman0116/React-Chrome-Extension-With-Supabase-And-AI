@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 
-import CircleItem from "../../../components/CircleItem";
-import Loading from "../../../components/Loading";
-import { CircleInterface } from "../../../types/circle";
+import CircleItem from "../../../../components/CircleItem";
+import Loading from "../../../../components/Loading";
+import { CircleInterface } from "../../../../types/circle";
 import classNames from "classnames";
-import { useCircleContext } from "../../../context/CircleContext";
+import { useCircleContext } from "../../../../context/CircleContext";
 
 const RecommendedCircles = () => {
 

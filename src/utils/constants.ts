@@ -1,7 +1,7 @@
 export const circlePageStatus = {
   CIRCLE_LIST: 0,
-  ADD_CIRCLE: 1,
-  CLAIM_CIRCLE: 2
+  ADD_AUTOMATICALLY: 1,
+  ADD_MANUALLY: 2
 }
 
 export const addCirclePageStatus = {

@@ -334,6 +334,16 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === "joinCircle") {
+    supabase.rpc('users_join_circle', {
+      circle_id: request.circleId
+    }).then(() => {
+      sendResponse(true)
+    })
+
+    return true
+  }
+
   if (request.action === "checkIsInBanList") {
     console.log("background.js: Checking if the url is in the ban list with url:", request.url);
     sendResponse(bannedURLList.includes(request.url.toLowerCase()));

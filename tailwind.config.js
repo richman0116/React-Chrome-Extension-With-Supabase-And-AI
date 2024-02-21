@@ -12,7 +12,9 @@ module.exports = {
         'primary': '#131719',
         'secondary': '#F3F3F3',
         'fourth': '#D0D1D1',
-        'brand': '#134D2E'
+        'brand': '#134D2E',
+        'stroke': '#E7E8E8',
+        'tertiary': '#A1A2A3'
       },
       fontSize: {
         '3.5xl': '2rem', //32px

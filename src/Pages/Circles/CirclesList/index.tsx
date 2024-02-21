@@ -4,6 +4,7 @@ import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 
 import { CircleInterface } from "../../../types/circle";
+import classNames from "classnames";
 
 interface ICircleList {
   circles: CircleInterface[];
@@ -25,7 +26,9 @@ const CirclList = ({ url, circles, isLoading }: ICircleList) => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-between h-full w-full gap-2">
+    <div className={classNames("w-full", {
+      "hidden": circles.length === 0
+    })}>
       <div className="w-full flex flex-col gap-2">
         {isLoading && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
@@ -34,7 +37,7 @@ const CirclList = ({ url, circles, isLoading }: ICircleList) => {
         )}
 
         {!isLoading && circles.length > 0 && (
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-1">
             {circles.map((circle, index) => (
               <CircleItem key={index} circle={circle} url={url} />
             ))}

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
+import classNames from "classnames";
 
 interface IMyCircles {
   url: string;
@@ -55,7 +56,9 @@ const MyCircles = ({ url, currentPageCircleIds }: IMyCircles) => {
   }, [isLoading, claimAvailableCircles]);
 
   return (
-    <div className="h-full w-full flex flex-col justify-between">
+    <div className={classNames("w-full flex flex-col justify-between", {
+      "hidden": claimAvailableCircles.length === 0
+    })}>
       <div className="w-full">
         {!isLoading && (
           <p className="text-xl font-medium text-primary">{resultText}</p>

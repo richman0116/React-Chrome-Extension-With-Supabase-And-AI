@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import CircleItem from "../../../components/CircleItem";
 import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
+import classNames from "classnames";
 
 interface IRecommendedCircles {
   url: string;
@@ -55,7 +56,9 @@ const RecommendedCircles = ({ url, currentPageCircleIds }: IRecommendedCircles) 
   }, [isLoading, recommendAvailableCircles]);
 
   return (
-    <div className="h-full w-full flex flex-col justify-between">
+    <div className={classNames("w-full flex flex-col justify-between", {
+      "hidden": recommendAvailableCircles.length === 0
+    })}>
       <div className="w-full">
         {!isLoading && (
           <p className="text-xl font-medium text-primary">{resultText}</p>
@@ -68,7 +71,7 @@ const RecommendedCircles = ({ url, currentPageCircleIds }: IRecommendedCircles) 
       )}
 
       {!isLoading && recommendAvailableCircles.length > 0 && (
-        <div className="w-full">
+        <div className="w-full flex flex-col gap-1">
           {recommendAvailableCircles.map((recommendCircle, index) => (
             <CircleItem
               key={index}

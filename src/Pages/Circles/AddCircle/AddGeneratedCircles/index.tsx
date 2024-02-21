@@ -86,11 +86,11 @@ const AddGeneratedCircles = ({
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index);
   }, [circles]);
 
-  const getRecommendedCircles = useCallback(() => {
+  const getSimilarCirclesFromTags = useCallback(() => {
     setIsGettingRecommendedCircles(true);
     chrome.runtime.sendMessage(
       {
-        action: "getRecommendedCircles",
+        action: "getSimilarCirclesFromTags",
         tags,
       },
       (response) => {
@@ -102,9 +102,9 @@ const AddGeneratedCircles = ({
 
   useEffect(() => {
     if (tags.length > 0) {
-      getRecommendedCircles();
+      getSimilarCirclesFromTags();
     }
-  }, [tags, getRecommendedCircles]);
+  }, [tags, getSimilarCirclesFromTags]);
 
   return (
     <div className="w-full h-full pt-5 flex flex-col justify-between">
@@ -146,13 +146,13 @@ const AddGeneratedCircles = ({
           !isGettingRecommendedCircles &&
           recommendedCircles.length === 0 && (
             <p className="text-base leading-normal font-bold">
-              There are no recommended circles
+              There are no similar circles
             </p>
           )}
         {!isGettingRecommendedCircles && recommendedCircles?.length > 0 && (
           <div className="w-full flex flex-col gap-2">
             <p className="text-base leading-normal font-bold">
-              Recommended circles on this page
+              Similar circles on this page
             </p>
             {recommendedCircles.map((circle, index) => (
               <CircleItem key={index} circle={circle} url={url} />

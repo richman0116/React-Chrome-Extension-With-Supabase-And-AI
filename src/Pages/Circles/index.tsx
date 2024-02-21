@@ -1,26 +1,25 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import AddNewCircle from "./AddCircle";
 import CirclList from "./CirclesList";
-import LogoutButton from "../../components/LogoutButton";
-import ClaimCircle from "./ClaimCircle";
 import { CircleInterface } from "../../types/circle";
-import { circlePageStatus } from "../../utils/constants";
+import Header from "../../components/Header";
+import MyCircles from "./MyCircles";
+import RecommendedCircles from "./RecommendedCircles";
 
 const Circles = () => {
-  const [pageStatus, setPageStatus] = useState<number>(circlePageStatus.CIRCLE_LIST);
   const [circles, setCircles] = useState<CircleInterface[]>([]);
   const [currentUrl, setCurrentUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const currentPageCircleIds = useMemo(() => circles.map((circle) => circle.id), [circles])
+  const currentPageCircleIds = useMemo(
+    () => circles.map((circle) => circle.id),
+    [circles]
+  );
 
   const getURLPromise: () => Promise<string> = useCallback(() => {
     return new Promise((resolve, reject) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        console.log("CirclesView: getURL: tabs[0].url: ", tabs[0].url);
         const url = tabs[0].url;
-        // setUrl(url);
-        console.log("CirclesView: setUrl(url): ", url);
         resolve(url || "");
       });
     });
@@ -35,14 +34,53 @@ const Circles = () => {
     getURL();
   }, [getURL]);
 
+  const getCircles = useCallback(async () => {
+    if (currentUrl) {
+      chrome.runtime.sendMessage({ action: "getCircles", url: currentUrl }, (response) => {
+        if (response.error) {
+          setCircles([]);
+          setIsLoading(false);
+        } else {
+          if (response.data) {
+            setCircles(response.data);
+            setIsLoading(false);
+          } else {
+            setCircles([]);
+            setIsLoading(false);
+          }
+        }
+      });
+    }
+  }, [currentUrl]);
+
+  useEffect(() => {
+    getCircles();
+  }, [getCircles]);
+
+  const resultText = useMemo(() => {
+    if (!isLoading) {
+      if (circles.length > 1) {
+        return `${circles.length} circles on this page`;
+      } else {
+        return `${circles.length} circle on this page`;
+      }
+    }
+  }, [circles, isLoading]);
+
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="w-full flex flex-row-reverse items-center justify-between">
-        <LogoutButton />
+    <div className="w-full h-full flex flex-col gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
+      <Header />
+      <div className="w-full sticky top-0 bg-white py-3 z-50">
+        <p className=" text-3.5xl font-medium capitalize text-primary">
+          {resultText}
+        </p>
       </div>
-      { pageStatus === circlePageStatus.CIRCLE_LIST && <CirclList setPageStatus={setPageStatus} url={currentUrl} circles={circles} setCircles={setCircles} /> }
-      { pageStatus === circlePageStatus.ADD_CIRCLE && <AddNewCircle setPageStatus={setPageStatus} url={currentUrl} /> }
-      { pageStatus === circlePageStatus.CLAIM_CIRCLE && <ClaimCircle setPageStatus={setPageStatus} url={currentUrl} currentPageCircleIds={currentPageCircleIds} /> }
+      <CirclList url={currentUrl} circles={circles} isLoading={isLoading} />
+      <RecommendedCircles url={currentUrl} currentPageCircleIds={currentPageCircleIds} />
+      <MyCircles
+        url={currentUrl}
+        currentPageCircleIds={currentPageCircleIds}
+      />
     </div>
   );
 };

@@ -288,11 +288,11 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true;
   }
 
-  if (request.action === "getRecommendedCircles") {
+  if (request.action === "getSimilarCirclesFromTags") {
     console.log("background.js: Getting Recommended Circles")
     if (supabaseUser) {
       supabase.rpc('get_similar_circles_from_tags', { tag_names: request.tags }).then(result => {
-        console.log('background.js: result of getting recommended circles: ', result)
+        console.log('background.js: result of getting similar circles: ', result)
         sendResponse(result.data)
       })
     } else {
@@ -302,6 +302,20 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === "getRecommendedCircles") {
+    console.log("background.js: Getting Recommended Circles from the current page's circles")
+    if (supabaseUser) {
+      supabase.rpc('get_related_circles_by_circle_ids', { circle_ids: request.circleIds }).then(result => {
+        console.log('background.js: result of getting recommended circles: ', result)
+        sendResponse(result.data)
+      })
+    } else {
+      console.error("background.js: User not logged in when calling getUserCircles")
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
+  }
+  
   if (request.action === "createCircle") {
     console.log("background.js: Creating circle with name: ", request.circleName, " and rl: ", request.url)
     console.log(request.circleName, request.url, request.circleDescription, request.tags, '============================')

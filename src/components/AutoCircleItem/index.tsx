@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { CircleInterface } from "../../types/circle";
 import { circlePageStatus } from "../../utils/constants";
 import RoundedButton from "../Buttons/RoundedButton";
+import { useCircleContext } from "../../context/CircleContext";
 
 interface AutoCircleItemInterface {
   circle: CircleInterface;
@@ -15,6 +16,8 @@ const AutoCircleItem = ({
 }: AutoCircleItemInterface) => {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const { name, description, tags } = circle;
+
+  const { setPageStatus } = useCircleContext()
 
   const handleAdd = useCallback(() => {
     setIsAdding(true);
@@ -47,13 +50,14 @@ const AutoCircleItem = ({
                 console.log("CirclesView: createCircle response: ", response);
                 setIsAdding(false);
                 // now we want to load circles again just to make sure the result went through
+                setPageStatus(circlePageStatus.CIRCLE_LIST)
               }
             }
           );
         }
       }
     );
-  }, [description, name, tags, url]);
+  }, [description, name, setPageStatus, tags, url]);
 
   return (
     <div className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">

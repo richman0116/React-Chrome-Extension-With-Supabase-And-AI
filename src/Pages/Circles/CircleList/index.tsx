@@ -37,7 +37,7 @@ const CircleList = () => {
       <PageCirclList />
       <RecommendedCircles />
       <MyCircles />
-      <div className="sticky bottom-1 w-fit justify-center">
+      <div className="fixed bottom-6 w-fit justify-center">
         <Button onClick={handlePlusClick}><Plus /></Button>
       </div>
     </div>

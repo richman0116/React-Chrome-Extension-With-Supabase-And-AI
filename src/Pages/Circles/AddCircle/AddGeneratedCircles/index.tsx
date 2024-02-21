@@ -69,7 +69,7 @@ const AddGeneratedCircles = () => {
   return (
     <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
       <CreationHeader title="Create Circle" onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} />
-      <div className="w-full">
+      <div className="w-full mb-20">
         <div className="w-full flex flex-col gap-2">
           {isLoading && (
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
@@ -86,7 +86,7 @@ const AddGeneratedCircles = () => {
           )}
         </div>
       </div>
-      <div className="sticky bottom-1 w-fit justify-center">
+      <div className="fixed bottom-6 w-fit justify-center">
         <Button onClick={handleManualClick}>Create manually</Button>
       </div>
     </div>

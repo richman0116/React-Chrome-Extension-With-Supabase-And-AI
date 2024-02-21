@@ -45,7 +45,7 @@ const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
   ref
 ) => {
   return (
-    <div className="relative flex flex-col gap-y-1 group">
+    <div className="relative flex flex-col gap-y-1 group w-full">
       <label
         title={title}
         htmlFor={id}

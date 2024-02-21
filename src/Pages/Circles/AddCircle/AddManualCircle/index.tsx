@@ -95,7 +95,7 @@ export const AddManualCircle = () => {
       <CreationHeader title="Create Manually" onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} />
       <form
         onSubmit={handleSubmit(handleCreateCircle)}
-        className="space-y-6 w-full"
+        className="space-y-6 w-full flex flex-col items-center"
       >
         <FormLine
           title="Name:"
@@ -125,7 +125,7 @@ export const AddManualCircle = () => {
           />
         </div> */}
 
-        <div className="flex justify-center w-full pt-10">
+        <div className="fixed bottom-6 w-fit justify-center">
           <Button
             type="submit"
             disabled={isSaving}

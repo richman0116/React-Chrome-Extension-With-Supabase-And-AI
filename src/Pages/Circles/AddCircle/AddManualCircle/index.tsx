@@ -4,7 +4,7 @@ import Select, { MultiValue } from "react-select";
 
 import FormLine from "../../../../components/FormLine";
 import { addCirclePageStatus, circlePageStatus } from "../../../../utils/constants";
-import { Button } from "../../../../components/GeneralButton";
+import LargeButton from "../../../../components/Buttons/LargeButton";
 import { TagInterface } from "../../../../types/tag";
 
 interface CircleFormData {
@@ -137,12 +137,12 @@ export const AddManualCircle = ({ setPageStatus, setAddPageStatus, url }: AddMan
         </div> */}
 
         <div className="flex justify-center w-full pt-10">
-          <Button
+          <LargeButton
             type="submit"
             disabled={isSaving}
           >
             {isSaving ? "Adding" : "Add"}
-          </Button>
+          </LargeButton>
         </div>
       </form>
     </div>

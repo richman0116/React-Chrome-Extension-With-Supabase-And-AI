@@ -9,7 +9,7 @@ import {
 import { addCirclePageStatus } from "../../../../utils/constants";
 import { CircleInterface } from "../../../../types/circle";
 import Loading from "../../../../components/Loading";
-import { Button } from "../../../../components/GeneralButton";
+import LargeButton from "../../../../components/Buttons/LargeButton";
 import AutoCircleItem from "../../../../components/AutoCircleItem";
 import { getSpecificNumberOfWords } from "../../../../utils/helpers";
 import CircleItem from "../../../../components/CircleItem";
@@ -162,9 +162,9 @@ const AddGeneratedCircles = ({
       </div>
 
       <div className="flex justify-end sticky bottom-5 w-full">
-        <Button onClick={getCircles} disabled={isLoading}>
+        <LargeButton onClick={getCircles} disabled={isLoading}>
           {isLoading ? "Generating" : "Generate New"}
-        </Button>
+        </LargeButton>
       </div>
     </div>
   );

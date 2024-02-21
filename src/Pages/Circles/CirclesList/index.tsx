@@ -13,7 +13,7 @@ import Loading from "../../../components/Loading";
 import { CircleInterface } from "../../../types/circle";
 import { isMainURL } from "../../../utils/helpers";
 import { circlePageStatus } from "../../../utils/constants";
-import { Button } from "../../../components/GeneralButton";
+import LargeButton from "../../../components/Buttons/LargeButton";
 
 interface ICircleList {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -113,14 +113,14 @@ const CirclList = ({
       <div className="flex justify-end sticky bottom-5 w-full">
         {!isMainUrl ? (
           <div className="flex w-full justify-evenly gap-2">
-            <Button onClick={() => setPageStatus(circlePageStatus.ADD_CIRCLE)}>
+            <LargeButton onClick={() => setPageStatus(circlePageStatus.ADD_CIRCLE)}>
               Add New
-            </Button>
-            <Button
+            </LargeButton>
+            <LargeButton
               onClick={() => setPageStatus(circlePageStatus.CLAIM_CIRCLE)}
             >
               Claim For My Circles
-            </Button>
+            </LargeButton>
           </div>
         ) : null}
       </div>

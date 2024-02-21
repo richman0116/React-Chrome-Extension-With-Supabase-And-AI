@@ -2,9 +2,12 @@ import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
-import { Button } from "../../components/GeneralButton";
+import LargeButton from "../../components/Buttons/LargeButton";
+import Header from "../../components/Header";
 // import ArrowBack from "../../components/ArrowBack.tsx";
 import { Paths } from "../../utils/constants";
+import Button from "../../components/Buttons/Button";
+import GoogleIcon from "../../components/GoogleIcon";
 
 interface LoginFormData {
   email: string;
@@ -12,12 +15,12 @@ interface LoginFormData {
 }
 
 interface LoginInterface {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
+  setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
 }
 
 const Login = ({ setIsLoggedIn }: LoginInterface) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>('')
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   const {
     handleSubmit,
@@ -39,7 +42,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
           (response) => {
             if (response.error) {
               console.log("response.error", response.error);
-              setErrorMsg(response.error)
+              setErrorMsg(response.error);
               setIsSubmitting(false);
             } else {
               console.log("response", response);
@@ -47,12 +50,12 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
                 // Kazuo: please have some notification system
                 // so that when the password is wrong or anything
                 // that make the response false, show a warning
-                setErrorMsg('')
+                setErrorMsg("");
                 setIsSubmitting(false);
-                setIsLoggedIn(true)
+                setIsLoggedIn(true);
               } else {
                 // something is wrong that made the response falses
-                setErrorMsg('Invalid login credentials')
+                setErrorMsg("Invalid login credentials");
                 setIsSubmitting(false);
               }
             }
@@ -66,52 +69,54 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col justify-center">
-      <div className="flex flex-col gap-4 w-full border border-black/10 shadow-md hover:shadow-lg rounded-md px-4 py-8">
-        <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Eden</h2>
-          <p className="text-lg font-semibold text-gray-500">Please log in</p>
-        </div>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex flex-col gap-5 w-full">
+        <Header />
+        <h2 className="text-3.5xl font-medium capitalize text-primary leading-normal">
+          Browse, Explore, Connect.
+        </h2>
         <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
           <FormLine
-            title="Email:"
+            title="Email"
             id="email"
             type="email"
             error={errors.email?.message}
             {...register("email")}
-            placeholder="Your email address here"
+            placeholder="Your email address"
             required
-            className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
           />
           <FormLine
-            title="Password:"
+            title="Password"
             id="password"
             type="password"
             error={errors.password?.message}
             {...register("password")}
-            placeholder="Your password here"
+            placeholder="Your password"
             required
-            className="w-full p-2 border rounded-lg bg-white focus:border-blue-300 focus:ring focus:ring-blue-200"
           />
           <p className="text-base text-red-700">{errorMsg}</p>
-          <div className="flex justify-center">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-            >
+          <div className="w-full flex items-center justify-center">
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Login"}
             </Button>
           </div>
-          <div className="w-full flex justify-center items-center">
-            <p className="text-base">{`Don't have an account?`}</p>
-            <a
-              href={Paths.SIGNUP}
-              target="_blank"
-              rel="noreferrer"
-              className="text-base text-blue-500 hover:text-blue-800 ml-2"
-            >
-              {`Register here`}
-            </a>
+          <div className="flex flex-col gap-2">
+            <LargeButton>
+              <div className="w-full flex justify-center items-center gap-2">
+                <GoogleIcon />
+                <p>Log in with Google</p>
+              </div>
+            </LargeButton>
+            <div className="w-full">
+              <a
+                href={Paths.SIGNUP}
+                target="_blank"
+                rel="noreferrer"
+                className="text-base text-blue-500 hover:text-blue-800"
+              >
+                <LargeButton>Sign Up</LargeButton>
+              </a>
+            </div>
           </div>
         </form>
       </div>

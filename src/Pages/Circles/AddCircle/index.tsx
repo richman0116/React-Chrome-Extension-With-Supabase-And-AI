@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import AddManualCircle from "./AddManualCircle";
 import { addCirclePageStatus, circlePageStatus } from "../../../utils/constants";
 import AddGeneratedCircles from "./AddGeneratedCircles";
-import { Button } from "../../../components/GeneralButton";
+import LargeButton from "../../../components/Buttons/LargeButton";
 
 interface IAddNewCircle {
   setPageStatus: Dispatch<SetStateAction<number>>;
@@ -26,16 +26,16 @@ export const AddNewCircle = ({ setPageStatus, url }: IAddNewCircle) => {
           </div>
           <p className=" text-lg">You can add new circles manually or by choosing one of the auto-generated circles by ChatGPT</p>
           <div className="flex flex-col gap-10">
-            <Button
+            <LargeButton
               onClick={() => setAddPageStatus(addCirclePageStatus.ADD_AUTOMATICALLY)}
             >
               Choose From Auto-generated Circles
-            </Button>
-            <Button
+            </LargeButton>
+            <LargeButton
               onClick={() => setAddPageStatus(addCirclePageStatus.ADD_MANUALLY)}
             >
               Add Manually
-            </Button>
+            </LargeButton>
           </div>
         </div>
       )}

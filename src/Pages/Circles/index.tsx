@@ -7,11 +7,7 @@ import ClaimCircle from "./ClaimCircle";
 import { CircleInterface } from "../../types/circle";
 import { circlePageStatus } from "../../utils/constants";
 
-interface CirclesInterface {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
-}
-
-const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
+const Circles = () => {
   const [pageStatus, setPageStatus] = useState<number>(circlePageStatus.CIRCLE_LIST);
   const [circles, setCircles] = useState<CircleInterface[]>([]);
   const [currentUrl, setCurrentUrl] = useState<string>("");
@@ -42,7 +38,7 @@ const Circles = ({ setIsLoggedIn }: CirclesInterface) => {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="w-full flex flex-row-reverse items-center justify-between">
-        <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+        <LogoutButton />
       </div>
       { pageStatus === circlePageStatus.CIRCLE_LIST && <CirclList setPageStatus={setPageStatus} url={currentUrl} circles={circles} setCircles={setCircles} /> }
       { pageStatus === circlePageStatus.ADD_CIRCLE && <AddNewCircle setPageStatus={setPageStatus} url={currentUrl} /> }

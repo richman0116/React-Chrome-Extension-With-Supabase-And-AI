@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../components/FormLine";
@@ -8,19 +8,18 @@ import Header from "../../components/Header";
 import { Paths } from "../../utils/constants";
 import Button from "../../components/Buttons/Button";
 import GoogleIcon from "../../components/GoogleIcon";
+import { useAuthContext } from "../../context/AuthContext";
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-interface LoginInterface {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
-}
-
-const Login = ({ setIsLoggedIn }: LoginInterface) => {
+const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+
+  const { setIsAuthenticated } = useAuthContext()
 
   const {
     handleSubmit,
@@ -52,7 +51,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
                 // that make the response false, show a warning
                 setErrorMsg("");
                 setIsSubmitting(false);
-                setIsLoggedIn(true);
+                setIsAuthenticated(true);
               } else {
                 // something is wrong that made the response falses
                 setErrorMsg("Invalid login credentials");
@@ -65,7 +64,7 @@ const Login = ({ setIsLoggedIn }: LoginInterface) => {
         console.log(ex, "kkkkkkkk");
       }
     },
-    [setIsLoggedIn]
+    [setIsAuthenticated]
   );
 
   return (

@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction, useCallback } from "react"
+import { useCallback } from "react"
+import { useAuthContext } from "../../context/AuthContext";
 
-interface LogoutButtonInterface {
-  setIsLoggedIn: Dispatch<SetStateAction<boolean>>
-}
+const LogoutButton = () => {
 
-const LogoutButton = ({ setIsLoggedIn }: LogoutButtonInterface) => {
+  const { setIsAuthenticated } = useAuthContext()
+
   const handleLogOut = useCallback(() => {
     try {
       chrome.runtime.sendMessage(
@@ -13,14 +13,14 @@ const LogoutButton = ({ setIsLoggedIn }: LogoutButtonInterface) => {
         },
         (response) => {
           if (response) {
-            setIsLoggedIn(false)
+            setIsAuthenticated(false)
           }
         }
       );
     } catch (err) {
 
     }
-  }, [setIsLoggedIn])
+  }, [setIsAuthenticated])
   return (
     <button
       onClick={handleLogOut}

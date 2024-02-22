@@ -103,7 +103,7 @@ export const AddManualCircle = () => {
           type="text"
           error={errors.name?.message}
           {...register("name")}
-          placeholder="Add circle name"
+          placeholder="Give it a good name!"
           required
         />
         <FormLine
@@ -112,7 +112,7 @@ export const AddManualCircle = () => {
           type="text"
           error={errors.description?.message}
           {...register("description")}
-          placeholder="Add circle description"
+          placeholder="What does it about?"
           required
         />
         {/* <div className="flex flex-col gap-y-1">

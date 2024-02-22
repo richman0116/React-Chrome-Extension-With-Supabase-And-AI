@@ -42,7 +42,6 @@ interface SupabaseUserDataInterface {
 
 let userLoaded = false; // check if we are loading the user
 let supabaseUser: SupabaseUserDataInterface = {}; // store the user
-let supabaseUsername: string = ""; // store the username
 
 // function to get a value from storage
 function getFromStorage(key: string): Promise<{
@@ -123,16 +122,15 @@ async function logout() {
   if (error) console.log("An error occurred on log out")
   setToStorage('supabaseSession', '');
   supabaseUser = {}
-  supabaseUsername = ''
   userLoaded = false
 }
 
 // get user name from saved supabaseUser variable
-async function getUsername() {
-  console.log("background.js: Getting username with id: ", supabaseUser?.data?.user?.id);
+async function getUserAvatarUrl() {
+  console.log("background.js: Getting user avatar url with id: ", supabaseUser?.data?.user?.id);
   return supabase
     .from('users')
-    .select('user_name')
+    .select('avatar_url')
     .eq('id', supabaseUser?.data?.user?.id)
 }
 
@@ -220,20 +218,17 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     });
     return true;
   }
-  if (request.action === "getUsername") {
-    console.log("background.js: Getting username");
-    if (supabaseUsername) {
-      sendResponse(supabaseUsername)
-    } else {
-      getUsername().then(result => {
-        console.log("background.js: Result of getUsername: ", result);
-        // supabaseUsername = result?.data?[0]?.user_name;
-        // sendResponse(result.data?[0].user_name);
-      }).catch(error => {
-        console.log("background.js: Error getUsername: ", error);
-        sendResponse({ error: 'Error getting username.' });
-      });
-    }
+  if (request.action === "getUserAvatarUrl") {
+    console.log("background.js: Getting user avatar url");
+    getUserAvatarUrl().then((result: any) => {
+      console.log("background.js: Result of getUserAvatarUrl: ", result);
+      if (result.data) {
+        sendResponse(result.data[0]);
+      }
+    }).catch(error => {
+      console.log("background.js: Error getUserAvatarUrl: ", error);
+      sendResponse({ error: 'Error getting user avatar url.' });
+    });
     return true;
   }
   if (request.action === "getPageContent") {
@@ -429,17 +424,35 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return true
   }
 
-});
-
-chrome.runtime.onStartup.addListener(async () => {
-  console.log("background.js: We are here")
-  // on startup, we do the login thing
-  await getUser();
-  const usernameResult = await getUsername();
-  if (usernameResult) {
-    // supabaseUsername = usernameResult.data[0].user_name;
+  if (request.action === "getUniqueUsersCountInUserCircles") {
+    console.log("background.js: Getting unique users count in user's circles")
+    if (supabaseUser) {
+      supabase.rpc('users_get_unique_users_count_in_circles', { userid: supabaseUser.data?.user?.id }).then(result => {
+        console.log('background.js: result of getting unique users count in user\'s circles : ', result)
+        sendResponse(result.data)
+      })
+    } else {
+      console.error("background.js: User not logged in when calling getUserCircles")
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
   }
-})
+
+  if (request.action === "getUserCirclesCount") {
+    console.log("background.js: Getting user circle's count")
+    if (supabaseUser) {
+      supabase.rpc('circles_get_user_circles_count', { userid: supabaseUser.data?.user?.id }).then(result => {
+        console.log('background.js: result of getting user circles count : ', result)
+        sendResponse(result.data)
+      })
+    } else {
+      console.error("background.js: User not logged in when calling getUserCircles")
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
+  }
+
+});
 
 // whenever we update a tab, log the url
 chrome.tabs.onUpdated.addListener( async (tabId, changeInfo, tab) => {

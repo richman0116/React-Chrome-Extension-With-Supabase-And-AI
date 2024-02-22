@@ -69,34 +69,35 @@ const CircleItem = ({
         className=" rounded-full min-w-[48px] h-12"
       />
       <div className="w-full flex items-center">
-        <div className="relative">
-          <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
-            <div className="flex justify-between items-center w-full">
-              <p className="text-xs font-bold text-primary">{circle.name}</p>
-              {isOnClaimPage ? null : (
-                <p className="italic">{isJoined ? "Joined" : ""}</p>
-              )}
-            </div>
-            <p className="text-ellipsis line-clamp-2 text-xs font-medium text-tertiary">
-              {circle.description}
-            </p>
+        <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
+          <div className="flex justify-between items-center w-full">
+            <p className="text-base font-bold text-primary line-clamp-1" title={circle.name}>{circle.name}</p>
+            {isOnClaimPage ? null : (
+              <p className="italic">{isJoined ? "Joined" : ""}</p>
+            )}
           </div>
+          <p
+            className="text-ellipsis line-clamp-2 text-sm font-medium text-tertiary"
+            title={circle.description}
+          >
+            {circle.description}
+          </p>
         </div>
       </div>
 
       {!isJoined ? (
         <div className="hidden group-hover:block">
-        <RoundedButton
-          disabled={isJoining}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            handleJoin(circle.id)
-          }}
+          <RoundedButton
+            disabled={isJoining}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleJoin(circle.id);
+            }}
           >
-          {isJoining ? "Joining" : "Join"}
-        </RoundedButton>
-          </div>
+            {isJoining ? "Joining" : "Join"}
+          </RoundedButton>
+        </div>
       ) : null}
     </a>
   );

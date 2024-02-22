@@ -14,6 +14,8 @@ interface AuthContextType {
   isChecking: boolean;
   avatarUrl: string;
   setAvatarUrl: Dispatch<SetStateAction<string>>;
+  showLogoutBtn: boolean;
+  setShowLogoutBtn: Dispatch<SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,7 +23,9 @@ const AuthContext = createContext<AuthContextType>({
   setIsAuthenticated: () => {},
   isChecking: true,
   avatarUrl: "",
-  setAvatarUrl: () => {}
+  setAvatarUrl: () => {},
+  showLogoutBtn: false,
+  setShowLogoutBtn: () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);
@@ -35,7 +39,8 @@ export const AuthContextProvider = ({
 }: AuthContextProviderInterface) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState("")
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [showLogoutBtn, setShowLogoutBtn] = useState(false);
 
   const checkIfLoggedIn = useCallback(() => {
     chrome.runtime.sendMessage({ action: "checkLoggedIn" }, (response) => {
@@ -60,7 +65,15 @@ export const AuthContextProvider = ({
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, setIsAuthenticated, isChecking, avatarUrl, setAvatarUrl }}
+      value={{
+        isAuthenticated,
+        setIsAuthenticated,
+        isChecking,
+        avatarUrl,
+        setAvatarUrl,
+        showLogoutBtn,
+        setShowLogoutBtn,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -71,7 +71,7 @@ const CircleItem = ({
       <div className="w-full flex items-center">
         <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
           <div className="flex justify-between items-center w-full">
-            <p className="text-base font-bold text-primary">{circle.name}</p>
+            <p className="text-base font-bold text-primary line-clamp-1" title={circle.name}>{circle.name}</p>
             {isOnClaimPage ? null : (
               <p className="italic">{isJoined ? "Joined" : ""}</p>
             )}

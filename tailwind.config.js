@@ -14,7 +14,8 @@ module.exports = {
         'fourth': '#D0D1D1',
         'brand': '#134D2E',
         'stroke': '#E7E8E8',
-        'tertiary': '#A1A2A3'
+        'tertiary': '#A1A2A3',
+        'alert': '#F64F4F'
       },
       fontSize: {
         '3.5xl': '2rem', //32px

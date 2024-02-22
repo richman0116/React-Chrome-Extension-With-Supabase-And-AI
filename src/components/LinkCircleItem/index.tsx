@@ -18,7 +18,7 @@ interface ILinkCircleItem {
 const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
   const [isLinking, setIsLinking] = useState<boolean>(false);
 
-  const { getCircles } = useCircleContext()
+  const { getCircles } = useCircleContext();
 
   const handleClaim = useCallback(
     (circleId: string) => {
@@ -27,7 +27,7 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
         { action: "claimCircle", circleId, url },
         (response) => {
           if (response) {
-            getCircles()
+            getCircles();
           }
           setIsLinking(false);
         }
@@ -48,7 +48,9 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
         alt="circle logo"
         className=" rounded-full min-w-[40px] h-10"
       />
-      <p className="text-ellipsis line-clamp-2 block group-hover:hidden text-xs font-medium text-primary">{circle.name}</p>
+      <p className="text-ellipsis line-clamp-2 group-hover:hidden text-xs font-medium text-primary">
+        {circle.name}
+      </p>
 
       <div className="hidden group-hover:block">
         <RoundedButton

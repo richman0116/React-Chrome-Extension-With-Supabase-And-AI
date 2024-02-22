@@ -41,14 +41,14 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
       href={`https://0xeden.com/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
-      className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-3 items-center rounded-2xl group hover:justify-between"
+      className="p-3 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-3 items-center rounded-2xl group hover:justify-between"
     >
       <img
         src={circle.circle_logo_image || `../duck.jpg`}
         alt="circle logo"
         className=" rounded-full min-w-[40px] h-10"
       />
-      <p className="block group-hover:hidden text-xs font-medium text-primary">{circle.name}</p>
+      <p className="text-ellipsis line-clamp-2 block group-hover:hidden text-xs font-medium text-primary">{circle.name}</p>
 
       <div className="hidden group-hover:block">
         <RoundedButton

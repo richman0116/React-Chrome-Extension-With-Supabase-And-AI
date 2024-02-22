@@ -17,7 +17,7 @@ const AutoCircleItem = ({
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const { name, description, tags } = circle;
 
-  const { setPageStatus } = useCircleContext()
+  const { setPageStatus, getCircles } = useCircleContext()
 
   const handleAdd = useCallback(() => {
     setIsAdding(true);
@@ -48,6 +48,7 @@ const AutoCircleItem = ({
                 setIsAdding(false);
               } else {
                 console.log("CirclesView: createCircle response: ", response);
+                getCircles()
                 setIsAdding(false);
                 // now we want to load circles again just to make sure the result went through
                 setPageStatus(circlePageStatus.CIRCLE_LIST)
@@ -57,7 +58,7 @@ const AutoCircleItem = ({
         }
       }
     );
-  }, [description, name, setPageStatus, tags, url]);
+  }, [description, getCircles, name, setPageStatus, tags, url]);
 
   return (
     <div className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">
@@ -69,8 +70,8 @@ const AutoCircleItem = ({
       <div className="w-full flex items-center">
         <div className="relative">
           <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
-            <p className="text-xs font-bold text-primary">{circle.name}</p>
-            <p className="text-ellipsis line-clamp-2 text-xs font-medium text-tertiary">
+            <p className="text-base font-bold text-primary">{circle.name}</p>
+            <p className="text-ellipsis line-clamp-2 text-sm font-medium text-tertiary">
               {circle.description}
             </p>
           </div>

@@ -6,7 +6,6 @@ import LargeButton from "../../components/Buttons/LargeButton";
 import Header from "../../components/Header";
 // import ArrowBack from "../../components/ArrowBack.tsx";
 import { Paths } from "../../utils/constants";
-import Button from "../../components/Buttons/Button";
 import GoogleIcon from "../../components/SVGIcons/GoogleIcon";
 import { useAuthContext } from "../../context/AuthContext";
 
@@ -19,7 +18,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  const { setIsAuthenticated } = useAuthContext()
+  const { setIsAuthenticated } = useAuthContext();
 
   const {
     handleSubmit,
@@ -94,12 +93,12 @@ const Login = () => {
             required
           />
           <p className="text-base text-red-700">{errorMsg}</p>
-          <div className="w-full flex items-center justify-center">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Login"}
-            </Button>
-          </div>
           <div className="flex flex-col gap-2">
+            <div className="w-full flex items-center justify-center">
+              <LargeButton type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Login"}
+              </LargeButton>
+            </div>
             <LargeButton>
               <div className="w-full flex justify-center items-center gap-2">
                 <GoogleIcon />

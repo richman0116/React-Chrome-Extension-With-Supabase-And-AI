@@ -29,7 +29,7 @@ const CircleList = () => {
   return (
     <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
       <Header />
-      <div className="w-full sticky top-0 bg-white py-3 z-50">
+      <div className="w-full sticky top-0 bg-white py-3 z-40">
         <p className=" text-3.5xl font-medium capitalize text-primary">
           {resultText}
         </p>

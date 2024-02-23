@@ -427,9 +427,9 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.action === "getUniqueUsersCountInUserCircles") {
     console.log("background.js: Getting unique users count in user's circles")
     if (supabaseUser) {
-      supabase.rpc('users_get_unique_users_count_in_circles', { userid: supabaseUser.data?.user?.id }).then(result => {
+      supabase.rpc('get_users_in_my_circles').then(result => {
         console.log('background.js: result of getting unique users count in user\'s circles : ', result)
-        sendResponse(result.data)
+        sendResponse(result?.data?.length)
       })
     } else {
       console.error("background.js: User not logged in when calling getUserCircles")

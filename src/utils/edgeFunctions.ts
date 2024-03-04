@@ -37,11 +37,23 @@ export const getGeneratedCircles = async (pageUrl: string, pageContent: string )
 //   return res
 // }
 
-export const generateCircleImage = async(circle_id: string) => {
-  const url = 'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/generateImageForCircle'
+export const generateCircleImage = async(circle_id?: string, name?: string, description?: string) => {
+  const url = 'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/generateImageFrom'
   // this function takes the existing circle id and generates the image for it
   const data = {
-    circle_id
+    circle_id,
+    name,
+    description
+  }
+  const res = await callAPIRequest(url, data)
+  return res;
+}
+
+export const generateTags = async (name: string, description: string) => {
+  const url = 'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/generateTagsForCircle'
+  const data = {
+    name,
+    description
   }
   const res = await callAPIRequest(url, data)
   return res;

@@ -2,7 +2,8 @@
 import supabase from '../utils/supabase'
 import { Session, AuthError } from '@supabase/supabase-js';
 
-import { getGeneratedCircles, generateCircleImage } from '../utils/edgeFunctions';
+import { getGeneratedCircles } from '../utils/edgeFunctions';
+import { supabaseSotrageUrl } from '../utils/constants';
 
 const bannedURLList: string[] = [
   "https://twitter.com/home",
@@ -191,6 +192,15 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
   return data
 }
 
+const updateCircleImageUrl = async (circleId: string) => {
+  const { error, status } = await supabase.from('circles').update({circle_logo_image: `${supabaseSotrageUrl}/media_bucket/circle_images/${circleId}.webp`}).eq('id', circleId);
+  if (error) {
+    console.log(error, 'An error occurred on circle image updating')
+  }
+  return status
+}
+
+
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.action === "checkLoggedIn") {
     // This is an example async function, replace with your own
@@ -323,7 +333,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       console.log("background.js: Result of creating circle with tags: ", result);
       // here we will generate the circle image by sending the edge function
       // we dont even need to await this
-      generateCircleImage(result.data);
+      // generateCircleImage(result.data); // we will generate the circle image in mannual circle creation UI. :by Kazuo
       sendResponse(result)
     })
     return true;
@@ -386,7 +396,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       tag_names: request.names
     }).then(result => {
       console.log("background.js: Result of adding tags: ", result)
-      sendResponse(result)
+      sendResponse(result.data)
     })
     return true;
   }
@@ -450,6 +460,20 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
       sendResponse({ error: 'User not logged in' })
     }
     return true;
+  }
+
+  if (request.action === "updateCircleImageUrl") {
+    console.log("background.js: Updating circle image url")
+    if (supabaseUser) {
+      updateCircleImageUrl(request.circleId)
+      .then((status: number) => {
+        if (status === 204) {
+          sendResponse("success")
+        }
+      })
+    }
+
+    return true
   }
 
 });

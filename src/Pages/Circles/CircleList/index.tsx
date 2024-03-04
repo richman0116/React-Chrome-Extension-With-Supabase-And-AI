@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 
 import Header from "../../../components/Header";
 import MyCircles from "./MyCircles";
-import RecommendedCircles from "./RecommendedCircles";
 import { useCircleContext } from "../../../context/CircleContext";
 import PageCirclList from "./PageCirclesList";
 import Button from "../../../components/Buttons/Button";
@@ -35,7 +34,6 @@ const CircleList = () => {
         </p>
       </div>
       <PageCirclList />
-      <RecommendedCircles />
       <MyCircles />
       <div className="fixed bottom-6 w-fit justify-center">
         <Button onClick={handlePlusClick}><Plus /></Button>

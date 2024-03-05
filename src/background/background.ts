@@ -392,7 +392,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 
   if (request.action === "addTags") {
     console.log("background.js: Adding tags")
-    supabase.rpc('tags_add_new', {
+    supabase.rpc('tags_add_new_return_all_ids', {
       tag_names: request.names
     }).then(result => {
       console.log("background.js: Result of adding tags: ", result)

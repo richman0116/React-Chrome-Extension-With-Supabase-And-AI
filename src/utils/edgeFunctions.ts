@@ -56,5 +56,6 @@ export const generateTags = async (name: string, description: string) => {
     description
   }
   const res = await callAPIRequest(url, data)
-  return res;
+  const tagsString = res.replaceAll("'", '"')
+  return JSON.parse(tagsString);
 }

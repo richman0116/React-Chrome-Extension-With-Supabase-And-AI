@@ -24,7 +24,11 @@ module.exports = {
         3.725: '0.9375rem', //15px
       },
       width: {
+        25: '6.25rem', // 100px
         25.5: '6.375rem', // 102px
+      },
+      height: {
+        25: '6.25rem', // 100px
       },
       hoverBackgroundColor: {
         'gold-dark': '#DAB307',

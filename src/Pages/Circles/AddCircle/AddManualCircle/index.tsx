@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormLine from "../../../../components/FormLine";
@@ -11,10 +11,12 @@ import Loading from "../../../../components/Loading";
 
 import { resizeAndConvertImageToBuffer, uploadImageToSupabase } from "../../../../utils/helpers";
 import { circlePageStatus } from "../../../../utils/constants";
-import { generateCircleImage } from "../../../../utils/edgeFunctions";
+import { generateCircleImage, generateTags } from "../../../../utils/edgeFunctions";
 
 import { CircleInterface } from "../../../../types/circle";
 import { initialCircleData } from "..";
+import UploadIcon from "../../../../components/SVGIcons/UploadIcon";
+import classNames from "classnames";
 
 interface CircleFormData {
   name: string;
@@ -44,18 +46,22 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const { tags } = circleData
 
   const handleCreateCircle = useCallback(
-    (data: CircleFormData) => {
+    async (data: CircleFormData) => {
       if (circleImageUrl) {
         setIsSaving(true);
+        const { name, description } = data;
+        let availableTags = tags
+        if (tags.length === 1 && tags[0] === '') {
+          availableTags = await generateTags(name, description)
+        }
         
         // add tags first
         chrome.runtime.sendMessage(
           {
             action: "addTags",
-            names: tags
+            names: availableTags
           },
           (addedTags: string[]) => {
-            const { name, description } = data;
             chrome.runtime.sendMessage(
               {
                 action: "createCircle",
@@ -108,7 +114,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
         )
       }
     },
-    [circleImageUrl, url, tags, setPageStatus, getCircles]
+    [circleImageUrl, getCircles, setPageStatus, tags, url]
   );
 
   const handleGenerateImage = useCallback(async () => {
@@ -121,6 +127,17 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
       setIsGeneratingImage(false);
     }
   }, [getValues]);
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const imgFile = e.target.files?.[0]
+    if (imgFile) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        setCircleImageUrl(reader.result as string)
+      }
+      reader.readAsDataURL(imgFile)
+    }
+  }
 
   return (
     <div className="w-full h-full py-5">
@@ -155,13 +172,33 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           required
         />
         {isGeneratingImage ? (
-          <Loading />
+          <div className="w-25 h-25 flex items-center justify-center">
+            <Loading />
+          </div>
         ) : (
-          <img
-            src={circleImageUrl || "../duck.jpg"}
-            alt="circle logo"
-            className=" rounded-full min-w-[128px] h-32"
-          />
+          <div className="w-25 h-25 ">
+              <div className="relative w-full h-full rounded-full bg-secondary">
+                { circleImageUrl ? 
+                <div>
+                  <img
+                    src={circleImageUrl}
+                    alt="circle logo"
+                    className="z-10 rounded-full w-25 h-25"
+                  />
+
+                </div>: null
+                }
+                <div className="absolute top-0 inset-0 flex items-center justify-center group cursor-pointer" onClick={() => document.getElementById('fileInput')?.click()}>
+                  <div className={classNames("w-fit text-tertiary z-20", {
+                    "hidden group-hover:flex text-transparent group-hover:text-white": circleImageUrl,
+                    "group-hover:text-black/50": !circleImageUrl
+                  })}>
+                    <UploadIcon />
+                  </div>
+                </div>
+                <input id="fileInput" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              </div>
+          </div>
         )}
 
         <div className="w-full flex justify-center">

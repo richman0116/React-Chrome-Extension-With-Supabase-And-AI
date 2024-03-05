@@ -1,7 +1,7 @@
-import { circlePageStatus } from "../../utils/constants"
-import CircleList from "./CircleList"
-import { useCircleContext } from "../../context/CircleContext"
-import AddCircle from "./AddCircle"
+import { circlePageStatus } from '../../utils/constants'
+import CircleList from './CircleList'
+import { useCircleContext } from '../../context/CircleContext'
+import AddCircle from './AddCircle'
 
 const Circles = () => {
   const { pageStatus } = useCircleContext()

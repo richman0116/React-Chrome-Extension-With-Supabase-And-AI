@@ -1,88 +1,90 @@
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 
-import Loading from "../../../../components/Loading";
-import Button from "../../../../components/Buttons/Button";
-import { useCircleContext } from "../../../../context/CircleContext";
-import { CircleInterface } from "../../../../types/circle";
-import { getSpecificNumberOfWords } from "../../../../utils/helpers";
-import { circlePageStatus } from "../../../../utils/constants";
-import AutoCircleItem from "../../../../components/AutoCircleItem";
-import CreationHeader from "../../../../components/CreationHeader";
-import GenerateButton from "../../../../components/Buttons/GenerateButton";
-import Refresh from "../../../../components/SVGIcons/Refresh";
-import RecommendedCircles from "./RecommendedCircles";
-
+import Loading from '../../../../components/Loading'
+import Button from '../../../../components/Buttons/Button'
+import { useCircleContext } from '../../../../context/CircleContext'
+import { CircleInterface } from '../../../../types/circle'
+import { getSpecificNumberOfWords } from '../../../../utils/helpers'
+import { circlePageStatus } from '../../../../utils/constants'
+import AutoCircleItem from '../../../../components/AutoCircleItem'
+import CreationHeader from '../../../../components/CreationHeader'
+import GenerateButton from '../../../../components/Buttons/GenerateButton'
+import Refresh from '../../../../components/SVGIcons/Refresh'
+import RecommendedCircles from './RecommendedCircles'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
 }
 
 const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
-  const [circles, setCircles] = useState<CircleInterface[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [circles, setCircles] = useState<CircleInterface[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { currentUrl: url, setPageStatus } = useCircleContext();
+  const { currentUrl: url, setPageStatus } = useCircleContext()
 
   const tags: string[] = useMemo(() => {
-    const allTags = circles.map((circle) => circle.tags).flat();
-    return allTags.filter((tag, index, array) => array.indexOf(tag) === index);
-  }, [circles]);
+    const allTags = circles.map((circle) => circle.tags).flat()
+    return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
+  }, [circles])
 
   const getCircles = useCallback(() => {
-    setIsLoading(true);
+    setIsLoading(true)
     setCircles([])
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.runtime.sendMessage(
-        { action: "getPageContent", tabId: tabs[0].id },
+        { action: 'getPageContent', tabId: tabs[0].id },
         (response) => {
           chrome.runtime.sendMessage(
             {
-              action: "getGeneratedCircles",
+              action: 'getGeneratedCircles',
               pageUrl: url,
               pageContent: response,
             },
             (res1) => {
-              console.log("Generated circles: ", res1);
-              if (res1?.error && res1?.error === "context_length_exceeded") {
-                const limitedWords = getSpecificNumberOfWords(response, 5000);
+              console.log('Generated circles: ', res1)
+              if (res1?.error && res1?.error === 'context_length_exceeded') {
+                const limitedWords = getSpecificNumberOfWords(response, 5000)
                 chrome.runtime.sendMessage(
                   {
-                    action: "getGeneratedCircles",
+                    action: 'getGeneratedCircles',
                     pageUrl: url,
                     pageContent: limitedWords,
                   },
                   (res2) => {
-                    console.log("Generated circles with limited words: ", res2);
+                    console.log('Generated circles with limited words: ', res2)
                     if (res2.length >= 5) {
-                      setCircles(res2);
+                      setCircles(res2)
                     }
-                    setIsLoading(false);
+                    setIsLoading(false)
                   }
-                );
+                )
               } else {
                 if (res1.length >= 5) {
-                  setCircles(res1);
+                  setCircles(res1)
                 }
-                setIsLoading(false);
+                setIsLoading(false)
               }
             }
-          );
+          )
         }
-      );
-    });
-  }, [url]);
-
-  const handleAddClick = useCallback((circleData: CircleInterface) => {
-    setCircleData({
-      ...circleData,
-      tags
+      )
     })
-    setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [setCircleData, setPageStatus, tags])
+  }, [url])
+
+  const handleAddClick = useCallback(
+    (circleData: CircleInterface) => {
+      setCircleData({
+        ...circleData,
+        tags,
+      })
+      setPageStatus(circlePageStatus.ADD_MANUALLY)
+    },
+    [setCircleData, setPageStatus, tags]
+  )
 
   const handleManualClick = useCallback(() => {
-    setPageStatus(circlePageStatus.ADD_MANUALLY);
-  }, [setPageStatus]);
+    setPageStatus(circlePageStatus.ADD_MANUALLY)
+  }, [setPageStatus])
 
   return (
     <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
@@ -100,14 +102,21 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
 
           {!isLoading && circles.length === 0 && (
             <div className="w-full h-80 flex flex-col items-center justify-center">
-              <p className="text-lg font-medium capitalize text-primary text-center">You can generate circles by OpenAI</p>
+              <p className="text-lg font-medium capitalize text-primary text-center">
+                You can generate circles by OpenAI
+              </p>
             </div>
           )}
 
           {!isLoading && circles.length > 0 && (
             <div className="w-full flex flex-col gap-1">
               {circles.map((circle, index) => (
-                <AutoCircleItem key={index} circle={circle} url={url} onAdd={() => handleAddClick(circle)} />
+                <AutoCircleItem
+                  key={index}
+                  circle={circle}
+                  url={url}
+                  onAdd={() => handleAddClick(circle)}
+                />
               ))}
             </div>
           )}
@@ -115,7 +124,7 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
             <div className="w-full flex justify-center">
               <GenerateButton type="button" onClick={getCircles}>
                 <Refresh />
-                <p>Generate {circles.length > 0 ? "New" : ""}</p>
+                <p>Generate {circles.length > 0 ? 'New' : ''}</p>
               </GenerateButton>
             </div>
           )}
@@ -126,7 +135,7 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
         <Button onClick={handleManualClick}>Create manually</Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddGeneratedCircles;
+export default AddGeneratedCircles

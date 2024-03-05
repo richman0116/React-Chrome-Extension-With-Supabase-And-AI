@@ -20,14 +20,6 @@
       "js": ["js/content.bundle.js"]
     }
   ],
-  "permissions": [
-    "tabs",
-    "scripting",
-    "activeTab",
-    "storage"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ]
+  "permissions": ["tabs", "scripting", "activeTab", "storage"],
+  "host_permissions": ["http://*/*", "https://*/*"]
 }

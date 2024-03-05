@@ -13,6 +13,6 @@ const UserIcon = () => (
       fill="#424547"
     />
   </svg>
-);
+)
 
-export default UserIcon;
+export default UserIcon

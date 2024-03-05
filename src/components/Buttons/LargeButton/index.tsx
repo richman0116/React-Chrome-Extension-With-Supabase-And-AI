@@ -16,9 +16,12 @@ const LargeButton = forwardRef<HTMLButtonElement, LargeButtonProps>(
         type={type || 'button'}
         disabled={disabled}
         {...props}
-        className={classNames("w-full py-3.725 text-sm font-medium leading-normal text-center text-black/90 bg-secondary rounded-xl hover:bg-gray-200", {
-          'cursor-not-allowed text-black/50': disabled
-        })}
+        className={classNames(
+          'w-full py-3.725 text-sm font-medium leading-normal text-center text-black/90 bg-secondary rounded-xl hover:bg-gray-200',
+          {
+            'cursor-not-allowed text-black/50': disabled,
+          }
+        )}
       />
     )
   }

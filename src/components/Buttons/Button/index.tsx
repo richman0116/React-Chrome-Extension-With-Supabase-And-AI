@@ -16,9 +16,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type={type || 'button'}
         disabled={disabled}
         {...props}
-        className={classNames("w-fit px-5 py-3 rounded-2xl bg-brand hover:bg-green-900 text-white text-base font-bold leading-normal", {
-          'cursor-not-allowed bg-brand/70': disabled
-        })}
+        className={classNames(
+          'w-fit px-5 py-3 rounded-2xl bg-brand hover:bg-green-900 text-white text-base font-bold leading-normal',
+          {
+            'cursor-not-allowed bg-brand/70': disabled,
+          }
+        )}
       />
     )
   }

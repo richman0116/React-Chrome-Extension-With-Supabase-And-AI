@@ -1,19 +1,13 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
 
-import { CircleInterface } from "../../types/circle";
-import RoundedButton from "../Buttons/RoundedButton";
+import { CircleInterface } from '../../types/circle'
+import RoundedButton from '../Buttons/RoundedButton'
 
 interface CircleItemInterface {
-  circle: CircleInterface;
-  url: string;
-  isOnClaimPage?: boolean;
-  setPageStatus?: Dispatch<SetStateAction<number>>;
+  circle: CircleInterface
+  url: string
+  isOnClaimPage?: boolean
+  setPageStatus?: Dispatch<SetStateAction<number>>
 }
 
 const CircleItem = ({
@@ -22,39 +16,36 @@ const CircleItem = ({
   setPageStatus,
   url,
 }: CircleItemInterface) => {
-  const [isJoined, setIsJoined] = useState<boolean>(false);
-  const [isJoining, setIsJoining] = useState<boolean>(false);
+  const [isJoined, setIsJoined] = useState<boolean>(false)
+  const [isJoining, setIsJoining] = useState<boolean>(false)
 
   const checkIfJoined = useCallback(async () => {
     chrome.runtime.sendMessage(
-      { action: "checkIfUserJoinedCircle", circleId: circle.id },
+      { action: 'checkIfUserJoinedCircle', circleId: circle.id },
       (response) => {
         if (response) {
-          setIsJoined(response);
+          setIsJoined(response)
         }
       }
-    );
-  }, [circle.id]);
+    )
+  }, [circle.id])
 
   useEffect(() => {
-    checkIfJoined();
-  }, [checkIfJoined]);
+    checkIfJoined()
+  }, [checkIfJoined])
 
   const handleJoin = useCallback(
     (circleId: string) => {
-      setIsJoining(true);
-      chrome.runtime.sendMessage(
-        { action: "joinCircle", circleId, url },
-        (response) => {
-          if (response === true) {
-            checkIfJoined();
-          }
-          setIsJoining(false);
+      setIsJoining(true)
+      chrome.runtime.sendMessage({ action: 'joinCircle', circleId, url }, (response) => {
+        if (response === true) {
+          checkIfJoined()
         }
-      );
+        setIsJoining(false)
+      })
     },
     [checkIfJoined, url]
-  );
+  )
 
   return (
     <a
@@ -71,10 +62,13 @@ const CircleItem = ({
       <div className="w-full flex items-center">
         <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
           <div className="flex justify-between items-center w-full">
-            <p className="text-base font-bold text-primary line-clamp-1" title={circle.name}>{circle.name}</p>
-            {isOnClaimPage ? null : (
-              <p className="italic">{isJoined ? "Joined" : ""}</p>
-            )}
+            <p
+              className="text-base font-bold text-primary line-clamp-1"
+              title={circle.name}
+            >
+              {circle.name}
+            </p>
+            {isOnClaimPage ? null : <p className="italic">{isJoined ? 'Joined' : ''}</p>}
           </div>
           <p
             className="text-ellipsis line-clamp-2 text-sm font-medium text-tertiary"
@@ -90,17 +84,17 @@ const CircleItem = ({
           <RoundedButton
             disabled={isJoining}
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleJoin(circle.id);
+              e.preventDefault()
+              e.stopPropagation()
+              handleJoin(circle.id)
             }}
           >
-            {isJoining ? "Joining" : "Join"}
+            {isJoining ? 'Joining' : 'Join'}
           </RoundedButton>
         </div>
       ) : null}
     </a>
-  );
-};
+  )
+}
 
-export default CircleItem;
+export default CircleItem

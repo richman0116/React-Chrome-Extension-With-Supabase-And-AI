@@ -6,62 +6,60 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
+} from 'react'
 
 interface AuthContextType {
-  isAuthenticated: boolean;
-  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
-  isChecking: boolean;
-  avatarUrl: string;
-  setAvatarUrl: Dispatch<SetStateAction<string>>;
-  showLogoutBtn: boolean;
-  setShowLogoutBtn: Dispatch<SetStateAction<boolean>>;
+  isAuthenticated: boolean
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>
+  isChecking: boolean
+  avatarUrl: string
+  setAvatarUrl: Dispatch<SetStateAction<string>>
+  showLogoutBtn: boolean
+  setShowLogoutBtn: Dispatch<SetStateAction<boolean>>
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   setIsAuthenticated: () => {},
   isChecking: true,
-  avatarUrl: "",
+  avatarUrl: '',
   setAvatarUrl: () => {},
   showLogoutBtn: false,
   setShowLogoutBtn: () => {},
-});
+})
 
-export const useAuthContext = () => useContext(AuthContext);
+export const useAuthContext = () => useContext(AuthContext)
 
 interface AuthContextProviderInterface {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
-export const AuthContextProvider = ({
-  children,
-}: AuthContextProviderInterface) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [showLogoutBtn, setShowLogoutBtn] = useState(false);
+export const AuthContextProvider = ({ children }: AuthContextProviderInterface) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [showLogoutBtn, setShowLogoutBtn] = useState(false)
 
   const checkIfLoggedIn = useCallback(() => {
-    chrome.runtime.sendMessage({ action: "checkLoggedIn" }, (response) => {
+    chrome.runtime.sendMessage({ action: 'checkLoggedIn' }, (response) => {
       if (chrome.runtime.lastError) {
-        setIsChecking(false);
-        console.error(chrome.runtime.lastError);
+        setIsChecking(false)
+        console.error(chrome.runtime.lastError)
       } else {
         if (response === true) {
-          setIsAuthenticated(true);
-          setIsChecking(false);
+          setIsAuthenticated(true)
+          setIsChecking(false)
         } else {
-          setIsAuthenticated(false);
-          setIsChecking(false);
+          setIsAuthenticated(false)
+          setIsChecking(false)
         }
       }
-    });
-  }, []);
+    })
+  }, [])
 
   useEffect(() => {
-    checkIfLoggedIn();
-  }, [checkIfLoggedIn]);
+    checkIfLoggedIn()
+  }, [checkIfLoggedIn])
 
   return (
     <AuthContext.Provider
@@ -77,5 +75,5 @@ export const AuthContextProvider = ({
     >
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}

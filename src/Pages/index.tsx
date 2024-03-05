@@ -1,10 +1,10 @@
-import Circles from "./Circles";
-import Login from "./Login";
-import Loading from "../components/Loading";
-import { useAuthContext } from "../context/AuthContext";
+import Circles from './Circles'
+import Login from './Login'
+import Loading from '../components/Loading'
+import { useAuthContext } from '../context/AuthContext'
 
 const Main = () => {
-  const { isAuthenticated, isChecking, setShowLogoutBtn } = useAuthContext();
+  const { isAuthenticated, isChecking, setShowLogoutBtn } = useAuthContext()
 
   return (
     <div
@@ -19,7 +19,7 @@ const Main = () => {
         <>{isAuthenticated ? <Circles /> : <Login />}</>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Main;
+export default Main

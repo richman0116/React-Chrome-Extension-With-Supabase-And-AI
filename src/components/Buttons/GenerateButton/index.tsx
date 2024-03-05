@@ -16,9 +16,12 @@ const GenerateButton = forwardRef<HTMLButtonElement, GenerateButtonProps>(
         type={type || 'button'}
         disabled={disabled}
         {...props}
-        className={classNames("w-fit px-3 py-2 rounded-full bg-secondary hover:bg-gray-200 text-primary text-xs font-bold leading-normal flex items-center gap-1", {
-          'cursor-not-allowed bg-tertiary': disabled
-        })}
+        className={classNames(
+          'w-fit px-3 py-2 rounded-full bg-secondary hover:bg-gray-200 text-primary text-xs font-bold leading-normal flex items-center gap-1',
+          {
+            'cursor-not-allowed bg-tertiary': disabled,
+          }
+        )}
       />
     )
   }

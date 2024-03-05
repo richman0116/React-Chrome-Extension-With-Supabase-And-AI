@@ -14,6 +14,6 @@ const Chevron = () => (
       fill="#131719"
     />
   </svg>
-);
+)
 
-export default Chevron;
+export default Chevron

@@ -13,6 +13,6 @@ const Plus = () => (
       fill="white"
     />
   </svg>
-);
+)
 
-export default Plus;
+export default Plus

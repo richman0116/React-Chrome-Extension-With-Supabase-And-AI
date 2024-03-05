@@ -4,18 +4,18 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor: {
-        'cream': '#FAF3E0',
-        'gold': '#F0C808',
+        cream: '#FAF3E0',
+        gold: '#F0C808',
       },
       colors: {
-        'gold': '#F0C808',
-        'primary': '#131719',
-        'secondary': '#F3F3F3',
-        'fourth': '#D0D1D1',
-        'brand': '#134D2E',
-        'stroke': '#E7E8E8',
-        'tertiary': '#A1A2A3',
-        'alert': '#F64F4F'
+        gold: '#F0C808',
+        primary: '#131719',
+        secondary: '#F3F3F3',
+        fourth: '#D0D1D1',
+        brand: '#134D2E',
+        stroke: '#E7E8E8',
+        tertiary: '#A1A2A3',
+        alert: '#F64F4F',
       },
       fontSize: {
         '3.5xl': '2rem', //32px
@@ -35,10 +35,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['HKGrotesk', 'sans-serif'],
-      }
+      },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar')({ nocompatible: true }),
-  ],
+  plugins: [require('tailwind-scrollbar')({ nocompatible: true })],
 }

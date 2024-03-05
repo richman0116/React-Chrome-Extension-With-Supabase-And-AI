@@ -1,8 +1,8 @@
-import Chevron from "../SVGIcons/Chevron";
+import Chevron from '../SVGIcons/Chevron'
 
 interface ICreationHeader {
-  title: string;
-  onBack: () => void;
+  title: string
+  onBack: () => void
 }
 
 const CreationHeader = ({ title, onBack }: ICreationHeader) => (
@@ -10,10 +10,8 @@ const CreationHeader = ({ title, onBack }: ICreationHeader) => (
     <div className="text-primary cursor-pointer" onClick={onBack}>
       <Chevron />
     </div>
-    <p className="text-2xl font-medium capitalize text-primary">
-      {title}
-    </p>
+    <p className="text-2xl font-medium capitalize text-primary">{title}</p>
   </div>
-);
+)
 
-export default CreationHeader;
+export default CreationHeader

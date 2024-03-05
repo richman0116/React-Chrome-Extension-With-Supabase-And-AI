@@ -13,6 +13,6 @@ const CircleIcon = () => (
       fill="#424547"
     />
   </svg>
-);
+)
 
-export default CircleIcon;
+export default CircleIcon

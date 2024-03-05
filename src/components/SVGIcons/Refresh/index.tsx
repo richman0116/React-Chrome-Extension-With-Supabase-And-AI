@@ -14,6 +14,6 @@ const Refresh = () => (
       fill="#424547"
     />
   </svg>
-);
+)
 
-export default Refresh;
+export default Refresh

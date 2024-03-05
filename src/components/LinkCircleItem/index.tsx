@@ -1,34 +1,31 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react'
 
-import { CircleInterface } from "../../types/circle";
-import RoundedButton from "../Buttons/RoundedButton";
-import { useCircleContext } from "../../context/CircleContext";
+import { CircleInterface } from '../../types/circle'
+import RoundedButton from '../Buttons/RoundedButton'
+import { useCircleContext } from '../../context/CircleContext'
 
 interface ILinkCircleItem {
-  circle: CircleInterface;
-  url: string;
+  circle: CircleInterface
+  url: string
 }
 
 const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
-  const [isLinking, setIsLinking] = useState<boolean>(false);
+  const [isLinking, setIsLinking] = useState<boolean>(false)
 
-  const { getCircles } = useCircleContext();
+  const { getCircles } = useCircleContext()
 
   const handleClaim = useCallback(
     (circleId: string) => {
-      setIsLinking(true);
-      chrome.runtime.sendMessage(
-        { action: "claimCircle", circleId, url },
-        (response) => {
-          if (response) {
-            getCircles();
-          }
-          setIsLinking(false);
+      setIsLinking(true)
+      chrome.runtime.sendMessage({ action: 'claimCircle', circleId, url }, (response) => {
+        if (response) {
+          getCircles()
         }
-      );
+        setIsLinking(false)
+      })
     },
     [getCircles, url]
-  );
+  )
 
   return (
     <a
@@ -50,16 +47,16 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
         <RoundedButton
           disabled={isLinking}
           onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleClaim(circle.id);
+            e.preventDefault()
+            e.stopPropagation()
+            handleClaim(circle.id)
           }}
         >
-          {isLinking ? "Linking" : "Link"}
+          {isLinking ? 'Linking' : 'Link'}
         </RoundedButton>
       </div>
     </a>
-  );
-};
+  )
+}
 
-export default LinkCircleItem;
+export default LinkCircleItem

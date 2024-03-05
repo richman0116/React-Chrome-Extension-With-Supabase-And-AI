@@ -1,70 +1,70 @@
-import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
-import FormLine from "../../components/FormLine";
-import LargeButton from "../../components/Buttons/LargeButton";
-import Header from "../../components/Header";
+import FormLine from '../../components/FormLine'
+import LargeButton from '../../components/Buttons/LargeButton'
+import Header from '../../components/Header'
 // import ArrowBack from "../../components/ArrowBack.tsx";
-import { Paths } from "../../utils/constants";
-import GoogleIcon from "../../components/SVGIcons/GoogleIcon";
-import { useAuthContext } from "../../context/AuthContext";
+import { Paths } from '../../utils/constants'
+import GoogleIcon from '../../components/SVGIcons/GoogleIcon'
+import { useAuthContext } from '../../context/AuthContext'
 
 interface LoginFormData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 const Login = () => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [errorMsg, setErrorMsg] = useState<string>('')
 
-  const { setIsAuthenticated } = useAuthContext();
+  const { setIsAuthenticated } = useAuthContext()
 
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<LoginFormData>({});
+  } = useForm<LoginFormData>({})
 
   const handleSignIn = useCallback(
     (data: LoginFormData) => {
       try {
-        setIsSubmitting(true);
-        const { email, password } = data;
+        setIsSubmitting(true)
+        const { email, password } = data
         chrome.runtime.sendMessage(
           {
-            action: "loginWithEmailPassword",
+            action: 'loginWithEmailPassword',
             email,
             password,
           },
           (response) => {
             if (response.error) {
-              console.log("response.error", response.error);
-              setErrorMsg(response.error);
-              setIsSubmitting(false);
+              console.log('response.error', response.error)
+              setErrorMsg(response.error)
+              setIsSubmitting(false)
             } else {
-              console.log("response", response);
+              console.log('response', response)
               if (response) {
                 // Kazuo: please have some notification system
                 // so that when the password is wrong or anything
                 // that make the response false, show a warning
-                setErrorMsg("");
-                setIsSubmitting(false);
-                setIsAuthenticated(true);
+                setErrorMsg('')
+                setIsSubmitting(false)
+                setIsAuthenticated(true)
               } else {
                 // something is wrong that made the response falses
-                setErrorMsg("Invalid login credentials");
-                setIsSubmitting(false);
+                setErrorMsg('Invalid login credentials')
+                setIsSubmitting(false)
               }
             }
           }
-        );
+        )
       } catch (ex) {
-        console.log(ex, "kkkkkkkk");
+        console.log(ex, 'kkkkkkkk')
       }
     },
     [setIsAuthenticated]
-  );
+  )
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -79,7 +79,7 @@ const Login = () => {
             id="email"
             type="email"
             error={errors.email?.message}
-            {...register("email")}
+            {...register('email')}
             placeholder="Your email address"
             required
           />
@@ -88,7 +88,7 @@ const Login = () => {
             id="password"
             type="password"
             error={errors.password?.message}
-            {...register("password")}
+            {...register('password')}
             placeholder="Your password"
             required
           />
@@ -96,7 +96,7 @@ const Login = () => {
           <div className="flex flex-col gap-2">
             <div className="w-full flex items-center justify-center">
               <LargeButton type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Login"}
+                {isSubmitting ? 'Submitting...' : 'Login'}
               </LargeButton>
             </div>
             <LargeButton>
@@ -119,7 +119,7 @@ const Login = () => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

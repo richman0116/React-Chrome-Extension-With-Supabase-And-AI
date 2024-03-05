@@ -1,48 +1,48 @@
-import { useCallback, useEffect, useState } from "react";
-import { useAuthContext } from "../../context/AuthContext";
-import CircleIcon from "../SVGIcons/CircleIcon";
-import UserIcon from "../SVGIcons/UserIcon";
-import Avatar from "../Avatar";
-import LogoutButton from "../LogoutButton";
+import { useCallback, useEffect, useState } from 'react'
+import { useAuthContext } from '../../context/AuthContext'
+import CircleIcon from '../SVGIcons/CircleIcon'
+import UserIcon from '../SVGIcons/UserIcon'
+import Avatar from '../Avatar'
+import LogoutButton from '../LogoutButton'
 
 const Header = () => {
-  const { isAuthenticated, showLogoutBtn, setShowLogoutBtn } = useAuthContext();
-  const [usersCount, setUsersCount] = useState(0);
-  const [circlesCount, setCirclesCount] = useState(0);
+  const { isAuthenticated, showLogoutBtn, setShowLogoutBtn } = useAuthContext()
+  const [usersCount, setUsersCount] = useState(0)
+  const [circlesCount, setCirclesCount] = useState(0)
 
   useEffect(() => {
-    (() => {
+    ;(() => {
       chrome.runtime.sendMessage(
         {
-          action: "getUniqueUsersCountInUserCircles",
+          action: 'getUniqueUsersCountInUserCircles',
         },
         (res: any) => {
           if (!res.error) {
-            setUsersCount(res);
+            setUsersCount(res)
           }
         }
-      );
-    })();
-  }, []);
+      )
+    })()
+  }, [])
 
   useEffect(() => {
-    (() => {
+    ;(() => {
       chrome.runtime.sendMessage(
         {
-          action: "getUserCirclesCount",
+          action: 'getUserCirclesCount',
         },
         (res: any) => {
           if (!res.error) {
-            setCirclesCount(res);
+            setCirclesCount(res)
           }
         }
-      );
-    })();
-  }, []);
+      )
+    })()
+  }, [])
 
   const handleAvatarClick = useCallback(() => {
-    setShowLogoutBtn(!showLogoutBtn);
-  }, [setShowLogoutBtn, showLogoutBtn]);
+    setShowLogoutBtn(!showLogoutBtn)
+  }, [setShowLogoutBtn, showLogoutBtn])
 
   return (
     <div className="w-full flex justify-between items-center relative">
@@ -51,9 +51,9 @@ const Header = () => {
         <div
           className="px-3 py-2 bg-secondary flex items-center gap-2 rounded-3xl text-primary cursor-pointer"
           onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleAvatarClick();
+            e.stopPropagation()
+            e.preventDefault()
+            handleAvatarClick()
           }}
         >
           <div className="flex gap-1 items-center justify-between">
@@ -73,7 +73,7 @@ const Header = () => {
         </div>
       ) : null}
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

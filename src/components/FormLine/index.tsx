@@ -6,24 +6,24 @@ import {
   InputHTMLAttributes,
   KeyboardEvent,
   MouseEvent,
-} from "react";
+} from 'react'
 
-import classNames from "classnames";
+import classNames from 'classnames'
 
 interface IFormLine extends InputHTMLAttributes<HTMLInputElement> {
-  id: string;
-  type?: string;
-  title?: string;
-  showStatus?: boolean;
-  isLoading?: boolean;
-  placeholder?: string;
-  value?: string;
-  error?: string | boolean;
-  required?: boolean;
-  disabled?: boolean;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
-  onStatusClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  id: string
+  type?: string
+  title?: string
+  showStatus?: boolean
+  isLoading?: boolean
+  placeholder?: string
+  value?: string
+  error?: string | boolean
+  required?: boolean
+  disabled?: boolean
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void
+  onStatusClick?: (e: MouseEvent<HTMLDivElement>) => void
 }
 
 const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
@@ -49,10 +49,13 @@ const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
       <label
         title={title}
         htmlFor={id}
-        className={classNames("text-sm transition-all duration-300 font-bold leading-4 group-focus-within:font-extrabold", {
-          "text-red": error,
-          "text-black/60 group-focus-within:text-black/70": !error,
-        })}
+        className={classNames(
+          'text-sm transition-all duration-300 font-bold leading-4 group-focus-within:font-extrabold',
+          {
+            'text-red': error,
+            'text-black/60 group-focus-within:text-black/70': !error,
+          }
+        )}
       >
         {title}
       </label>
@@ -72,7 +75,7 @@ const FormLine: ForwardRefRenderFunction<HTMLInputElement, IFormLine> = (
       />
       <span className="text-sm font-semibold leading-4 text-red">{error}</span>
     </div>
-  );
-};
+  )
+}
 
-export default forwardRef(FormLine);
+export default forwardRef(FormLine)

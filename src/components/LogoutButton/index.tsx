@@ -1,25 +1,22 @@
-import { useCallback } from "react"
-import { useAuthContext } from "../../context/AuthContext";
+import { useCallback } from 'react'
+import { useAuthContext } from '../../context/AuthContext'
 
 const LogoutButton = () => {
-
   const { setIsAuthenticated } = useAuthContext()
 
   const handleLogOut = useCallback(() => {
     try {
       chrome.runtime.sendMessage(
         {
-          action: "logout"
+          action: 'logout',
         },
         (response) => {
           if (response) {
             setIsAuthenticated(false)
           }
         }
-      );
-    } catch (err) {
-
-    }
+      )
+    } catch (err) {}
   }, [setIsAuthenticated])
   return (
     <button

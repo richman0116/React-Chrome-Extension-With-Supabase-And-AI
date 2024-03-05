@@ -1,14 +1,13 @@
-import { CircleInterface } from "../../types/circle";
-import RoundedButton from "../Buttons/RoundedButton";
+import { CircleInterface } from '../../types/circle'
+import RoundedButton from '../Buttons/RoundedButton'
 
 interface AutoCircleItemInterface {
-  circle: CircleInterface;
-  url: string;
+  circle: CircleInterface
+  url: string
   onAdd: () => void
 }
 
 const AutoCircleItem = ({ circle, onAdd }: AutoCircleItemInterface) => {
-
   return (
     <div className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">
       <img
@@ -36,12 +35,10 @@ const AutoCircleItem = ({ circle, onAdd }: AutoCircleItemInterface) => {
       </div>
 
       <div className="hidden group-hover:block">
-        <RoundedButton onClick={onAdd}>
-          Add
-        </RoundedButton>
+        <RoundedButton onClick={onAdd}>Add</RoundedButton>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AutoCircleItem;
+export default AutoCircleItem

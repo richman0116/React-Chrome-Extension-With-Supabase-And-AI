@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 
 import Loading from '../../../../components/Loading'
 import Button from '../../../../components/Buttons/Button'
@@ -14,10 +14,11 @@ import RecommendedCircles from './RecommendedCircles'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
+  generatedCircles: CircleInterface[]
+  setGeneratedCircles: Dispatch<SetStateAction<CircleInterface[]>>
 }
 
-const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
-  const [circles, setCircles] = useState<CircleInterface[]>([])
+const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const { currentUrl: url, setPageStatus } = useCircleContext()
@@ -69,7 +70,13 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
         }
       )
     })
-  }, [url])
+  }, [setCircles, url])
+
+  useEffect(() => {
+    if (circles.length === 0) {
+      getCircles()
+    }
+  }, [circles.length, getCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {

@@ -1,3 +1,4 @@
+import { circleLoadingMessages } from './constants'
 import supabase from './supabase'
 
 const bannedURLList: string[] = [
@@ -102,4 +103,9 @@ export const uploadImageToSupabase = async (
   } catch (ex) {
     console.error('An error occurred on image uploading', ex)
   }
+}
+
+export const getCircleLoadingMessage = () => {
+  const randomNumber = Math.floor(Math.random() * (circleLoadingMessages.length - 0 + 1))
+  return circleLoadingMessages[randomNumber]
 }

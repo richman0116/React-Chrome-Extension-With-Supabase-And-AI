@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
 import CircleItem from '../../../../../components/CircleItem'
-import Loading from '../../../../../components/Loading'
 import { CircleInterface } from '../../../../../types/circle'
 import { useCircleContext } from '../../../../../context/CircleContext'
 

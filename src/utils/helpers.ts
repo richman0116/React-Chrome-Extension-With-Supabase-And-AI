@@ -106,6 +106,6 @@ export const uploadImageToSupabase = async (
 }
 
 export const getCircleLoadingMessage = () => {
-  const randomNumber = Math.floor(Math.random() * (circleLoadingMessages.length - 0 + 1))
+  const randomNumber = Math.floor(Math.random() * (circleLoadingMessages.length ))
   return circleLoadingMessages[randomNumber]
 }

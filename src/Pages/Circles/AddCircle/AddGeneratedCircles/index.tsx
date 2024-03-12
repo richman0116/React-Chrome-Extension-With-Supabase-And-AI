@@ -19,6 +19,7 @@ interface IAddGeneratedCircles {
 
 const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isFailed, setIsFailed] = useState(false)
 
   const { currentUrl: url, setPageStatus } = useCircleContext()
 
@@ -53,14 +54,20 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
                   (res2) => {
                     console.log('Generated circles with limited words: ', res2)
                     if (res2.length >= 5) {
+                      setIsFailed(false)
                       setCircles(res2)
+                    } else {
+                      setIsFailed(true)
                     }
                     setIsLoading(false)
                   }
                 )
               } else {
                 if (res1.length >= 5) {
+                  setIsFailed(false)
                   setCircles(res1)
+                } else {
+                  setIsFailed(true)
                 }
                 setIsLoading(false)
               }
@@ -109,6 +116,12 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
                   <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
                 </div>
                 </div>
+            </div>
+          )}
+
+          {!isLoading && isFailed && (
+            <div className="w-full h-80 flex flex-col items-center justify-center">
+              <p className="text-sm font-medium leading-normal text-center text-red-400">Something went wrong!</p>
             </div>
           )}
 

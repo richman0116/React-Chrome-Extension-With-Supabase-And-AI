@@ -1,10 +1,9 @@
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 
-import Loading from '../../../../components/Loading'
 import Button from '../../../../components/Buttons/Button'
 import { useCircleContext } from '../../../../context/CircleContext'
 import { CircleInterface } from '../../../../types/circle'
-import { getSpecificNumberOfWords } from '../../../../utils/helpers'
+import { getCircleLoadingMessage, getSpecificNumberOfWords } from '../../../../utils/helpers'
 import { circlePageStatus } from '../../../../utils/constants'
 import AutoCircleItem from '../../../../components/AutoCircleItem'
 import CreationHeader from '../../../../components/CreationHeader'
@@ -14,11 +13,13 @@ import RecommendedCircles from './RecommendedCircles'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
+  generatedCircles: CircleInterface[]
+  setGeneratedCircles: Dispatch<SetStateAction<CircleInterface[]>>
 }
 
-const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
-  const [circles, setCircles] = useState<CircleInterface[]>([])
+const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isFailed, setIsFailed] = useState(false)
 
   const { currentUrl: url, setPageStatus } = useCircleContext()
 
@@ -53,14 +54,20 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
                   (res2) => {
                     console.log('Generated circles with limited words: ', res2)
                     if (res2.length >= 5) {
+                      setIsFailed(false)
                       setCircles(res2)
+                    } else {
+                      setIsFailed(true)
                     }
                     setIsLoading(false)
                   }
                 )
               } else {
                 if (res1.length >= 5) {
+                  setIsFailed(false)
                   setCircles(res1)
+                } else {
+                  setIsFailed(true)
                 }
                 setIsLoading(false)
               }
@@ -69,7 +76,13 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
         }
       )
     })
-  }, [url])
+  }, [setCircles, url])
+
+  useEffect(() => {
+    if (circles.length === 0) {
+      getCircles()
+    }
+  }, [circles.length, getCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {
@@ -95,16 +108,20 @@ const AddGeneratedCircles = ({ setCircleData }: IAddGeneratedCircles) => {
       <div className="w-full mb-20">
         <div className="w-full flex flex-col gap-2 justify-between">
           {isLoading && (
-            <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
-              <Loading />
+            <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 flex flex-col gap-y-3">
+              <div className="-mt-6">
+                <p className="text-sm font-medium leading-normal text-center text-brand">Running on background</p>
+                <p className="text-base font-medium leading-normal text-center text-primary">{getCircleLoadingMessage()}...</p>
+                <div className='h-1.5 w-full bg-secondary overflow-hidden rounded-xl'>
+                  <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
+                </div>
+                </div>
             </div>
           )}
 
-          {!isLoading && circles.length === 0 && (
+          {!isLoading && isFailed && (
             <div className="w-full h-80 flex flex-col items-center justify-center">
-              <p className="text-lg font-medium capitalize text-primary text-center">
-                You can generate circles by OpenAI
-              </p>
+              <p className="text-sm font-medium leading-normal text-center text-red-400">Something went wrong!</p>
             </div>
           )}
 

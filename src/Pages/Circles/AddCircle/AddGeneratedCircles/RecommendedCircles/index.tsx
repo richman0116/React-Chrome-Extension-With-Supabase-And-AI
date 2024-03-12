@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
 import CircleItem from '../../../../../components/CircleItem'
-import Loading from '../../../../../components/Loading'
 import { CircleInterface } from '../../../../../types/circle'
 import { useCircleContext } from '../../../../../context/CircleContext'
 
@@ -50,11 +49,6 @@ const RecommendedCircles = ({ circles, tags }: IRecommendedCircles) => {
       <div className="w-full">
         {!isLoading && <p className="text-xl font-medium text-primary">{resultText}</p>}
       </div>
-      {isLoading && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
-          <Loading />
-        </div>
-      )}
 
       {!isLoading && circles.length > 0 && recommendedCircles.length > 0 && (
         <div className="w-full flex flex-col gap-1">

@@ -20,6 +20,7 @@ interface IAddGeneratedCircles {
 const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isFailed, setIsFailed] = useState(false)
+  const [message, setMessage] = useState(getCircleLoadingMessage());
 
   const { currentUrl: url, setPageStatus } = useCircleContext()
 
@@ -27,6 +28,17 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
     const allTags = circles.map((circle) => circle.tags).flat()
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
   }, [circles])
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setMessage(getCircleLoadingMessage());
+    }, 3000); // Change message every 3 seconds
+    if (!isLoading) {
+      clearInterval(intervalId); // clean up the interval if loading circles finished
+    }
+
+    return () => clearInterval(intervalId); // Clean up the interval on component unmount
+  }, [isLoading]); // Empty dependency array means this effect runs once on mount
 
   const getCircles = useCallback(() => {
     setIsLoading(true)
@@ -111,11 +123,11 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 flex flex-col gap-y-3">
               <div className="-mt-6">
                 <p className="text-sm font-medium leading-normal text-center text-brand">Running on background</p>
-                <p className="text-base font-medium leading-normal text-center text-primary">{getCircleLoadingMessage()}...</p>
+                <p className="text-base font-medium leading-normal text-center text-primary">{message}...</p>
                 <div className='h-1.5 w-full bg-secondary overflow-hidden rounded-xl'>
                   <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
                 </div>
-                </div>
+              </div>
             </div>
           )}
 

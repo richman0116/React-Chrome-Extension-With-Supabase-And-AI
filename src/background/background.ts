@@ -41,6 +41,9 @@ interface SupabaseUserDataInterface {
 
 let userLoaded = false // check if we are loading the user
 let supabaseUser: SupabaseUserDataInterface = {} // store the user
+let tabId: number;
+
+let circleGeneratingTabIds: number[] = []
 
 // function to get a value from storage
 function getFromStorage(key: string): Promise<
@@ -437,13 +440,42 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'getGeneratedCircles') {
     console.log('background.js: Getting generated circles from the Edge function')
+    const exists = circleGeneratingTabIds.includes(tabId)
+    if (!exists) {
+      circleGeneratingTabIds.push(tabId)
+    }
+
     getGeneratedCircles(request.pageUrl, request.pageContent)
       .then((circles) => {
         sendResponse(circles)
+        setToStorage(tabId.toString(), JSON.stringify(circles))
       })
       .catch((error) => {
         sendResponse([])
       })
+    return true
+  }
+
+  if (request.action === 'getCirclesFromStorage') {
+    console.log('background.js: Getting saved circles from the storage')
+    getFromStorage(tabId.toString())
+    .then((circles) => {
+      sendResponse(circles)
+    })
+    .catch(() => {
+      sendResponse([])
+    })
+    return true
+  }
+
+  if (request.action === 'checkIfCircleIsGenerating') {
+    console.log('background.js: checking if the circle generating status')
+    if (circleGeneratingTabIds.includes(tabId)) {
+      sendResponse(true)
+    } else {
+      sendResponse(false)
+    }
+
     return true
   }
 
@@ -583,6 +615,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 
 // whenever new tab is activated
 chrome.tabs.onActivated.addListener((actveInfo) => {
+  tabId = actveInfo.tabId
   chrome.tabs.get(actveInfo.tabId, async (tab) => {
     const url = tab.url
     if (url) {

@@ -22,12 +22,17 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   const [isFailed, setIsFailed] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, setPageStatus } = useCircleContext()
+  const { currentUrl: url, setPageStatus, isGeneratingCircles } = useCircleContext()
+  console.log({ isGeneratingCircles, circles })
 
   const tags: string[] = useMemo(() => {
     const allTags = circles.map((circle) => circle.tags).flat()
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
   }, [circles])
+
+  useEffect(() => {
+    setIsLoading(isGeneratingCircles)
+  }, [isGeneratingCircles])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -91,10 +96,10 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   }, [setCircles, url])
 
   useEffect(() => {
-    if (circles.length === 0) {
+    if (circles.length === 0 && !isGeneratingCircles) {
       getCircles()
     }
-  }, [circles.length, getCircles])
+  }, [circles.length, getCircles, isGeneratingCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {

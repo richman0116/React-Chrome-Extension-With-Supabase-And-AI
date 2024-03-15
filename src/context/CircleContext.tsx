@@ -19,6 +19,8 @@ interface ICircleContext {
   getCircles: () => void
   pageStatus: number
   setPageStatus: Dispatch<SetStateAction<number>>
+  isGeneratingCircles: boolean
+  setIsGeneratingCircles: Dispatch<SetStateAction<boolean>>
 }
 
 const CircleContext = createContext<ICircleContext>({
@@ -26,9 +28,11 @@ const CircleContext = createContext<ICircleContext>({
   currentUrl: '',
   isLoading: true,
   currentPageCircleIds: [],
-  getCircles: () => {},
+  getCircles: () => { },
   pageStatus: 0,
-  setPageStatus: () => {},
+  setPageStatus: () => { },
+  isGeneratingCircles: false,
+  setIsGeneratingCircles: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -42,6 +46,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
+  const [isGeneratingCircles, setIsGeneratingCircles] = useState(false)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -92,6 +97,23 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
     getCircles()
   }, [getCircles])
 
+  useEffect(() => {
+    const checkIfCircleIsGenerating = () => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'checkIfCircleIsGenerating'
+        },
+        (res: boolean) => {
+          console.log(res, '^^^^^^^^^^^^^')
+          setIsGeneratingCircles(res)
+          setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+        }
+      )
+    }
+
+    checkIfCircleIsGenerating()
+  }, [setPageStatus])
+
   return (
     <CircleContext.Provider
       value={{
@@ -102,6 +124,8 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         isLoading,
         pageStatus,
         setPageStatus,
+        isGeneratingCircles,
+        setIsGeneratingCircles
       }}
     >
       {children}

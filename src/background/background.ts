@@ -1,8 +1,13 @@
 import supabase from '../utils/supabase'
-import { Session, AuthError } from '@supabase/supabase-js'
 
-import { getGeneratedCircles } from '../utils/edgeFunctions'
-import { supabaseSotrageUrl } from '../utils/constants'
+import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
+import { ICircleGenerationStatus } from '../types/circle'
+import {
+  getFromStorage,
+  handleCircleGeneration,
+  removeItemFromStorage,
+  setToStorage,
+} from './helpers'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -41,47 +46,6 @@ interface SupabaseUserDataInterface {
 
 let userLoaded = false // check if we are loading the user
 let supabaseUser: SupabaseUserDataInterface = {} // store the user
-let tabId: number;
-
-let circleGeneratingTabIds: number[] = []
-
-// function to get a value from storage
-function getFromStorage(key: string): Promise<
-  | {
-      data: {
-        session: Session
-      }
-      error: null
-    }
-  | {
-      data: {
-        session: null
-      }
-      error: AuthError
-    }
-  | {
-      data: {
-        session: null
-      }
-      error: null
-    }
-> {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], function (result) {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError as string))
-      } else {
-        resolve(JSON.parse(result[key] || '{}'))
-      }
-    })
-  })
-}
-
-function setToStorage(key: string, value: string) {
-  chrome.storage.local.set({ [key]: value }, function () {
-    console.log(`Value of ${key} is set to ${value}`)
-  })
-}
 
 // log user in with email and password
 // if the result is success
@@ -438,41 +402,47 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getGeneratedCircles') {
-    console.log('background.js: Getting generated circles from the Edge function')
-    const exists = circleGeneratingTabIds.includes(tabId)
-    if (!exists) {
-      circleGeneratingTabIds.push(tabId)
+  if (request.action === 'generatedCircles') {
+    console.log(
+      'background.js: Getting generated circles from the Edge function and saving it to local storage'
+    )
+    const tabId = request.tabId
+    const generatingCircles: ICircleGenerationStatus = {
+      status: CircleGenerationStatus.GENERATING,
+      result: [],
+    }
+    setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
+
+    try {
+      handleCircleGeneration(tabId, request.pageUrl, request.pageContent)
+      sendResponse(true)
+    } catch (err) {
+      sendResponse(false)
     }
 
-    getGeneratedCircles(request.pageUrl, request.pageContent)
-      .then((circles) => {
-        sendResponse(circles)
-        setToStorage(tabId.toString(), JSON.stringify(circles))
-      })
-      .catch((error) => {
-        sendResponse([])
-      })
     return true
   }
 
-  if (request.action === 'getCirclesFromStorage') {
+  if (request.action === 'getCircleGenerationStatus') {
     console.log('background.js: Getting saved circles from the storage')
-    getFromStorage(tabId.toString())
-    .then((circles) => {
-      sendResponse(circles)
-    })
-    .catch(() => {
-      sendResponse([])
-    })
+    const tabId = request.tabId
+    getFromStorage(tabId?.toString())
+      .then((generationStatus: ICircleGenerationStatus) => {
+        sendResponse(Object.keys(generationStatus).length > 0 ? generationStatus : null)
+      })
+      .catch(() => {
+        sendResponse(null)
+      })
     return true
   }
 
-  if (request.action === 'checkIfCircleIsGenerating') {
-    console.log('background.js: checking if the circle generating status')
-    if (circleGeneratingTabIds.includes(tabId)) {
+  if (request.action === 'removeCirclesFromStorage') {
+    const tabId = request.tabId
+    console.log('background.js: Removing circles from the storage. TabId: ', tabId)
+    try {
+      removeItemFromStorage(tabId.toString())
       sendResponse(true)
-    } else {
+    } catch (err) {
       sendResponse(false)
     }
 
@@ -615,7 +585,6 @@ chrome.tabs.onCreated.addListener((tab) => {
 
 // whenever new tab is activated
 chrome.tabs.onActivated.addListener((actveInfo) => {
-  tabId = actveInfo.tabId
   chrome.tabs.get(actveInfo.tabId, async (tab) => {
     const url = tab.url
     if (url) {

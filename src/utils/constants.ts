@@ -13,12 +13,18 @@ export const Paths = {
 export const supabaseSotrageUrl = `${SUPABASE_URL}/storage/v1/object/public`
 
 export const circleLoadingMessages = [
-  "Summoning your ape",
-  "Your ape is eating bananas",
-  "Doing the hard work",
-  "Digging through the page",
-  "Ape trying to make sense of the page",
-  "Imagining",
-  "Almost there",
-  "Hang on"
+  'Summoning your ape',
+  'Your ape is eating bananas',
+  'Doing the hard work',
+  'Digging through the page',
+  'Ape trying to make sense of the page',
+  'Imagining',
+  'Almost there',
+  'Hang on',
 ]
+
+export enum CircleGenerationStatus {
+  GENERATING = 'generating',
+  SUCCEEDED = 'succeeded',
+  FAILED = 'failed',
+}

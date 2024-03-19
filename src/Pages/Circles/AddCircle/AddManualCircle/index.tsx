@@ -36,7 +36,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const [circleImageUrl, setCircleImageUrl] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
-  const { currentUrl: url, setPageStatus, getCircles } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, getCircles, setCircleGenerationStatus } = useCircleContext()
   const {
     handleSubmit,
     register,
@@ -55,7 +55,11 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
         const { name, description } = data
         let availableTags = tags
         if (tags.length === 1 && tags[0] === '') {
-          availableTags = await generateTags(name, description)
+          try {
+            availableTags = await generateTags(name, description)
+          } catch {
+            setIsSaving(false)
+          }
         }
 
         // add tags first
@@ -103,10 +107,22 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
                       },
                       (res) => {
                         if (res === 'success') {
-                          getCircles()
-                          setIsSaving(false)
-                          setPageStatus(circlePageStatus.CIRCLE_LIST)
                           // now we want to load circles again just to make sure the result went through
+                          getCircles()
+                          // we need to remove the generated circles from the storage
+                          chrome.runtime.sendMessage(
+                            {
+                              action: "removeCirclesFromStorage",
+                              tabId: currentTabId
+                            },
+                            (res) => {
+                              if (res) {
+                                setIsSaving(false)
+                                setCircleGenerationStatus(null)
+                                setPageStatus(circlePageStatus.CIRCLE_LIST)
+                              }
+                            }
+                          )
                         } else {
                           setIsSaving(false)
                         }
@@ -123,7 +139,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
         )
       }
     },
-    [circleImageUrl, getCircles, setPageStatus, tags, url]
+    [circleImageUrl, currentTabId, getCircles, setCircleGenerationStatus, setPageStatus, tags, url]
   )
 
   const handleGenerateImage = useCallback(async () => {

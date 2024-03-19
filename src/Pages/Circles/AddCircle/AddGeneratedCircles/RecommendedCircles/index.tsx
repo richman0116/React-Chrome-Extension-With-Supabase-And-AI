@@ -46,6 +46,14 @@ const RecommendedCircles = ({ circles, tags }: IRecommendedCircles) => {
 
   return (
     <div className="w-full flex flex-col justify-between gap-3">
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-sm font-medium leading-normal text-center text-brand pb-5">Getting Recommended Circles</p>
+          <div className='h-1.5 bg-secondary overflow-hidden rounded-xl mx-32'>
+            <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
+          </div>
+        </div>
+      )}
       <div className="w-full">
         {!isLoading && <p className="text-xl font-medium text-primary">{resultText}</p>}
       </div>

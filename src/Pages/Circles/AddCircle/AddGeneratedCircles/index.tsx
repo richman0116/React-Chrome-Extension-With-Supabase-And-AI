@@ -3,8 +3,8 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } f
 import Button from '../../../../components/Buttons/Button'
 import { useCircleContext } from '../../../../context/CircleContext'
 import { CircleInterface } from '../../../../types/circle'
-import { getCircleLoadingMessage, getSpecificNumberOfWords } from '../../../../utils/helpers'
-import { circlePageStatus } from '../../../../utils/constants'
+import { getCircleLoadingMessage } from '../../../../utils/helpers'
+import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
 import AutoCircleItem from '../../../../components/AutoCircleItem'
 import CreationHeader from '../../../../components/CreationHeader'
 import GenerateButton from '../../../../components/Buttons/GenerateButton'
@@ -22,12 +22,29 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   const [isFailed, setIsFailed] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, setPageStatus } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, setCircleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
+
+  useEffect(() => {
+    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
+      setCircles(circleGenerationStatus?.result)
+    }
+  }, [circleGenerationStatus?.result, circleGenerationStatus?.status, setCircles])
 
   const tags: string[] = useMemo(() => {
     const allTags = circles.map((circle) => circle.tags).flat()
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
   }, [circles])
+
+  useEffect(() => {
+    if (circleGenerationStatus?.status === CircleGenerationStatus.GENERATING) {
+      setIsLoading(true)
+    } else if (circleGenerationStatus?.status === CircleGenerationStatus.FAILED) {
+      setIsFailed(true)
+      setIsLoading(false)
+    } else {
+      setIsLoading(false)
+    }
+  }, [circleGenerationStatus?.status])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -43,58 +60,33 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   const getCircles = useCallback(() => {
     setIsLoading(true)
     setCircles([])
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (currentTabId) {
       chrome.runtime.sendMessage(
-        { action: 'getPageContent', tabId: tabs[0].id },
+        { action: 'getPageContent', tabId: currentTabId },
         (response) => {
           chrome.runtime.sendMessage(
             {
-              action: 'getGeneratedCircles',
+              action: 'generatedCircles',
               pageUrl: url,
               pageContent: response,
+              tabId: currentTabId
             },
-            (res1) => {
-              console.log('Generated circles: ', res1)
-              if (res1?.error && res1?.error === 'context_length_exceeded') {
-                const limitedWords = getSpecificNumberOfWords(response, 5000)
-                chrome.runtime.sendMessage(
-                  {
-                    action: 'getGeneratedCircles',
-                    pageUrl: url,
-                    pageContent: limitedWords,
-                  },
-                  (res2) => {
-                    console.log('Generated circles with limited words: ', res2)
-                    if (res2.length >= 5) {
-                      setIsFailed(false)
-                      setCircles(res2)
-                    } else {
-                      setIsFailed(true)
-                    }
-                    setIsLoading(false)
-                  }
-                )
-              } else {
-                if (res1.length >= 5) {
-                  setIsFailed(false)
-                  setCircles(res1)
-                } else {
-                  setIsFailed(true)
-                }
-                setIsLoading(false)
+            (res: boolean) => {
+              if (res) {
+                getCircleGenerationStatus()
               }
             }
           )
         }
       )
-    })
-  }, [setCircles, url])
+    }
+  }, [currentTabId, getCircleGenerationStatus, setCircles, url])
 
   useEffect(() => {
-    if (circles.length === 0) {
+    if (circles.length === 0 && !circleGenerationStatus) {
       getCircles()
     }
-  }, [circles.length, getCircles])
+  }, [circleGenerationStatus, circles.length, getCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {
@@ -107,6 +99,21 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
     [setCircleData, setPageStatus, tags]
   )
 
+  const handlePrevClick = useCallback(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: "removeCirclesFromStorage",
+        tabId: currentTabId
+      },
+      (res) => {
+        if (res) {
+          setCircleGenerationStatus(null)
+          setPageStatus(circlePageStatus.CIRCLE_LIST)
+        }
+      }
+    )
+  }, [currentTabId, setCircleGenerationStatus, setPageStatus])
+
   const handleManualClick = useCallback(() => {
     setPageStatus(circlePageStatus.ADD_MANUALLY)
   }, [setPageStatus])
@@ -115,7 +122,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
     <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
       <CreationHeader
         title="Create Circle"
-        onBack={() => setPageStatus(circlePageStatus.CIRCLE_LIST)}
+        onBack={handlePrevClick}
       />
       <div className="w-full mb-20">
         <div className="w-full flex flex-col gap-2 justify-between">

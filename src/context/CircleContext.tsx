@@ -8,27 +8,37 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { CircleInterface } from '../types/circle'
-import { circlePageStatus } from '../utils/constants'
+import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
+import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
 
 interface ICircleContext {
   circles: CircleInterface[]
   currentUrl: string
+  currentTabId: number
   isLoading: boolean
   currentPageCircleIds: string[]
   getCircles: () => void
   pageStatus: number
   setPageStatus: Dispatch<SetStateAction<number>>
+  isLoadingCGenerationStatus: boolean
+  circleGenerationStatus: ICircleGenerationStatus | null
+  setCircleGenerationStatus: Dispatch<SetStateAction<ICircleGenerationStatus | null>>
+  getCircleGenerationStatus: () => void
 }
 
 const CircleContext = createContext<ICircleContext>({
   circles: [],
   currentUrl: '',
+  currentTabId: NaN,
   isLoading: true,
   currentPageCircleIds: [],
-  getCircles: () => {},
+  getCircles: () => { },
   pageStatus: 0,
-  setPageStatus: () => {},
+  setPageStatus: () => { },
+  isLoadingCGenerationStatus: false,
+  circleGenerationStatus: null,
+  setCircleGenerationStatus: () => { },
+  getCircleGenerationStatus: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -40,31 +50,23 @@ interface ICircleContextProvider {
 export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circles, setCircles] = useState<CircleInterface[]>([])
   const [currentUrl, setCurrentUrl] = useState<string>('')
+  const [currentTabId, setCurrentTabId] = useState<number>(NaN)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
+  const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
+  const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
     [circles]
   )
 
-  const getURLPromise: () => Promise<string> = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const url = tabs[0].url
-        resolve(url || '')
-      })
+  useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      setCurrentUrl(tabs[0]?.url || '')
+      setCurrentTabId(tabs[0].id || NaN)
     })
   }, [])
-
-  const getURL = useCallback(async () => {
-    const urlResult = await getURLPromise()
-    setCurrentUrl(urlResult)
-  }, [getURLPromise])
-
-  useEffect(() => {
-    getURL()
-  }, [getURL])
 
   const getCircles = useCallback(async () => {
     if (currentUrl) {
@@ -92,16 +94,58 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
     getCircles()
   }, [getCircles])
 
+  const getCircleGenerationStatus = useCallback(() => {
+    if (pageStatus !== circlePageStatus.ADD_MANUALLY) {
+      const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
+        chrome.runtime.sendMessage(
+          {
+            action: 'getCircleGenerationStatus',
+            tabId: currentTabId
+          },
+          (res: ICircleGenerationStatus) => {
+            setIsLoadingCGenerationStatus(false)
+            if (res) {
+              if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
+                setCircleGenerationStatus(res)
+              }
+
+              if (pageStatus !== circlePageStatus.ADD_AUTOMATICALLY) {
+                setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+              }
+
+              if (res.status !== CircleGenerationStatus.GENERATING) {
+                clearInterval(getCircleGenerationStatusInterval)
+              }
+
+            } else {
+              clearInterval(getCircleGenerationStatusInterval)
+            }
+          }
+        )
+      }, 1500)
+    }
+  }, [circleGenerationStatus, currentTabId, pageStatus])
+
+  useEffect(() => {
+    getCircleGenerationStatus()
+
+  }, [getCircleGenerationStatus])
+
   return (
     <CircleContext.Provider
       value={{
         circles,
         currentUrl,
+        currentTabId,
         currentPageCircleIds,
         getCircles,
         isLoading,
         pageStatus,
         setPageStatus,
+        isLoadingCGenerationStatus,
+        circleGenerationStatus,
+        setCircleGenerationStatus,
+        getCircleGenerationStatus
       }}
     >
       {children}

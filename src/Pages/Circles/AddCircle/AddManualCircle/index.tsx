@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { ChangeEvent, Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import FormLine from '../../../../components/FormLine'
@@ -79,14 +79,9 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
               },
               async (response) => {
                 if (response.error) {
-                  console.log(
-                    'CirclesView: createCircle response.error: ',
-                    response.error
-                  )
                   setIsSaving(false)
                 } else {
                   const addedCircleId = response.data
-                  console.log('Added circle id ', addedCircleId)
 
                   try {
                     // convert the OpenAI image to resized image buffer
@@ -152,6 +147,10 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
       setIsGeneratingImage(false)
     }
   }, [getValues])
+
+  useEffect(() => {
+    handleGenerateImage()
+  }, [handleGenerateImage])
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const imgFile = e.target.files?.[0]

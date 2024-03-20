@@ -140,7 +140,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
 
           {!isLoading && isFailed && (
             <div className="w-full h-80 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium leading-normal text-center text-red-400">Something went wrong!</p>
+              <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>
             </div>
           )}
 

@@ -182,18 +182,30 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           id="name"
           type="text"
           error={errors.name?.message}
-          {...register('name')}
+          {...register('name', {
+            required: "Circle name is required",
+            // --- will be applied if we need later ------
+            // pattern: {
+            //   value: /^[a-zA-Z0-9 _-]+$/,
+            //   message: "Please enter a valid name"
+            // }
+          })}
           placeholder="Give it a good name!"
-          required
         />
         <FormLine
           title="Description:"
           id="description"
           type="text"
           error={errors.description?.message}
-          {...register('description')}
+          {...register('description', {
+            required: "Circle description is required",
+            // --- will be applied if we need later ------
+            // pattern: {
+            //   value: /^[a-zA-Z0-9 _-]+$/,
+            //   message: "Please enter a valid description"
+            // }
+          })}
           placeholder="What does it about?"
-          required
         />
         {isGeneratingImage ? (
           <div className="w-25 h-25 flex items-center justify-center">

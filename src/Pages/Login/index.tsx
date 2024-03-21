@@ -8,6 +8,7 @@ import Header from '../../components/Header'
 import { Paths } from '../../utils/constants'
 import GoogleIcon from '../../components/SVGIcons/GoogleIcon'
 import { useAuthContext } from '../../context/AuthContext'
+import { BJActions } from '../../background/actions'
 
 interface LoginFormData {
   email: string
@@ -33,7 +34,7 @@ const Login = () => {
         const { email, password } = data
         chrome.runtime.sendMessage(
           {
-            action: 'loginWithEmailPassword',
+            action: BJActions.LOGIN_WITH_EMAIL_PASSWORD,
             email,
             password,
           },

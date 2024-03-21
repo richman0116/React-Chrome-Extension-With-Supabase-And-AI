@@ -9,6 +9,7 @@ export interface CircleInterface {
 }
 
 export interface ICircleGenerationStatus {
+  type: 'auto' | 'manual'
   status: CircleGenerationStatus
   result: CircleInterface[]
 }

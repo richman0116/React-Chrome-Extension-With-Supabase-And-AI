@@ -10,6 +10,7 @@ import CreationHeader from '../../../../components/CreationHeader'
 import GenerateButton from '../../../../components/Buttons/GenerateButton'
 import Refresh from '../../../../components/SVGIcons/Refresh'
 import RecommendedCircles from './RecommendedCircles'
+import { BJActions } from '../../../../background/actions'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
@@ -62,11 +63,11 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
     setCircles([])
     if (currentTabId) {
       chrome.runtime.sendMessage(
-        { action: 'getPageContent', tabId: currentTabId },
+        { action: BJActions.GET_PAGE_CONTENT, tabId: currentTabId },
         (response) => {
           chrome.runtime.sendMessage(
             {
-              action: 'generatedCircles',
+              action: BJActions.GENERATE_CIRCLES,
               pageUrl: url,
               pageContent: response,
               tabId: currentTabId
@@ -102,7 +103,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   const handlePrevClick = useCallback(() => {
     chrome.runtime.sendMessage(
       {
-        action: "removeCirclesFromStorage",
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
         tabId: currentTabId
       },
       (res) => {

@@ -20,6 +20,7 @@ import { CircleInterface } from '../../../../types/circle'
 import { initialCircleData } from '..'
 import UploadIcon from '../../../../components/SVGIcons/UploadIcon'
 import classNames from 'classnames'
+import { BJActions } from '../../../../background/actions'
 
 interface CircleFormData {
   name: string
@@ -65,13 +66,13 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
         // add tags first
         chrome.runtime.sendMessage(
           {
-            action: 'addTags',
+            action: BJActions.ADD_TAGS,
             names: availableTags,
           },
           (addedTags: string[]) => {
             chrome.runtime.sendMessage(
               {
-                action: 'createCircle',
+                action: BJActions.CREATE_CIRCLE,
                 circleName: name,
                 circleDescription: description,
                 url,
@@ -97,7 +98,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
                     // update the circle's logo url
                     chrome.runtime.sendMessage(
                       {
-                        action: 'updateCircleImageUrl',
+                        action: BJActions.UPDATE_CIRCLE_IMAGE_URL,
                         circleId: addedCircleId,
                       },
                       (res) => {
@@ -107,7 +108,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
                           // we need to remove the generated circles from the storage
                           chrome.runtime.sendMessage(
                             {
-                              action: "removeCirclesFromStorage",
+                              action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
                               tabId: currentTabId
                             },
                             (res) => {

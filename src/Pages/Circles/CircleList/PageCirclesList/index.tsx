@@ -5,13 +5,14 @@ import Loading from '../../../../components/Loading'
 
 import classNames from 'classnames'
 import { useCircleContext } from '../../../../context/CircleContext'
+import { BJActions } from '../../../../background/actions'
 
 const PageCirclList = () => {
   const { circles, isLoading, currentUrl: url } = useCircleContext()
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0].url
-      chrome.runtime.sendMessage({ action: 'showCircleCount', url }, (response) => {
+      chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
         console.log('circle bagdge number has been updated')
       })
     })

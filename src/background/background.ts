@@ -8,6 +8,7 @@ import {
   removeItemFromStorage,
   setToStorage,
 } from './helpers'
+import { BJActions } from './actions'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -182,7 +183,7 @@ const updateCircleImageUrl = async (circleId: string) => {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'checkLoggedIn') {
+  if (request.action === BJActions.CHECK_LOGGED_IN) {
     // This is an example async function, replace with your own
     getUser()
       .then((result) => {
@@ -199,7 +200,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true // This will keep the message channel open until sendResponse is executed
   }
-  if (request.action === 'loginWithEmailPassword') {
+  if (request.action === BJActions.LOGIN_WITH_EMAIL_PASSWORD) {
     console.log('background.js: Logging in with email and password')
     loginWithEmailPassword(request.email, request.password)
       .then((result) => {
@@ -212,7 +213,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
-  if (request.action === 'getUserAvatarUrl') {
+  if (request.action === BJActions.LOGOUT) {
+    logout().then(() => {
+      sendResponse(true)
+    })
+    return true
+  }
+  if (request.action === BJActions.GET_USER_AVATAR_URL) {
     console.log('background.js: Getting user avatar url')
     getUserAvatarUrl()
       .then((result: any) => {
@@ -227,7 +234,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
-  if (request.action === 'getPageContent') {
+  if (request.action === BJActions.GET_PAGE_CONTENT) {
     console.log('background.js: Getting page content')
     if (supabaseUser) {
       chrome.scripting
@@ -255,7 +262,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
-  if (request.action === 'getCircles') {
+  if (request.action === BJActions.GET_CIRCLES) {
     console.log('background.js: Getting circles')
     if (supabaseUser) {
       supabase
@@ -270,7 +277,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
-  if (request.action === 'getUserCircles') {
+  if (request.action === BJActions.GET_USER_CIRCLES) {
     console.log('background.js: Getting User circles')
     if (supabaseUser) {
       supabase
@@ -286,7 +293,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getSimilarCirclesFromTags') {
+  if (request.action === BJActions.GET_SIMILAR_CIRCLES_FROM_TAGS) {
     console.log('background.js: Getting Recommended Circles')
     if (supabaseUser) {
       supabase
@@ -302,7 +309,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getRecommendedCircles') {
+  if (request.action === BJActions.GET_RECOMMENDED_CIRCLES) {
     console.log(
       "background.js: Getting Recommended Circles from the current page's circles"
     )
@@ -320,7 +327,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'createCircle') {
+  if (request.action === BJActions.CREATE_CIRCLE) {
     console.log(
       'background.js: Creating circle with name: ',
       request.circleName,
@@ -351,7 +358,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'joinCircle') {
+  if (request.action === BJActions.JOIN_CIRCLE) {
     supabase
       .rpc('users_join_circle', {
         circle_id: request.circleId,
@@ -363,16 +370,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'checkIsInBanList') {
-    console.log(
-      'background.js: Checking if the url is in the ban list with url:',
-      request.url
-    )
-    sendResponse(bannedURLList.includes(request.url.toLowerCase()))
-    return true
-  }
-
-  if (request.action === 'claimCircle') {
+  if (request.action === BJActions.CLAIM_CIRCLE) {
     console.log(
       'background.js: Claiming the circle: ',
       request.circleId,
@@ -390,24 +388,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getCircleImage') {
-    // console.log("background.js: Getting generated circle image from the Edge function")
-    // getGeneratedCircleImage(request.name, request.description)
-    // .then((imageUrl) => {
-    //   sendResponse(imageUrl)
-    // })
-    // .catch((error) => {
-    //   sendResponse('')
-    // })
-    return true
-  }
-
-  if (request.action === 'generatedCircles') {
+  if (request.action === BJActions.GENERATE_CIRCLES) {
     console.log(
       'background.js: Getting generated circles from the Edge function and saving it to local storage'
     )
     const tabId = request.tabId
     const generatingCircles: ICircleGenerationStatus = {
+      type: 'auto',
       status: CircleGenerationStatus.GENERATING,
       result: [],
     }
@@ -423,7 +410,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getCircleGenerationStatus') {
+  if (request.action === BJActions.GET_CIRCLE_GENERATION_STATUS) {
     console.log('background.js: Getting saved circles from the storage')
     const tabId = request.tabId
     getFromStorage(tabId?.toString())
@@ -436,7 +423,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'removeCirclesFromStorage') {
+  if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
     const tabId = request.tabId
     console.log('background.js: Removing circles from the storage. TabId: ', tabId)
     try {
@@ -449,7 +436,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'addTags') {
+  if (request.action === BJActions.ADD_TAGS) {
     console.log('background.js: Adding tags')
     supabase
       .rpc('tags_add_new_return_all_ids', {
@@ -462,7 +449,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getTags') {
+  if (request.action === BJActions.ADD_TAGS) {
     console.log('background.js: Getting Tags')
     if (supabaseUser) {
       supabase.rpc('get_all_tags').then((result) => {
@@ -476,26 +463,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'checkIfUserJoinedCircle') {
+  if (request.action === BJActions.CHECK_IF_USER_JOINED_CIRCLE) {
     checkIfUserJoinedCircle(request.circleId).then((result) => {
       sendResponse(result)
     })
     return true
   }
-
-  if (request.action === 'logout') {
-    logout().then(() => {
-      sendResponse(true)
-    })
-    return true
-  }
-
-  if (request.action === 'showCircleCount') {
+  if (request.action === BJActions.SHOW_CIRCLE_COUNT) {
     showCircleCount(request.url).then(() => {})
     return true
   }
 
-  if (request.action === 'getUniqueUsersCountInUserCircles') {
+  if (request.action === BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES) {
     console.log("background.js: Getting unique users count in user's circles")
     if (supabaseUser) {
       supabase.rpc('get_users_in_my_circles').then((result) => {
@@ -512,7 +491,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getUserCirclesCount') {
+  if (request.action === BJActions.GET_USER_CIRCLE_COUNT) {
     console.log("background.js: Getting user circle's count")
     if (supabaseUser) {
       supabase
@@ -528,7 +507,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'updateCircleImageUrl') {
+  if (request.action === BJActions.UPDATE_CIRCLE_IMAGE_URL) {
     console.log('background.js: Updating circle image url')
     if (supabaseUser) {
       updateCircleImageUrl(request.circleId).then((status: number) => {

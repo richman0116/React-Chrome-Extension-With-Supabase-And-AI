@@ -4,6 +4,7 @@ import CircleIcon from '../SVGIcons/CircleIcon'
 import UserIcon from '../SVGIcons/UserIcon'
 import Avatar from '../Avatar'
 import LogoutButton from '../LogoutButton'
+import { BJActions } from '../../background/actions'
 
 const Header = () => {
   const { isAuthenticated, showLogoutBtn, setShowLogoutBtn } = useAuthContext()
@@ -11,10 +12,10 @@ const Header = () => {
   const [circlesCount, setCirclesCount] = useState(0)
 
   useEffect(() => {
-    ;(() => {
+    ; (() => {
       chrome.runtime.sendMessage(
         {
-          action: 'getUniqueUsersCountInUserCircles',
+          action: BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES,
         },
         (res: any) => {
           if (!res.error) {
@@ -26,10 +27,10 @@ const Header = () => {
   }, [])
 
   useEffect(() => {
-    ;(() => {
+    ; (() => {
       chrome.runtime.sendMessage(
         {
-          action: 'getUserCirclesCount',
+          action: BJActions.GET_USER_CIRCLE_COUNT,
         },
         (res: any) => {
           if (!res.error) {

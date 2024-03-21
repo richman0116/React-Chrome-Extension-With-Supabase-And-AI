@@ -10,6 +10,7 @@ import React, {
 } from 'react'
 import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
 import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
+import { BJActions } from '../background/actions'
 
 interface ICircleContext {
   circles: CircleInterface[]
@@ -71,7 +72,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const getCircles = useCallback(async () => {
     if (currentUrl) {
       chrome.runtime.sendMessage(
-        { action: 'getCircles', url: currentUrl },
+        { action: BJActions.GET_CIRCLES, url: currentUrl },
         (response) => {
           if (response.error) {
             setCircles([])
@@ -99,7 +100,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
       const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
         chrome.runtime.sendMessage(
           {
-            action: 'getCircleGenerationStatus',
+            action: BJActions.GET_CIRCLE_GENERATION_STATUS,
             tabId: currentTabId
           },
           (res: ICircleGenerationStatus) => {

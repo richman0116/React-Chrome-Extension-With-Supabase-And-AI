@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react'
 import CircleItem from '../../../../../components/CircleItem'
 import { CircleInterface } from '../../../../../types/circle'
 import { useCircleContext } from '../../../../../context/CircleContext'
+import { BJActions } from '../../../../../background/actions'
 
 interface IRecommendedCircles {
   circles: CircleInterface[]
@@ -18,7 +19,7 @@ const RecommendedCircles = ({ circles, tags }: IRecommendedCircles) => {
     setIsLoading(true)
     chrome.runtime.sendMessage(
       {
-        action: 'getSimilarCirclesFromTags',
+        action: BJActions.GET_SIMILAR_CIRCLES_FROM_TAGS,
         tags,
       },
       (response) => {

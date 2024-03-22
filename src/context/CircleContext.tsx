@@ -96,36 +96,37 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   }, [getCircles])
 
   const getCircleGenerationStatus = useCallback(() => {
-    if (pageStatus !== circlePageStatus.ADD_MANUALLY) {
-      const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
-        chrome.runtime.sendMessage(
-          {
-            action: BJActions.GET_CIRCLE_GENERATION_STATUS,
-            tabId: currentTabId
-          },
-          (res: ICircleGenerationStatus) => {
-            setIsLoadingCGenerationStatus(false)
-            if (res) {
-              if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
-                setCircleGenerationStatus(res)
-              }
+    const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.GET_CIRCLE_GENERATION_STATUS,
+          tabId: currentTabId
+        },
+        (res: ICircleGenerationStatus) => {
+          setIsLoadingCGenerationStatus(false)
+          if (res) {
+            const { type } = res
+            if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
+              setCircleGenerationStatus(res)
+            }
 
-              if (pageStatus !== circlePageStatus.ADD_AUTOMATICALLY) {
-                setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
-              }
-
-              if (res.status !== CircleGenerationStatus.GENERATING) {
-                clearInterval(getCircleGenerationStatusInterval)
-              }
-
+            if (type === "auto") {
+              setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
             } else {
+              setPageStatus(circlePageStatus.ADD_MANUALLY)
+            }
+
+            if (res.status !== CircleGenerationStatus.GENERATING) {
               clearInterval(getCircleGenerationStatusInterval)
             }
+
+          } else {
+            clearInterval(getCircleGenerationStatusInterval)
           }
-        )
-      }, 1500)
-    }
-  }, [circleGenerationStatus, currentTabId, pageStatus])
+        }
+      )
+    }, 1500)
+  }, [circleGenerationStatus, currentTabId])
 
   useEffect(() => {
     getCircleGenerationStatus()

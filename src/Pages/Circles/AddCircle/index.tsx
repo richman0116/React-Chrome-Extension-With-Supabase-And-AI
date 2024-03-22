@@ -1,8 +1,8 @@
-import { circlePageStatus } from '../../../utils/constants'
+import { CircleGenerationStatus, circlePageStatus } from '../../../utils/constants'
 import { useCircleContext } from '../../../context/CircleContext'
 import AddGeneratedCircles from './AddGeneratedCircles'
 import AddManualCircle from './AddManualCircle'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CircleInterface } from '../../../types/circle'
 
 export const initialCircleData = {
@@ -14,9 +14,20 @@ export const initialCircleData = {
 }
 
 const AddCircle = () => {
-  const { pageStatus } = useCircleContext()
+  const { pageStatus, circleGenerationStatus } = useCircleContext()
   const [circleData, setCircleData] = useState(initialCircleData)
   const [generatedCircles, setGeneratedCircles] = useState<CircleInterface[]>([])
+
+  useEffect(() => {
+    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
+      if (circleGenerationStatus.type === "auto") {
+        setGeneratedCircles(circleGenerationStatus?.result)
+      }
+      if (circleGenerationStatus.type === "manual") {
+        setCircleData(circleGenerationStatus.result[0])
+      }
+    }
+  }, [circleGenerationStatus?.result, circleGenerationStatus?.status, circleGenerationStatus?.type])
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">

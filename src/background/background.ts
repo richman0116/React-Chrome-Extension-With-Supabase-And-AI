@@ -4,11 +4,13 @@ import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
 import { ICircleGenerationStatus } from '../types/circle'
 import {
   getFromStorage,
+  handleCircleCreation,
   handleCircleGeneration,
   removeItemFromStorage,
   setToStorage,
 } from './helpers'
 import { BJActions } from './actions'
+import { generateTags } from '../utils/edgeFunctions'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -169,19 +171,6 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
   return data
 }
 
-const updateCircleImageUrl = async (circleId: string) => {
-  const { error, status } = await supabase
-    .from('circles')
-    .update({
-      circle_logo_image: `${supabaseSotrageUrl}/media_bucket/circle_images/${circleId}.webp`,
-    })
-    .eq('id', circleId)
-  if (error) {
-    console.log(error, 'An error occurred on circle image updating')
-  }
-  return status
-}
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === BJActions.CHECK_LOGGED_IN) {
     // This is an example async function, replace with your own
@@ -328,33 +317,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === BJActions.CREATE_CIRCLE) {
-    console.log(
-      'background.js: Creating circle with name: ',
-      request.circleName,
-      ' and rl: ',
-      request.url
-    )
-    console.log(
-      request.circleName,
-      request.url,
-      request.circleDescription,
-      request.tags,
-      '============================'
-    )
-    supabase
-      .rpc('circles_checkpoint_add_new_with_tags_return_id', {
-        p_circle_name: request.circleName,
-        p_url: request.url,
-        p_circle_description: request.circleDescription,
-        circle_tags: request.tags,
-      })
-      .then((result) => {
-        console.log('background.js: Result of creating circle with tags: ', result)
-        // here we will generate the circle image by sending the edge function
-        // we dont even need to await this
-        // generateCircleImage(result.data); // we will generate the circle image in mannual circle creation UI. :by Kazuo
-        sendResponse(result)
-      })
+    const { tabId, url, circleName, circleDescription, imageBlob, tags } = request
+
+    // neet to remove generated circles from the storage
+    removeItemFromStorage(tabId.toString())
+
+    const generatingCircle: ICircleGenerationStatus = {
+      type: 'manual',
+      status: CircleGenerationStatus.GENERATING,
+      result: [],
+    }
+    setToStorage(tabId.toString(), JSON.stringify(generatingCircle))
+    try {
+      if (tags.length === 1 && tags[0] === '') {
+        try {
+          generateTags(circleName, circleDescription).then((addedTagNames: string[]) => {
+            handleCircleCreation(
+              supabase,
+              tabId,
+              url,
+              circleName,
+              circleDescription,
+              imageBlob,
+              addedTagNames
+            )
+          })
+        } catch (err) {
+          console.error('An error occurred on generating tags')
+          sendResponse(false)
+        }
+      } else {
+        handleCircleCreation(
+          supabase,
+          tabId,
+          url,
+          circleName,
+          circleDescription,
+          imageBlob,
+          tags
+        )
+      }
+      sendResponse(true)
+    } catch (err) {
+      sendResponse(false)
+    }
+
     return true
   }
 
@@ -506,19 +513,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
-
-  if (request.action === BJActions.UPDATE_CIRCLE_IMAGE_URL) {
-    console.log('background.js: Updating circle image url')
-    if (supabaseUser) {
-      updateCircleImageUrl(request.circleId).then((status: number) => {
-        if (status === 204) {
-          sendResponse('success')
-        }
-      })
-    }
-
-    return true
-  }
 })
 
 // whenever we update a tab, log the url
@@ -539,21 +533,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   // execute a content script to get the text content of the page
   if (supabaseUser && changeInfo.url) {
     await showCircleCount(changeInfo.url)
-    // chrome.scripting.executeScript({
-    //     target: { tabId: tab.id },
-    //     func: () => {
-    //         const texts = (document.body.innerText);
-    //         return texts;
-    //     }
-    // }).then((result) => {
-    //     tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
-    //     // it's not needed right now but maybe later we will need to look at the content
-    //     const hash = CryptoJS.SHA256(result[0].result).toString();
-    //     console.log(changeInfo.url)
-    //     console.log(hash);
-    // }).catch((err) => {
-    //     console.error(`Error executing script: ${err}`);
-    // });
   }
 })
 

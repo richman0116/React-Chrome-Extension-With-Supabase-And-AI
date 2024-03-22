@@ -52,9 +52,7 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
 }
 
 // Define a function to resize and convert an image to WebP format, returning the result as a Uint8Array
-export const resizeAndConvertImageToBuffer = async (
-  imageUrl: string
-): Promise<Uint8Array> => {
+export const resizeAndConvertImageToBlob = async (imageUrl: string): Promise<Blob> => {
   // Load the image
   const img = await loadImage(imageUrl)
 
@@ -81,8 +79,9 @@ export const resizeAndConvertImageToBuffer = async (
   }
 
   // Convert the blob to an ArrayBuffer then to a Uint8Array
-  const buffer = await blob.arrayBuffer()
-  return new Uint8Array(buffer)
+  // const buffer = await blob.arrayBuffer()
+  // return new Uint8Array(buffer)
+  return blob
 }
 
 export const uploadImageToSupabase = async (
@@ -91,12 +90,13 @@ export const uploadImageToSupabase = async (
   uploadPath: string
 ) => {
   try {
-    const { error } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(uploadPath, imageBuffer, {
         contentType: 'image/webp',
         upsert: false,
       })
+    console.log(data, '****** image uploading result')
     if (error) {
       console.error(error)
     }
@@ -106,6 +106,6 @@ export const uploadImageToSupabase = async (
 }
 
 export const getCircleLoadingMessage = () => {
-  const randomNumber = Math.floor(Math.random() * (circleLoadingMessages.length ))
+  const randomNumber = Math.floor(Math.random() * circleLoadingMessages.length)
   return circleLoadingMessages[randomNumber]
 }

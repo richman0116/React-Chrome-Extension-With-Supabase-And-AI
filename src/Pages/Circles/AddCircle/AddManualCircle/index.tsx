@@ -10,11 +10,11 @@ import Refresh from '../../../../components/SVGIcons/Refresh'
 import Loading from '../../../../components/Loading'
 
 import {
-  resizeAndConvertImageToBuffer,
-  uploadImageToSupabase,
+  getCircleLoadingMessage,
+  resizeAndConvertImageToBlob,
 } from '../../../../utils/helpers'
-import { circlePageStatus } from '../../../../utils/constants'
-import { generateCircleImage, generateTags } from '../../../../utils/edgeFunctions'
+import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
+import { generateCircleImage } from '../../../../utils/edgeFunctions'
 
 import { CircleInterface } from '../../../../types/circle'
 import { initialCircleData } from '..'
@@ -36,8 +36,9 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [circleImageUrl, setCircleImageUrl] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, currentTabId, setPageStatus, getCircles, setCircleGenerationStatus } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
   const {
     handleSubmit,
     register,
@@ -49,94 +50,56 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
 
   const { tags } = circleData
 
-  const handleCreateCircle = useCallback(
-    async (data: CircleFormData) => {
-      if (circleImageUrl) {
-        setIsSaving(true)
-        const { name, description } = data
-        let availableTags = tags
-        if (tags.length === 1 && tags[0] === '') {
-          try {
-            availableTags = await generateTags(name, description)
-          } catch {
-            setIsSaving(false)
+  useEffect(() => {
+    if (circleData.circle_logo_image) {
+      setCircleImageUrl(circleData.circle_logo_image)
+    }
+  }, [circleData.circle_logo_image])
+
+  useEffect(() => {
+    if (circleGenerationStatus?.status === CircleGenerationStatus.GENERATING) {
+      setIsSaving(true)
+    } else if (circleGenerationStatus?.status === CircleGenerationStatus.FAILED) {
+      setIsSaving(false)
+    } else {
+      setIsSaving(false)
+    }
+  }, [circleGenerationStatus?.status])
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setMessage(getCircleLoadingMessage());
+    }, 3000); // Change message every 3 seconds
+    if (!isSaving) {
+      clearInterval(intervalId); // clean up the interval if loading circles finished
+    }
+
+    return () => clearInterval(intervalId); // Clean up the interval on component unmount
+  }, [isSaving]); // Empty dependency array means this effect runs once on mount
+
+  const handleCreateCircle = useCallback(async (data: CircleFormData) => {
+    if (circleImageUrl) {
+      const imageBlob = await resizeAndConvertImageToBlob(circleImageUrl)
+
+      const { name, description } = data
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.CREATE_CIRCLE,
+          tabId: currentTabId,
+          url,
+          circleName: name,
+          circleDescription: description,
+          imageBlob,
+          tags: tags,
+        },
+        (response: boolean) => {
+          if (response) {
+            getCircleGenerationStatus()
           }
         }
-
-        // add tags first
-        chrome.runtime.sendMessage(
-          {
-            action: BJActions.ADD_TAGS,
-            names: availableTags,
-          },
-          (addedTags: string[]) => {
-            chrome.runtime.sendMessage(
-              {
-                action: BJActions.CREATE_CIRCLE,
-                circleName: name,
-                circleDescription: description,
-                url,
-                tags: addedTags,
-              },
-              async (response) => {
-                if (response.error) {
-                  setIsSaving(false)
-                } else {
-                  const addedCircleId = response.data
-
-                  try {
-                    // convert the OpenAI image to resized image buffer
-                    const webpBuffer = await resizeAndConvertImageToBuffer(circleImageUrl)
-
-                    // upload the converted image to Supabase storage
-                    await uploadImageToSupabase(
-                      webpBuffer,
-                      'media_bucket',
-                      `circle_images/${addedCircleId}.webp`
-                    )
-
-                    // update the circle's logo url
-                    chrome.runtime.sendMessage(
-                      {
-                        action: BJActions.UPDATE_CIRCLE_IMAGE_URL,
-                        circleId: addedCircleId,
-                      },
-                      (res) => {
-                        if (res === 'success') {
-                          // now we want to load circles again just to make sure the result went through
-                          getCircles()
-                          // we need to remove the generated circles from the storage
-                          chrome.runtime.sendMessage(
-                            {
-                              action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-                              tabId: currentTabId
-                            },
-                            (res) => {
-                              if (res) {
-                                setIsSaving(false)
-                                setCircleGenerationStatus(null)
-                                setPageStatus(circlePageStatus.CIRCLE_LIST)
-                              }
-                            }
-                          )
-                        } else {
-                          setIsSaving(false)
-                        }
-                      }
-                    )
-                  } catch (ex) {
-                    console.error(ex)
-                    setIsSaving(false)
-                  }
-                }
-              }
-            )
-          }
-        )
-      }
-    },
-    [circleImageUrl, currentTabId, getCircles, setCircleGenerationStatus, setPageStatus, tags, url]
-  )
+      )
+    }
+  }, [circleImageUrl, currentTabId, getCircleGenerationStatus, tags, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
@@ -173,94 +136,108 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
         }}
       />
-      <form
-        onSubmit={handleSubmit(handleCreateCircle)}
-        className="space-y-6 w-full flex flex-col items-center"
-      >
-        <FormLine
-          title="Name:"
-          id="name"
-          type="text"
-          error={errors.name?.message}
-          {...register('name', {
-            required: "Circle name is required",
-            // --- will be applied if we need later ------
-            // pattern: {
-            //   value: /^[a-zA-Z0-9 _-]+$/,
-            //   message: "Please enter a valid name"
-            // }
-          })}
-          placeholder="Give it a good name!"
-        />
-        <FormLine
-          title="Description:"
-          id="description"
-          type="text"
-          error={errors.description?.message}
-          {...register('description', {
-            required: "Circle description is required",
-            // --- will be applied if we need later ------
-            // pattern: {
-            //   value: /^[a-zA-Z0-9 _-]+$/,
-            //   message: "Please enter a valid description"
-            // }
-          })}
-          placeholder="What does it about?"
-        />
-        {isGeneratingImage ? (
-          <div className="w-25 h-25 flex items-center justify-center">
-            <Loading />
-          </div>
-        ) : (
-          <div className="w-25 h-25 ">
-            <div className="relative w-full h-full rounded-full bg-secondary">
-              {circleImageUrl ? (
-                <div>
-                  <img
-                    src={circleImageUrl}
-                    alt="circle logo"
-                    className="z-10 rounded-full w-25 h-25"
-                  />
-                </div>
-              ) : null}
-              <div
-                className="absolute top-0 inset-0 flex items-center justify-center group cursor-pointer"
-                onClick={() => document.getElementById('fileInput')?.click()}
-              >
-                <div
-                  className={classNames('w-fit text-tertiary z-20', {
-                    'hidden group-hover:flex text-transparent group-hover:text-white':
-                      circleImageUrl,
-                    'group-hover:text-black/50': !circleImageUrl,
-                  })}
-                >
-                  <UploadIcon />
-                </div>
+      <div className="w-full flex flex-col gap-2 justify-between">
+        {isSaving && (
+          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 flex flex-col gap-y-3">
+            <div className="-mt-6">
+              <p className="text-sm font-medium leading-normal text-center text-brand">Running on background</p>
+              <p className="text-base font-medium leading-normal text-center text-primary">{message}...</p>
+              <div className='h-1.5 w-full bg-secondary overflow-hidden rounded-xl'>
+                <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
               </div>
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
             </div>
           </div>
         )}
+        {!isSaving &&
+          <form
+            onSubmit={handleSubmit(handleCreateCircle)}
+            className="space-y-6 w-full flex flex-col items-center"
+          >
+            <FormLine
+              title="Name:"
+              id="name"
+              type="text"
+              error={errors.name?.message}
+              {...register('name', {
+                required: "Circle name is required",
+                // --- will be applied if we need later ------
+                // pattern: {
+                //   value: /^[a-zA-Z0-9 _-]+$/,
+                //   message: "Please enter a valid name"
+                // }
+              })}
+              placeholder="Give it a good name!"
+            />
+            <FormLine
+              title="Description:"
+              id="description"
+              type="text"
+              error={errors.description?.message}
+              {...register('description', {
+                required: "Circle description is required",
+                // --- will be applied if we need later ------
+                // pattern: {
+                //   value: /^[a-zA-Z0-9 _-]+$/,
+                //   message: "Please enter a valid description"
+                // }
+              })}
+              placeholder="What does it about?"
+            />
+            {isGeneratingImage ? (
+              <div className="w-25 h-25 flex items-center justify-center">
+                <Loading />
+              </div>
+            ) : (
+              <div className="w-25 h-25 ">
+                <div className="relative w-full h-full rounded-full bg-secondary">
+                  {circleImageUrl ? (
+                    <div>
+                      <img
+                        src={circleImageUrl}
+                        alt="circle logo"
+                        className="z-10 rounded-full w-25 h-25"
+                      />
+                    </div>
+                  ) : null}
+                  <div
+                    className="absolute top-0 inset-0 flex items-center justify-center group cursor-pointer"
+                    onClick={() => document.getElementById('fileInput')?.click()}
+                  >
+                    <div
+                      className={classNames('w-fit text-tertiary z-20', {
+                        'hidden group-hover:flex text-transparent group-hover:text-white':
+                          circleImageUrl,
+                        'group-hover:text-black/50': !circleImageUrl,
+                      })}
+                    >
+                      <UploadIcon />
+                    </div>
+                  </div>
+                  <input
+                    id="fileInput"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            )}
 
-        <div className="w-full flex justify-center">
-          <GenerateButton type="button" onClick={handleGenerateImage}>
-            <Refresh />
-            <p>{isGeneratingImage ? 'Generating' : 'Generate'}</p>
-          </GenerateButton>
-        </div>
+            <div className="w-full flex justify-center">
+              <GenerateButton type="button" onClick={handleGenerateImage}>
+                <Refresh />
+                <p>{isGeneratingImage ? 'Generating' : 'Generate'}</p>
+              </GenerateButton>
+            </div>
 
-        <div className="fixed bottom-6 w-fit justify-center">
-          <Button type="submit" disabled={isSaving}>
-            {isSaving ? 'Completing' : 'Complete'}
-          </Button>
-        </div>
-      </form>
+            <div className="fixed bottom-6 w-fit justify-center">
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? 'Completing' : 'Complete'}
+              </Button>
+            </div>
+          </form>}
+      </div>
     </div>
   )
 }

@@ -19,5 +19,4 @@ export enum BJActions {
   SHOW_CIRCLE_COUNT = 'showCircleCount',
   GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES = 'getUniqueUsersCountInUserCircles',
   GET_USER_CIRCLE_COUNT = 'getUserCirclesCount',
-  UPDATE_CIRCLE_IMAGE_URL = 'updateCircleImageUrl',
 }

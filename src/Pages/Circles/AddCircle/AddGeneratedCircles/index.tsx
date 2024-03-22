@@ -25,12 +25,6 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
 
   const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, setCircleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
 
-  useEffect(() => {
-    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
-      setCircles(circleGenerationStatus?.result)
-    }
-  }, [circleGenerationStatus?.result, circleGenerationStatus?.status, setCircles])
-
   const tags: string[] = useMemo(() => {
     const allTags = circles.map((circle) => circle.tags).flat()
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
@@ -43,6 +37,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
       setIsFailed(true)
       setIsLoading(false)
     } else {
+      setIsFailed(false)
       setIsLoading(false)
     }
   }, [circleGenerationStatus?.status])

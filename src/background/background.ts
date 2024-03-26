@@ -10,7 +10,7 @@ import {
   setToStorage,
 } from './helpers'
 import { BJActions } from './actions'
-import { generateTags } from '../utils/edgeFunctions'
+import { generateCircleImage, generateTags } from '../utils/edgeFunctions'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -429,6 +429,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.error('background.js: User not logged in when generating circles')
       sendResponse({ error: 'User not logged in' })
     }
+
+    return true
+  }
+
+  if (request.action === BJActions.GENERATE_CIRCLE_IMAGE) {
+    console.log(
+      'background.js: Getting generate circle image from the Edge function and saving it to local storage'
+    )
+    const { tabId, name, description, tags } = request
+    generateCircleImage(undefined, name, description).then((result) => {
+      const imageUrl = result?.url?.replaceAll('"', '')
+      const newCircleGenerationStatus: ICircleGenerationStatus = {
+        type: 'manual',
+        status: CircleGenerationStatus.INITIALIZED,
+        result: [
+          {
+            id: '',
+            name,
+            description,
+            tags,
+            circle_logo_image: imageUrl,
+          },
+        ],
+      }
+      setToStorage(tabId.toString(), JSON.stringify(newCircleGenerationStatus))
+    })
 
     return true
   }

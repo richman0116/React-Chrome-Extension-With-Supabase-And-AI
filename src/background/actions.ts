@@ -14,6 +14,7 @@ export enum BJActions {
   GENERATE_CIRCLES = 'generatedCircles',
   GET_CIRCLE_GENERATION_STATUS = 'getCircleGenerationStatus',
   SET_CIRCLE_GENERATION_STATUS = 'setCircleGenerationStatus',
+  GENERATE_CIRCLE_IMAGE = 'generateCircleImage',
   REMOVE_CIRCLES_FROM_STORAGE = 'removeCirclesFromStorage',
   ADD_TAGS = 'addTags',
   CHECK_IF_USER_JOINED_CIRCLE = 'checkIfUserJoinedCircle',

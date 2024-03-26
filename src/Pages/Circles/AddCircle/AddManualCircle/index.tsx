@@ -14,7 +14,6 @@ import {
   resizeAndConvertImageToBlob,
 } from '../../../../utils/helpers'
 import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
-import { generateCircleImage } from '../../../../utils/edgeFunctions'
 
 import { CircleInterface } from '../../../../types/circle'
 import { initialCircleData } from '..'
@@ -58,6 +57,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   useEffect(() => {
     if (circleData.circle_logo_image) {
       setCircleImageUrl(circleData.circle_logo_image)
+      setIsGeneratingImage(false)
     }
   }, [circleData.circle_logo_image])
 
@@ -111,17 +111,24 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
     const description = getValues('description')
-    if (name && description) {
+    if (name && description && (!isGeneratingImage)) {
       setIsGeneratingImage(true)
-      const result = await generateCircleImage(undefined, name, description)
-      setCircleImageUrl(result?.url?.replaceAll('"', ''))
-      setIsGeneratingImage(false)
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.GENERATE_CIRCLE_IMAGE,
+          tabId: currentTabId,
+          name,
+          description,
+          tags
+        }
+      )
+      getCircleGenerationStatus()
     }
-  }, [getValues])
+  }, [currentTabId, getCircleGenerationStatus, getValues, isGeneratingImage, tags])
 
   useEffect(() => {
     handleGenerateImage()
-  }, [handleGenerateImage, circleData])
+  }, [handleGenerateImage])
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const imgFile = e.target.files?.[0]

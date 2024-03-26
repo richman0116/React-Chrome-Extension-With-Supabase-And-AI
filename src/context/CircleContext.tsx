@@ -101,19 +101,21 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         (res: ICircleGenerationStatus) => {
           setIsLoadingCGenerationStatus(false)
           if (res) {
-            const { type } = res
+            const { type, result, status } = res
             if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
               setCircleGenerationStatus(res)
             }
 
             if (type === "auto") {
               setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
-            } else {
+              if (status !== CircleGenerationStatus.GENERATING) {
+                clearInterval(getCircleGenerationStatusInterval)
+              }
+            } else if (type === "manual") {
               setPageStatus(circlePageStatus.ADD_MANUALLY)
-            }
-
-            if (res.status !== CircleGenerationStatus.GENERATING) {
-              clearInterval(getCircleGenerationStatusInterval)
+              if (result[0].circle_logo_image || status === CircleGenerationStatus.SUCCEEDED) {
+                clearInterval(getCircleGenerationStatusInterval)
+              }
             }
           } else {
             setPageStatus(circlePageStatus.CIRCLE_LIST)

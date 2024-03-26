@@ -113,7 +113,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
               }
             } else if (type === "manual") {
               setPageStatus(circlePageStatus.ADD_MANUALLY)
-              if (result[0].circle_logo_image || status === CircleGenerationStatus.SUCCEEDED) {
+              if (result[0].circle_logo_image || status === CircleGenerationStatus.SUCCEEDED || status === CircleGenerationStatus.FAILED) {
                 clearInterval(getCircleGenerationStatusInterval)
               }
             }

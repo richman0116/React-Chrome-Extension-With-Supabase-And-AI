@@ -437,10 +437,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log(
       'background.js: Getting generate circle image from the Edge function and saving it to local storage'
     )
+
     const { tabId, name, description, tags } = request
-    generateCircleImage(undefined, name, description).then((result) => {
-      const imageUrl = result?.url?.replaceAll('"', '')
-      const newCircleGenerationStatus: ICircleGenerationStatus = {
+    // initialize the status
+    setToStorage(
+      tabId.toString(),
+      JSON.stringify({
         type: 'manual',
         status: CircleGenerationStatus.INITIALIZED,
         result: [
@@ -449,11 +451,45 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             name,
             description,
             tags,
-            circle_logo_image: imageUrl,
           },
         ],
+      })
+    )
+
+    generateCircleImage(undefined, name, description).then((result) => {
+      if (result.error) {
+        setToStorage(
+          tabId.toString(),
+          JSON.stringify({
+            type: 'manual',
+            status: CircleGenerationStatus.FAILED,
+            result: [
+              {
+                id: '',
+                name,
+                description,
+                tags,
+              },
+            ],
+          })
+        )
+      } else if (result.url) {
+        const imageUrl = result?.url?.replaceAll('"', '')
+        const newCircleGenerationStatus: ICircleGenerationStatus = {
+          type: 'manual',
+          status: CircleGenerationStatus.INITIALIZED,
+          result: [
+            {
+              id: '',
+              name,
+              description,
+              tags,
+              circle_logo_image: imageUrl,
+            },
+          ],
+        }
+        setToStorage(tabId.toString(), JSON.stringify(newCircleGenerationStatus))
       }
-      setToStorage(tabId.toString(), JSON.stringify(newCircleGenerationStatus))
     })
 
     return true

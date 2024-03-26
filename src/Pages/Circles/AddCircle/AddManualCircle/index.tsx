@@ -111,7 +111,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
     const description = getValues('description')
-    if (name && description && (!isGeneratingImage)) {
+    if (name && description) {
       setIsGeneratingImage(true)
       chrome.runtime.sendMessage(
         {
@@ -124,11 +124,13 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
       )
       getCircleGenerationStatus()
     }
-  }, [currentTabId, getCircleGenerationStatus, getValues, isGeneratingImage, tags])
+  }, [currentTabId, getCircleGenerationStatus, getValues, tags])
 
   useEffect(() => {
-    handleGenerateImage()
-  }, [handleGenerateImage])
+    if (!isGeneratingImage && !(circleData.circle_logo_image)) {
+      handleGenerateImage()
+    }
+  }, [circleData.circle_logo_image, handleGenerateImage, isGeneratingImage])
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const imgFile = e.target.files?.[0]
@@ -239,7 +241,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
             )}
 
             <div className="w-full flex justify-center">
-              <GenerateButton type="button" onClick={handleGenerateImage}>
+              <GenerateButton type="button" onClick={handleGenerateImage} disabled={isGeneratingImage}>
                 <Refresh />
                 <p>{isGeneratingImage ? 'Generating' : 'Generate'}</p>
               </GenerateButton>

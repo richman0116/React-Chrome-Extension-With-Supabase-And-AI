@@ -320,9 +320,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (supabaseUser) {
       const { tabId, url, circleName, circleDescription, imageData, tags } = request
 
-      // neet to remove generated circles from the storage
-      removeItemFromStorage(tabId.toString())
-
       const generatingCircle: ICircleGenerationStatus = {
         type: 'manual',
         status: CircleGenerationStatus.GENERATING,

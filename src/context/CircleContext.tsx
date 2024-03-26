@@ -116,14 +116,13 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
               clearInterval(getCircleGenerationStatusInterval)
             }
           } else {
-            getCircles()
             setPageStatus(circlePageStatus.CIRCLE_LIST)
             clearInterval(getCircleGenerationStatusInterval)
           }
         }
       )
     }, 1500)
-  }, [circleGenerationStatus, currentTabId, getCircles])
+  }, [circleGenerationStatus, currentTabId])
 
   useEffect(() => {
     getCircleGenerationStatus()

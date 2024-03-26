@@ -79,20 +79,35 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   }, [currentTabId, getCircleGenerationStatus, setCircles, url])
 
   useEffect(() => {
-    if (circles.length === 0 && !circleGenerationStatus) {
+    if (circles.length === 0 && (!circleGenerationStatus || circleGenerationStatus.type === 'manual')) {
       getCircles()
     }
   }, [circleGenerationStatus, circles.length, getCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {
-      setCircleData({
-        ...circleData,
-        tags,
-      })
-      setPageStatus(circlePageStatus.ADD_MANUALLY)
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.SET_CIRCLE_GENERATION_STATUS,
+          tabId: currentTabId,
+          circleGenerationStatus: {
+            type: 'manual',
+            status: CircleGenerationStatus.INITIALIZED,
+            result: [circleData],
+          }
+        },
+        (res: Boolean) => {
+          if (res) {
+            setCircleData({
+              ...circleData,
+              tags,
+            })
+            setPageStatus(circlePageStatus.ADD_MANUALLY)
+          }
+        }
+      )
     },
-    [setCircleData, setPageStatus, tags]
+    [currentTabId, setCircleData, setPageStatus, tags]
   )
 
   const handlePrevClick = useCallback(() => {

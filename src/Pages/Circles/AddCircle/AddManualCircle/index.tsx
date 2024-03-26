@@ -42,6 +42,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const {
     handleSubmit,
     register,
+    reset,
     getValues,
     formState: { errors },
   } = useForm<CircleFormData>({
@@ -49,6 +50,10 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   })
 
   const { tags } = circleData
+
+  useEffect(() => {
+    reset(circleData)
+  }, [circleData, reset])
 
   useEffect(() => {
     if (circleData.circle_logo_image) {
@@ -116,7 +121,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
 
   useEffect(() => {
     handleGenerateImage()
-  }, [handleGenerateImage])
+  }, [handleGenerateImage, circleData])
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const imgFile = e.target.files?.[0]

@@ -24,6 +24,7 @@ export const circleLoadingMessages = [
 ]
 
 export enum CircleGenerationStatus {
+  INITIALIZED = 'initialized',
   GENERATING = 'generating',
   SUCCEEDED = 'succeeded',
   FAILED = 'failed',

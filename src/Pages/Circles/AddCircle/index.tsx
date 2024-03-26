@@ -19,10 +19,10 @@ const AddCircle = () => {
   const [generatedCircles, setGeneratedCircles] = useState<CircleInterface[]>([])
 
   useEffect(() => {
-    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
-      if (circleGenerationStatus?.type === "auto") {
-        setGeneratedCircles(circleGenerationStatus?.result)
-      }
+    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED && circleGenerationStatus.type === 'auto') {
+      setGeneratedCircles(circleGenerationStatus?.result)
+    } else if (circleGenerationStatus?.status === CircleGenerationStatus.INITIALIZED && circleGenerationStatus?.type === 'manual') {
+      setCircleData(circleGenerationStatus.result[0])
     }
   }, [circleGenerationStatus?.result, circleGenerationStatus?.status, circleGenerationStatus?.type])
 

@@ -13,6 +13,7 @@ export enum BJActions {
   CLAIM_CIRCLE = 'claimCircle',
   GENERATE_CIRCLES = 'generatedCircles',
   GET_CIRCLE_GENERATION_STATUS = 'getCircleGenerationStatus',
+  SET_CIRCLE_GENERATION_STATUS = 'setCircleGenerationStatus',
   REMOVE_CIRCLES_FROM_STORAGE = 'removeCirclesFromStorage',
   ADD_TAGS = 'addTags',
   CHECK_IF_USER_JOINED_CIRCLE = 'checkIfUserJoinedCircle',

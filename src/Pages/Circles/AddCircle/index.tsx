@@ -20,11 +20,8 @@ const AddCircle = () => {
 
   useEffect(() => {
     if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
-      if (circleGenerationStatus.type === "auto") {
+      if (circleGenerationStatus?.type === "auto") {
         setGeneratedCircles(circleGenerationStatus?.result)
-      }
-      if (circleGenerationStatus.type === "manual") {
-        setCircleData(circleGenerationStatus.result[0])
       }
     }
   }, [circleGenerationStatus?.result, circleGenerationStatus?.status, circleGenerationStatus?.type])

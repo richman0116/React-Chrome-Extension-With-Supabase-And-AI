@@ -79,7 +79,9 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
 
   const handleCreateCircle = useCallback(async (data: CircleFormData) => {
     if (circleImageUrl) {
-      const imageBlob = await resizeAndConvertImageToBlob(circleImageUrl)
+      setIsSaving(true)
+      const imageBuffer = await resizeAndConvertImageToBlob(circleImageUrl)
+      const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
 
       const { name, description } = data
       chrome.runtime.sendMessage(
@@ -89,7 +91,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           url,
           circleName: name,
           circleDescription: description,
-          imageBlob,
+          imageData,
           tags: tags,
         },
         (response: boolean) => {
@@ -107,7 +109,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
     if (name && description) {
       setIsGeneratingImage(true)
       const result = await generateCircleImage(undefined, name, description)
-      setCircleImageUrl(result.url.replaceAll('"', ''))
+      setCircleImageUrl(result?.url?.replaceAll('"', ''))
       setIsGeneratingImage(false)
     }
   }, [getValues])
@@ -233,7 +235,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
 
             <div className="fixed bottom-6 w-fit justify-center">
               <Button type="submit" disabled={isSaving}>
-                {isSaving ? 'Completing' : 'Complete'}
+                {isSaving ? 'Creating' : 'Create'}
               </Button>
             </div>
           </form>}

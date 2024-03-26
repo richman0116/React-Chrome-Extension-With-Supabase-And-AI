@@ -97,7 +97,7 @@ export const handleCircleCreation = (
   pageUrl: string,
   name: string,
   description: string,
-  imageBlob: Blob,
+  imageData: string,
   tagNames: string[]
 ) => {
   supabase
@@ -119,7 +119,9 @@ export const handleCircleCreation = (
       console.log(addedCircleId, '===== addedCircleid')
       try {
         // upload the converted image to Supabase storage
-        const imageBuffer = await imageBlob.arrayBuffer()
+        const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
+          c.charCodeAt(0)
+        ).buffer
         await uploadImageToSupabase(
           imageBuffer,
           'media_bucket',
@@ -128,14 +130,7 @@ export const handleCircleCreation = (
 
         const status = await updateCircleImageUrl(supabase, addedCircleId)
         if (status === 204) {
-          circleGenerationSuccessHandler('manual', tabId, [
-            {
-              name,
-              description,
-              circle_logo_image: `${supabaseSotrageUrl}/media_bucket/circle_images/${addedCircleId}.webp`,
-              tags: tagNames,
-            } as CircleInterface,
-          ])
+          removeItemFromStorage(tabId.toString())
         } else {
           circleGenerationFailedHandler('manual', tabId)
         }

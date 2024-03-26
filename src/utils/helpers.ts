@@ -52,7 +52,9 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
 }
 
 // Define a function to resize and convert an image to WebP format, returning the result as a Uint8Array
-export const resizeAndConvertImageToBlob = async (imageUrl: string): Promise<Blob> => {
+export const resizeAndConvertImageToBlob = async (
+  imageUrl: string
+): Promise<Uint8Array> => {
   // Load the image
   const img = await loadImage(imageUrl)
 
@@ -79,9 +81,8 @@ export const resizeAndConvertImageToBlob = async (imageUrl: string): Promise<Blo
   }
 
   // Convert the blob to an ArrayBuffer then to a Uint8Array
-  // const buffer = await blob.arrayBuffer()
-  // return new Uint8Array(buffer)
-  return blob
+  const buffer = await blob.arrayBuffer()
+  return new Uint8Array(buffer)
 }
 
 export const uploadImageToSupabase = async (

@@ -91,10 +91,6 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
     }
   }, [currentUrl])
 
-  useEffect(() => {
-    getCircles()
-  }, [getCircles])
-
   const getCircleGenerationStatus = useCallback(() => {
     const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
       chrome.runtime.sendMessage(
@@ -119,14 +115,15 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
             if (res.status !== CircleGenerationStatus.GENERATING) {
               clearInterval(getCircleGenerationStatusInterval)
             }
-
           } else {
+            getCircles()
+            setPageStatus(circlePageStatus.CIRCLE_LIST)
             clearInterval(getCircleGenerationStatusInterval)
           }
         }
       )
     }, 1500)
-  }, [circleGenerationStatus, currentTabId])
+  }, [circleGenerationStatus, currentTabId, getCircles])
 
   useEffect(() => {
     getCircleGenerationStatus()

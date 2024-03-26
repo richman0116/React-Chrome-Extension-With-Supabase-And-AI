@@ -1,6 +1,6 @@
 import supabase from '../utils/supabase'
 
-import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
+import { CircleGenerationStatus } from '../utils/constants'
 import { ICircleGenerationStatus } from '../types/circle'
 import {
   getFromStorage,
@@ -317,7 +317,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === BJActions.CREATE_CIRCLE) {
-    const { tabId, url, circleName, circleDescription, imageBlob, tags } = request
+    const { tabId, url, circleName, circleDescription, imageData, tags } = request
 
     // neet to remove generated circles from the storage
     removeItemFromStorage(tabId.toString())
@@ -338,7 +338,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               url,
               circleName,
               circleDescription,
-              imageBlob,
+              imageData,
               addedTagNames
             )
           })
@@ -353,7 +353,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           url,
           circleName,
           circleDescription,
-          imageBlob,
+          imageData,
           tags
         )
       }

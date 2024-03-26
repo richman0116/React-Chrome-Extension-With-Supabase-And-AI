@@ -12,7 +12,7 @@ const Header = () => {
   const [circlesCount, setCirclesCount] = useState(0)
 
   useEffect(() => {
-    ; (() => {
+    (() => {
       chrome.runtime.sendMessage(
         {
           action: BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES,
@@ -27,7 +27,7 @@ const Header = () => {
   }, [])
 
   useEffect(() => {
-    ; (() => {
+    (() => {
       chrome.runtime.sendMessage(
         {
           action: BJActions.GET_USER_CIRCLE_COUNT,

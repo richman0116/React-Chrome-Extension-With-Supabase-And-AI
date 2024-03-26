@@ -11,7 +11,7 @@ import Loading from '../../../../components/Loading'
 
 import {
   getCircleLoadingMessage,
-  resizeAndConvertImageToBlob,
+  resizeAndConvertImageToBuffer,
 } from '../../../../utils/helpers'
 import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
 
@@ -85,7 +85,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   const handleCreateCircle = useCallback(async (data: CircleFormData) => {
     if (circleImageUrl) {
       setIsSaving(true)
-      const imageBuffer = await resizeAndConvertImageToBlob(circleImageUrl)
+      const imageBuffer = await resizeAndConvertImageToBuffer(circleImageUrl)
       const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
 
       const { name, description } = data

@@ -6,7 +6,7 @@ const Avatar = () => {
   const { avatarUrl, setAvatarUrl } = useAuthContext()
 
   useEffect(() => {
-    ; (() => {
+    (() => {
       chrome.runtime.sendMessage(
         {
           action: BJActions.GET_USER_AVATAR_URL,

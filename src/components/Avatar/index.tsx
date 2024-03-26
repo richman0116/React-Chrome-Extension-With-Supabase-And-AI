@@ -1,14 +1,15 @@
 import { useEffect } from 'react'
 import { useAuthContext } from '../../context/AuthContext'
+import { BJActions } from '../../background/actions'
 
 const Avatar = () => {
   const { avatarUrl, setAvatarUrl } = useAuthContext()
 
   useEffect(() => {
-    ;(() => {
+    (() => {
       chrome.runtime.sendMessage(
         {
-          action: 'getUserAvatarUrl',
+          action: BJActions.GET_USER_AVATAR_URL,
         },
         (res) => {
           if (res) {

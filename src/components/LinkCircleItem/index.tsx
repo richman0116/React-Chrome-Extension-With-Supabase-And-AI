@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { CircleInterface } from '../../types/circle'
 import RoundedButton from '../Buttons/RoundedButton'
 import { useCircleContext } from '../../context/CircleContext'
+import { BJActions } from '../../background/actions'
 
 interface ILinkCircleItem {
   circle: CircleInterface
@@ -17,7 +18,7 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
   const handleClaim = useCallback(
     (circleId: string) => {
       setIsLinking(true)
-      chrome.runtime.sendMessage({ action: 'claimCircle', circleId, url }, (response) => {
+      chrome.runtime.sendMessage({ action: BJActions.CLAIM_CIRCLE, circleId, url }, (response) => {
         if (response) {
           getCircles()
         }

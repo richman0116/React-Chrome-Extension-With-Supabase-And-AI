@@ -10,6 +10,7 @@ import CreationHeader from '../../../../components/CreationHeader'
 import GenerateButton from '../../../../components/Buttons/GenerateButton'
 import Refresh from '../../../../components/SVGIcons/Refresh'
 import RecommendedCircles from './RecommendedCircles'
+import { BJActions } from '../../../../background/actions'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
@@ -24,12 +25,6 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
 
   const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, setCircleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
 
-  useEffect(() => {
-    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
-      setCircles(circleGenerationStatus?.result)
-    }
-  }, [circleGenerationStatus?.result, circleGenerationStatus?.status, setCircles])
-
   const tags: string[] = useMemo(() => {
     const allTags = circles.map((circle) => circle.tags).flat()
     return allTags.filter((tag, index, array) => array.indexOf(tag) === index)
@@ -42,6 +37,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
       setIsFailed(true)
       setIsLoading(false)
     } else {
+      setIsFailed(false)
       setIsLoading(false)
     }
   }, [circleGenerationStatus?.status])
@@ -62,11 +58,11 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
     setCircles([])
     if (currentTabId) {
       chrome.runtime.sendMessage(
-        { action: 'getPageContent', tabId: currentTabId },
+        { action: BJActions.GET_PAGE_CONTENT, tabId: currentTabId },
         (response) => {
           chrome.runtime.sendMessage(
             {
-              action: 'generatedCircles',
+              action: BJActions.GENERATE_CIRCLES,
               pageUrl: url,
               pageContent: response,
               tabId: currentTabId
@@ -83,26 +79,41 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   }, [currentTabId, getCircleGenerationStatus, setCircles, url])
 
   useEffect(() => {
-    if (circles.length === 0 && !circleGenerationStatus) {
+    if (circles.length === 0 && (!circleGenerationStatus || circleGenerationStatus.type === 'manual')) {
       getCircles()
     }
   }, [circleGenerationStatus, circles.length, getCircles])
 
   const handleAddClick = useCallback(
     (circleData: CircleInterface) => {
-      setCircleData({
-        ...circleData,
-        tags,
-      })
-      setPageStatus(circlePageStatus.ADD_MANUALLY)
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.SET_CIRCLE_GENERATION_STATUS,
+          tabId: currentTabId,
+          circleGenerationStatus: {
+            type: 'manual',
+            status: CircleGenerationStatus.INITIALIZED,
+            result: [circleData],
+          }
+        },
+        (res: Boolean) => {
+          if (res) {
+            setCircleData({
+              ...circleData,
+              tags,
+            })
+            setPageStatus(circlePageStatus.ADD_MANUALLY)
+          }
+        }
+      )
     },
-    [setCircleData, setPageStatus, tags]
+    [currentTabId, setCircleData, setPageStatus, tags]
   )
 
   const handlePrevClick = useCallback(() => {
     chrome.runtime.sendMessage(
       {
-        action: "removeCirclesFromStorage",
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
         tabId: currentTabId
       },
       (res) => {
@@ -140,7 +151,7 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
 
           {!isLoading && isFailed && (
             <div className="w-full h-80 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium leading-normal text-center text-red-400">Something went wrong!</p>
+              <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>
             </div>
           )}
 

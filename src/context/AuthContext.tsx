@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useState,
 } from 'react'
+import { BJActions } from '../background/actions'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -20,12 +21,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
-  setIsAuthenticated: () => {},
+  setIsAuthenticated: () => { },
   isChecking: true,
   avatarUrl: '',
-  setAvatarUrl: () => {},
+  setAvatarUrl: () => { },
   showLogoutBtn: false,
-  setShowLogoutBtn: () => {},
+  setShowLogoutBtn: () => { },
 })
 
 export const useAuthContext = () => useContext(AuthContext)
@@ -41,7 +42,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderInterface) 
   const [showLogoutBtn, setShowLogoutBtn] = useState(false)
 
   const checkIfLoggedIn = useCallback(() => {
-    chrome.runtime.sendMessage({ action: 'checkLoggedIn' }, (response) => {
+    chrome.runtime.sendMessage({ action: BJActions.CHECK_LOGGED_IN }, (response) => {
       if (chrome.runtime.lastError) {
         setIsChecking(false)
         console.error(chrome.runtime.lastError)

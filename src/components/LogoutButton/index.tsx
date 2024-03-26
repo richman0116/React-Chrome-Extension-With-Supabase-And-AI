@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useAuthContext } from '../../context/AuthContext'
+import { BJActions } from '../../background/actions'
 
 const LogoutButton = () => {
   const { setIsAuthenticated } = useAuthContext()
@@ -8,7 +9,7 @@ const LogoutButton = () => {
     try {
       chrome.runtime.sendMessage(
         {
-          action: 'logout',
+          action: BJActions.LOGOUT,
         },
         (response) => {
           if (response) {
@@ -16,7 +17,7 @@ const LogoutButton = () => {
           }
         }
       )
-    } catch (err) {}
+    } catch (err) { }
   }, [setIsAuthenticated])
   return (
     <button

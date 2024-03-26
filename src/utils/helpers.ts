@@ -91,12 +91,13 @@ export const uploadImageToSupabase = async (
   uploadPath: string
 ) => {
   try {
-    const { error } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(uploadPath, imageBuffer, {
         contentType: 'image/webp',
         upsert: false,
       })
+    console.log(data, '****** image uploading result')
     if (error) {
       console.error(error)
     }
@@ -106,6 +107,6 @@ export const uploadImageToSupabase = async (
 }
 
 export const getCircleLoadingMessage = () => {
-  const randomNumber = Math.floor(Math.random() * (circleLoadingMessages.length ))
+  const randomNumber = Math.floor(Math.random() * circleLoadingMessages.length)
   return circleLoadingMessages[randomNumber]
 }

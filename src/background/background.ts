@@ -1,13 +1,16 @@
 import supabase from '../utils/supabase'
 
-import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
+import { CircleGenerationStatus } from '../utils/constants'
 import { ICircleGenerationStatus } from '../types/circle'
 import {
   getFromStorage,
+  handleCircleCreation,
   handleCircleGeneration,
   removeItemFromStorage,
   setToStorage,
 } from './helpers'
+import { BJActions } from './actions'
+import { generateCircleImage, generateTags } from '../utils/edgeFunctions'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -168,21 +171,8 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
   return data
 }
 
-const updateCircleImageUrl = async (circleId: string) => {
-  const { error, status } = await supabase
-    .from('circles')
-    .update({
-      circle_logo_image: `${supabaseSotrageUrl}/media_bucket/circle_images/${circleId}.webp`,
-    })
-    .eq('id', circleId)
-  if (error) {
-    console.log(error, 'An error occurred on circle image updating')
-  }
-  return status
-}
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'checkLoggedIn') {
+  if (request.action === BJActions.CHECK_LOGGED_IN) {
     // This is an example async function, replace with your own
     getUser()
       .then((result) => {
@@ -199,7 +189,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true // This will keep the message channel open until sendResponse is executed
   }
-  if (request.action === 'loginWithEmailPassword') {
+  if (request.action === BJActions.LOGIN_WITH_EMAIL_PASSWORD) {
     console.log('background.js: Logging in with email and password')
     loginWithEmailPassword(request.email, request.password)
       .then((result) => {
@@ -212,7 +202,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
-  if (request.action === 'getUserAvatarUrl') {
+  if (request.action === BJActions.LOGOUT) {
+    logout().then(() => {
+      sendResponse(true)
+    })
+    return true
+  }
+  if (request.action === BJActions.GET_USER_AVATAR_URL) {
     console.log('background.js: Getting user avatar url')
     getUserAvatarUrl()
       .then((result: any) => {
@@ -227,7 +223,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
-  if (request.action === 'getPageContent') {
+  if (request.action === BJActions.GET_PAGE_CONTENT) {
     console.log('background.js: Getting page content')
     if (supabaseUser) {
       chrome.scripting
@@ -255,7 +251,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
-  if (request.action === 'getCircles') {
+  if (request.action === BJActions.GET_CIRCLES) {
     console.log('background.js: Getting circles')
     if (supabaseUser) {
       supabase
@@ -270,7 +266,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
-  if (request.action === 'getUserCircles') {
+  if (request.action === BJActions.GET_USER_CIRCLES) {
     console.log('background.js: Getting User circles')
     if (supabaseUser) {
       supabase
@@ -286,7 +282,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getSimilarCirclesFromTags') {
+  if (request.action === BJActions.GET_SIMILAR_CIRCLES_FROM_TAGS) {
     console.log('background.js: Getting Recommended Circles')
     if (supabaseUser) {
       supabase
@@ -302,7 +298,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getRecommendedCircles') {
+  if (request.action === BJActions.GET_RECOMMENDED_CIRCLES) {
     console.log(
       "background.js: Getting Recommended Circles from the current page's circles"
     )
@@ -320,110 +316,183 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'createCircle') {
-    console.log(
-      'background.js: Creating circle with name: ',
-      request.circleName,
-      ' and rl: ',
-      request.url
-    )
-    console.log(
-      request.circleName,
-      request.url,
-      request.circleDescription,
-      request.tags,
-      '============================'
-    )
-    supabase
-      .rpc('circles_checkpoint_add_new_with_tags_return_id', {
-        p_circle_name: request.circleName,
-        p_url: request.url,
-        p_circle_description: request.circleDescription,
-        circle_tags: request.tags,
-      })
-      .then((result) => {
-        console.log('background.js: Result of creating circle with tags: ', result)
-        // here we will generate the circle image by sending the edge function
-        // we dont even need to await this
-        // generateCircleImage(result.data); // we will generate the circle image in mannual circle creation UI. :by Kazuo
-        sendResponse(result)
-      })
-    return true
-  }
+  if (request.action === BJActions.CREATE_CIRCLE) {
+    if (supabaseUser) {
+      const { tabId, url, circleName, circleDescription, imageData, tags } = request
 
-  if (request.action === 'joinCircle') {
-    supabase
-      .rpc('users_join_circle', {
-        circle_id: request.circleId,
-      })
-      .then(() => {
+      const generatingCircle: ICircleGenerationStatus = {
+        type: 'manual',
+        status: CircleGenerationStatus.GENERATING,
+        result: [],
+      }
+      setToStorage(tabId.toString(), JSON.stringify(generatingCircle))
+      try {
+        if (tags.length === 1 && tags[0] === '') {
+          try {
+            generateTags(circleName, circleDescription).then(
+              (addedTagNames: string[]) => {
+                handleCircleCreation(
+                  supabase,
+                  tabId,
+                  url,
+                  circleName,
+                  circleDescription,
+                  imageData,
+                  addedTagNames
+                )
+              }
+            )
+          } catch (err) {
+            console.error('An error occurred on generating tags')
+            sendResponse(false)
+          }
+        } else {
+          handleCircleCreation(
+            supabase,
+            tabId,
+            url,
+            circleName,
+            circleDescription,
+            imageData,
+            tags
+          )
+        }
         sendResponse(true)
-      })
+      } catch (err) {
+        sendResponse(false)
+      }
+    } else {
+      console.error('background.js: User not logged in when creating a circle')
+      sendResponse({ error: 'User not logged in' })
+    }
 
     return true
   }
 
-  if (request.action === 'checkIsInBanList') {
-    console.log(
-      'background.js: Checking if the url is in the ban list with url:',
-      request.url
-    )
-    sendResponse(bannedURLList.includes(request.url.toLowerCase()))
+  if (request.action === BJActions.JOIN_CIRCLE) {
+    if (supabaseUser) {
+      supabase
+        .rpc('users_join_circle', {
+          circle_id: request.circleId,
+        })
+        .then(() => {
+          sendResponse(true)
+        })
+    } else {
+      console.error('background.js: User not logged in when joining circle')
+      sendResponse({ error: 'User not logged in' })
+    }
+
     return true
   }
 
-  if (request.action === 'claimCircle') {
-    console.log(
-      'background.js: Claiming the circle: ',
-      request.circleId,
-      ' and url: ',
-      request.url
-    )
-    supabase
-      .rpc('circles_claim_circle', {
-        p_url: request.url,
-        circle_id: request.circleId,
-      })
-      .then((result) => {
-        sendResponse(true)
-      })
+  if (request.action === BJActions.CLAIM_CIRCLE) {
+    if (supabaseUser) {
+      supabase
+        .rpc('circles_claim_circle', {
+          p_url: request.url,
+          circle_id: request.circleId,
+        })
+        .then((result) => {
+          sendResponse(true)
+        })
+    } else {
+      console.error('background.js: User not logged in when claiming circle')
+      sendResponse({ error: 'User not logged in' })
+    }
     return true
   }
 
-  if (request.action === 'getCircleImage') {
-    // console.log("background.js: Getting generated circle image from the Edge function")
-    // getGeneratedCircleImage(request.name, request.description)
-    // .then((imageUrl) => {
-    //   sendResponse(imageUrl)
-    // })
-    // .catch((error) => {
-    //   sendResponse('')
-    // })
-    return true
-  }
-
-  if (request.action === 'generatedCircles') {
+  if (request.action === BJActions.GENERATE_CIRCLES) {
     console.log(
       'background.js: Getting generated circles from the Edge function and saving it to local storage'
     )
-    const tabId = request.tabId
-    const generatingCircles: ICircleGenerationStatus = {
-      status: CircleGenerationStatus.GENERATING,
-      result: [],
-    }
-    setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
+    if (supabaseUser) {
+      const tabId = request.tabId
+      const generatingCircles: ICircleGenerationStatus = {
+        type: 'auto',
+        status: CircleGenerationStatus.GENERATING,
+        result: [],
+      }
+      setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
 
-    try {
-      handleCircleGeneration(tabId, request.pageUrl, request.pageContent)
-      sendResponse(true)
-    } catch (err) {
-      sendResponse(false)
+      try {
+        handleCircleGeneration(tabId, request.pageUrl, request.pageContent)
+        sendResponse(true)
+      } catch (err) {
+        sendResponse(false)
+      }
+    } else {
+      console.error('background.js: User not logged in when generating circles')
+      sendResponse({ error: 'User not logged in' })
     }
 
     return true
   }
 
-  if (request.action === 'getCircleGenerationStatus') {
+  if (request.action === BJActions.GENERATE_CIRCLE_IMAGE) {
+    console.log(
+      'background.js: Getting generate circle image from the Edge function and saving it to local storage'
+    )
+
+    const { tabId, name, description, tags } = request
+    // initialize the status
+    setToStorage(
+      tabId.toString(),
+      JSON.stringify({
+        type: 'manual',
+        status: CircleGenerationStatus.INITIALIZED,
+        result: [
+          {
+            id: '',
+            name,
+            description,
+            tags,
+          },
+        ],
+      })
+    )
+
+    generateCircleImage(undefined, name, description).then((result) => {
+      if (result.error) {
+        setToStorage(
+          tabId.toString(),
+          JSON.stringify({
+            type: 'manual',
+            status: CircleGenerationStatus.FAILED,
+            result: [
+              {
+                id: '',
+                name,
+                description,
+                tags,
+              },
+            ],
+          })
+        )
+      } else if (result.url) {
+        const imageUrl = result?.url?.replaceAll('"', '')
+        const newCircleGenerationStatus: ICircleGenerationStatus = {
+          type: 'manual',
+          status: CircleGenerationStatus.INITIALIZED,
+          result: [
+            {
+              id: '',
+              name,
+              description,
+              tags,
+              circle_logo_image: imageUrl,
+            },
+          ],
+        }
+        setToStorage(tabId.toString(), JSON.stringify(newCircleGenerationStatus))
+      }
+    })
+
+    return true
+  }
+
+  if (request.action === BJActions.GET_CIRCLE_GENERATION_STATUS) {
     console.log('background.js: Getting saved circles from the storage')
     const tabId = request.tabId
     getFromStorage(tabId?.toString())
@@ -436,7 +505,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'removeCirclesFromStorage') {
+  if (request.action === BJActions.SET_CIRCLE_GENERATION_STATUS) {
+    console.log('background.js: Saving circle generation status to storage')
+    const tabId = request.tabId
+    setToStorage(tabId.toString(), JSON.stringify(request.circleGenerationStatus))
+    sendResponse(true)
+
+    return true
+  }
+
+  if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
     const tabId = request.tabId
     console.log('background.js: Removing circles from the storage. TabId: ', tabId)
     try {
@@ -449,53 +527,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'addTags') {
+  if (request.action === BJActions.ADD_TAGS) {
     console.log('background.js: Adding tags')
-    supabase
-      .rpc('tags_add_new_return_all_ids', {
-        tag_names: request.names,
-      })
-      .then((result) => {
-        console.log('background.js: Result of adding tags: ', result)
-        sendResponse(result.data)
-      })
-    return true
-  }
-
-  if (request.action === 'getTags') {
-    console.log('background.js: Getting Tags')
     if (supabaseUser) {
-      supabase.rpc('get_all_tags').then((result) => {
-        console.log('background.js: result of getting all tags: ', result)
-        sendResponse(result)
-      })
+      supabase
+        .rpc('tags_add_new_return_all_ids', {
+          tag_names: request.names,
+        })
+        .then((result) => {
+          console.log('background.js: Result of adding tags: ', result)
+          sendResponse(result.data)
+        })
     } else {
-      console.error('background.js: User not logged in when calling getUserCircles')
+      console.error('background.js: User not logged in when adding tags')
       sendResponse({ error: 'User not logged in' })
     }
     return true
   }
 
-  if (request.action === 'checkIfUserJoinedCircle') {
+  if (request.action === BJActions.CHECK_IF_USER_JOINED_CIRCLE) {
     checkIfUserJoinedCircle(request.circleId).then((result) => {
       sendResponse(result)
     })
     return true
   }
-
-  if (request.action === 'logout') {
-    logout().then(() => {
-      sendResponse(true)
-    })
-    return true
-  }
-
-  if (request.action === 'showCircleCount') {
+  if (request.action === BJActions.SHOW_CIRCLE_COUNT) {
     showCircleCount(request.url).then(() => {})
     return true
   }
 
-  if (request.action === 'getUniqueUsersCountInUserCircles') {
+  if (request.action === BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES) {
     console.log("background.js: Getting unique users count in user's circles")
     if (supabaseUser) {
       supabase.rpc('get_users_in_my_circles').then((result) => {
@@ -512,7 +573,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === 'getUserCirclesCount') {
+  if (request.action === BJActions.GET_USER_CIRCLE_COUNT) {
     console.log("background.js: Getting user circle's count")
     if (supabaseUser) {
       supabase
@@ -525,19 +586,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.error('background.js: User not logged in when calling getUserCircles')
       sendResponse({ error: 'User not logged in' })
     }
-    return true
-  }
-
-  if (request.action === 'updateCircleImageUrl') {
-    console.log('background.js: Updating circle image url')
-    if (supabaseUser) {
-      updateCircleImageUrl(request.circleId).then((status: number) => {
-        if (status === 204) {
-          sendResponse('success')
-        }
-      })
-    }
-
     return true
   }
 })
@@ -560,21 +608,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   // execute a content script to get the text content of the page
   if (supabaseUser && changeInfo.url) {
     await showCircleCount(changeInfo.url)
-    // chrome.scripting.executeScript({
-    //     target: { tabId: tab.id },
-    //     func: () => {
-    //         const texts = (document.body.innerText);
-    //         return texts;
-    //     }
-    // }).then((result) => {
-    //     tabContents[tab.id] = result[0].result; // we will set the tab content for viewing later
-    //     // it's not needed right now but maybe later we will need to look at the content
-    //     const hash = CryptoJS.SHA256(result[0].result).toString();
-    //     console.log(changeInfo.url)
-    //     console.log(hash);
-    // }).catch((err) => {
-    //     console.error(`Error executing script: ${err}`);
-    // });
   }
 })
 

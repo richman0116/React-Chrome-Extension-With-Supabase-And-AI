@@ -8,6 +8,7 @@ import Header from '../../components/Header'
 import { Paths } from '../../utils/constants'
 import GoogleIcon from '../../components/SVGIcons/GoogleIcon'
 import { useAuthContext } from '../../context/AuthContext'
+import { BJActions } from '../../background/actions'
 
 interface LoginFormData {
   email: string
@@ -33,7 +34,7 @@ const Login = () => {
         const { email, password } = data
         chrome.runtime.sendMessage(
           {
-            action: 'loginWithEmailPassword',
+            action: BJActions.LOGIN_WITH_EMAIL_PASSWORD,
             email,
             password,
           },
@@ -77,22 +78,27 @@ const Login = () => {
           <FormLine
             title="Email"
             id="email"
-            type="email"
             error={errors.email?.message}
-            {...register('email')}
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^\S+@\S+$/i,
+                message: "Entered value does not match email format"
+              }
+            })}
             placeholder="Your email address"
-            required
           />
           <FormLine
             title="Password"
             id="password"
             type="password"
             error={errors.password?.message}
-            {...register('password')}
+            {...register('password', {
+              required: true
+            })}
             placeholder="Your password"
-            required
           />
-          <p className="text-base text-red-700">{errorMsg}</p>
+          <p className="text-base text-alert">{errorMsg}</p>
           <div className="flex flex-col gap-2">
             <div className="w-full flex items-center justify-center">
               <LargeButton type="submit" disabled={isSubmitting}>

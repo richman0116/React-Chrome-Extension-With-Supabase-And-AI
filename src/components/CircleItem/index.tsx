@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'reac
 
 import { CircleInterface } from '../../types/circle'
 import RoundedButton from '../Buttons/RoundedButton'
+import { BJActions } from '../../background/actions'
 
 interface CircleItemInterface {
   circle: CircleInterface
@@ -21,7 +22,7 @@ const CircleItem = ({
 
   const checkIfJoined = useCallback(async () => {
     chrome.runtime.sendMessage(
-      { action: 'checkIfUserJoinedCircle', circleId: circle.id },
+      { action: BJActions.CHECK_IF_USER_JOINED_CIRCLE, circleId: circle.id },
       (response) => {
         if (response) {
           setIsJoined(response)
@@ -37,7 +38,7 @@ const CircleItem = ({
   const handleJoin = useCallback(
     (circleId: string) => {
       setIsJoining(true)
-      chrome.runtime.sendMessage({ action: 'joinCircle', circleId, url }, (response) => {
+      chrome.runtime.sendMessage({ action: BJActions.JOIN_CIRCLE, circleId, url }, (response) => {
         if (response === true) {
           checkIfJoined()
         }

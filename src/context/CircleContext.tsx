@@ -10,6 +10,7 @@ import React, {
 } from 'react'
 import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
 import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
+import { BJActions } from '../background/actions'
 
 interface ICircleContext {
   circles: CircleInterface[]
@@ -71,7 +72,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const getCircles = useCallback(async () => {
     if (currentUrl) {
       chrome.runtime.sendMessage(
-        { action: 'getCircles', url: currentUrl },
+        { action: BJActions.GET_CIRCLES, url: currentUrl },
         (response) => {
           if (response.error) {
             setCircles([])
@@ -90,41 +91,40 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
     }
   }, [currentUrl])
 
-  useEffect(() => {
-    getCircles()
-  }, [getCircles])
-
   const getCircleGenerationStatus = useCallback(() => {
-    if (pageStatus !== circlePageStatus.ADD_MANUALLY) {
-      const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
-        chrome.runtime.sendMessage(
-          {
-            action: 'getCircleGenerationStatus',
-            tabId: currentTabId
-          },
-          (res: ICircleGenerationStatus) => {
-            setIsLoadingCGenerationStatus(false)
-            if (res) {
-              if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
-                setCircleGenerationStatus(res)
-              }
+    const getCircleGenerationStatusInterval: NodeJS.Timer = setInterval(() => {
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.GET_CIRCLE_GENERATION_STATUS,
+          tabId: currentTabId
+        },
+        (res: ICircleGenerationStatus) => {
+          setIsLoadingCGenerationStatus(false)
+          if (res) {
+            const { type, result, status } = res
+            if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
+              setCircleGenerationStatus(res)
+            }
 
-              if (pageStatus !== circlePageStatus.ADD_AUTOMATICALLY) {
-                setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
-              }
-
-              if (res.status !== CircleGenerationStatus.GENERATING) {
+            if (type === "auto") {
+              setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+              if (status !== CircleGenerationStatus.GENERATING) {
                 clearInterval(getCircleGenerationStatusInterval)
               }
-
-            } else {
-              clearInterval(getCircleGenerationStatusInterval)
+            } else if (type === "manual") {
+              setPageStatus(circlePageStatus.ADD_MANUALLY)
+              if (result[0].circle_logo_image || status === CircleGenerationStatus.SUCCEEDED || status === CircleGenerationStatus.FAILED) {
+                clearInterval(getCircleGenerationStatusInterval)
+              }
             }
+          } else {
+            setPageStatus(circlePageStatus.CIRCLE_LIST)
+            clearInterval(getCircleGenerationStatusInterval)
           }
-        )
-      }, 1500)
-    }
-  }, [circleGenerationStatus, currentTabId, pageStatus])
+        }
+      )
+    }, 1500)
+  }, [circleGenerationStatus, currentTabId])
 
   useEffect(() => {
     getCircleGenerationStatus()

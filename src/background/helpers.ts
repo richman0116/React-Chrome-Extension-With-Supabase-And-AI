@@ -1,7 +1,8 @@
+import { SupabaseClient } from '@supabase/supabase-js'
 import { CircleInterface } from '../types/circle'
-import { CircleGenerationStatus } from '../utils/constants'
+import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
 import { getGeneratedCircles } from '../utils/edgeFunctions'
-import { getSpecificNumberOfWords } from '../utils/helpers'
+import { getSpecificNumberOfWords, uploadImageToSupabase } from '../utils/helpers'
 
 // function to get a value from storage
 export const getFromStorage = (key: string): Promise<any> => {
@@ -24,19 +25,38 @@ export const removeItemFromStorage = (key: string) => {
   chrome.storage.local.remove(key)
 }
 
-const circleGenerationSuccessHandler = (tabId: number, circles: CircleInterface[]) => {
+const updateCircleImageUrl = async (supabase: SupabaseClient, circleId: string) => {
+  const { error, status } = await supabase
+    .from('circles')
+    .update({
+      circle_logo_image: `${supabaseSotrageUrl}/media_bucket/circle_images/${circleId}.webp`,
+    })
+    .eq('id', circleId)
+  if (error) {
+    console.log(error, 'An error occurred on circle image updating')
+  }
+  return status
+}
+
+const circleGenerationSuccessHandler = (
+  type: 'auto' | 'manual',
+  tabId: number,
+  circles: CircleInterface[]
+) => {
   setToStorage(
     tabId.toString(),
     JSON.stringify({
+      type,
       status: CircleGenerationStatus.SUCCEEDED,
       result: circles,
     })
   )
 }
-const circleGenerationFailedHandler = (tabId: number) => {
+const circleGenerationFailedHandler = (type: 'auto' | 'manual', tabId: number) => {
   setToStorage(
     tabId.toString(),
     JSON.stringify({
+      type,
       status: CircleGenerationStatus.FAILED,
       result: [],
     })
@@ -53,20 +73,70 @@ export const handleCircleGeneration = (
         const limitedWords = getSpecificNumberOfWords(pageContent, 5000)
         getGeneratedCircles(pageUrl, limitedWords).then((res2) => {
           if (res2.length > 0) {
-            circleGenerationSuccessHandler(tabId, res2)
+            circleGenerationSuccessHandler('auto', tabId, res2)
           } else {
-            circleGenerationFailedHandler(tabId)
+            circleGenerationFailedHandler('auto', tabId)
           }
         })
       } else {
         if (res1.length > 0) {
-          circleGenerationSuccessHandler(tabId, res1)
+          circleGenerationSuccessHandler('auto', tabId, res1)
         } else {
-          circleGenerationFailedHandler(tabId)
+          circleGenerationFailedHandler('auto', tabId)
         }
       }
     })
     .catch((error) => {
-      circleGenerationFailedHandler(tabId)
+      circleGenerationFailedHandler('auto', tabId)
+    })
+}
+
+export const handleCircleCreation = (
+  supabase: SupabaseClient<any, 'public', any>,
+  tabId: number,
+  pageUrl: string,
+  name: string,
+  description: string,
+  imageData: string,
+  tagNames: string[]
+) => {
+  supabase
+    .rpc('tags_add_new_return_all_ids', {
+      tag_names: tagNames,
+    })
+    .then(async (result) => {
+      const addedTags = result.data
+      const { data } = await supabase.rpc(
+        'circles_checkpoint_add_new_with_tags_return_id',
+        {
+          p_circle_name: name,
+          p_url: pageUrl,
+          p_circle_description: description,
+          circle_tags: addedTags,
+        }
+      )
+      const addedCircleId = data
+      console.log(addedCircleId, '===== addedCircleid')
+      try {
+        // upload the converted image to Supabase storage
+        const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
+          c.charCodeAt(0)
+        ).buffer
+        await uploadImageToSupabase(
+          imageBuffer,
+          'media_bucket',
+          `circle_images/${addedCircleId}.webp`
+        )
+
+        const status = await updateCircleImageUrl(supabase, addedCircleId)
+        if (status === 204) {
+          removeItemFromStorage(tabId.toString())
+        } else {
+          circleGenerationFailedHandler('manual', tabId)
+        }
+      } catch (err) {
+        circleGenerationFailedHandler('manual', tabId)
+        console.error(err)
+      }
     })
 }

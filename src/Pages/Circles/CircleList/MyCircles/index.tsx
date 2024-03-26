@@ -5,6 +5,7 @@ import { CircleInterface } from '../../../../types/circle'
 import classNames from 'classnames'
 import LinkCircleItem from '../../../../components/LinkCircleItem'
 import { useCircleContext } from '../../../../context/CircleContext'
+import { BJActions } from '../../../../background/actions'
 
 const MyCircles = () => {
   const [userCircles, setUserCircles] = useState<CircleInterface[]>([])
@@ -14,7 +15,7 @@ const MyCircles = () => {
 
   const getUserCircles = useCallback(async () => {
     if (url !== '') {
-      chrome.runtime.sendMessage({ action: 'getUserCircles' }, (response) => {
+      chrome.runtime.sendMessage({ action: BJActions.GET_USER_CIRCLES }, (response) => {
         if (response.error) {
           setUserCircles([])
           setIsLoading(false)

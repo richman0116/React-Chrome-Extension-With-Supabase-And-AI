@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import Header from '../../../components/Header'
 import MyCircles from './MyCircles'
@@ -9,7 +9,11 @@ import { circlePageStatus } from '../../../utils/constants'
 import Plus from '../../../components/SVGIcons/Plus'
 
 const CircleList = () => {
-  const { isLoading, circles, setPageStatus } = useCircleContext()
+  const { isLoading, circles, getCircles, setPageStatus } = useCircleContext()
+
+  useEffect(() => {
+    getCircles()
+  }, [getCircles])
 
   const resultText = useMemo(() => {
     if (!isLoading) {

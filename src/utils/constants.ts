@@ -4,6 +4,7 @@ export const circlePageStatus = {
   CIRCLE_LIST: 0,
   ADD_AUTOMATICALLY: 1,
   ADD_MANUALLY: 2,
+  ENLIGHTEN_ME: 3,
 }
 
 export const Paths = {

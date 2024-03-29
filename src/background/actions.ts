@@ -12,6 +12,7 @@ export enum BJActions {
   JOIN_CIRCLE = 'joinCircle',
   CLAIM_CIRCLE = 'claimCircle',
   GENERATE_CIRCLES = 'generatedCircles',
+  GENERATE_CIRCLES_WITH_HISTORY = 'generateCirclesWithHistory',
   GET_CIRCLE_GENERATION_STATUS = 'getCircleGenerationStatus',
   SET_CIRCLE_GENERATION_STATUS = 'setCircleGenerationStatus',
   GENERATE_CIRCLE_IMAGE = 'generateCircleImage',

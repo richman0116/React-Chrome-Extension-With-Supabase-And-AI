@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
-import Loading from '../../../../components/Loading'
+import LoadingSpinner from '../../../../components/LoadingSpinner'
 import { CircleInterface } from '../../../../types/circle'
 import classNames from 'classnames'
 import LinkCircleItem from '../../../../components/LinkCircleItem'
@@ -63,7 +63,7 @@ const MyCircles = () => {
       </div>
       {isLoading && (
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
-          <Loading />
+          <LoadingSpinner />
         </div>
       )}
 

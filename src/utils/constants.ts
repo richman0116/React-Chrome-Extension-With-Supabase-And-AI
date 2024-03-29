@@ -4,6 +4,7 @@ export const circlePageStatus = {
   CIRCLE_LIST: 0,
   ADD_AUTOMATICALLY: 1,
   ADD_MANUALLY: 2,
+  ENLIGHTEN_ME: 3,
 }
 
 export const Paths = {
@@ -19,7 +20,7 @@ export const circleLoadingMessages = [
   'Digging through the page',
   'Ape trying to make sense of the page',
   'Imagining',
-  'Almost there',
+  // 'Almost there',
   'Hang on',
 ]
 

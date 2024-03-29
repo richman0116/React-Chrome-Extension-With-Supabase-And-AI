@@ -5,9 +5,13 @@ import UserIcon from '../SVGIcons/UserIcon'
 import Avatar from '../Avatar'
 import LogoutButton from '../LogoutButton'
 import { BJActions } from '../../background/actions'
+import EnlightenIcon from '../SVGIcons/EnlightenIcon'
+import { useCircleContext } from '../../context/CircleContext'
+import { circlePageStatus } from '../../utils/constants'
 
 const Header = () => {
   const { isAuthenticated, showLogoutBtn, setShowLogoutBtn } = useAuthContext()
+  const { setPageStatus } = useCircleContext()
   const [usersCount, setUsersCount] = useState(0)
   const [circlesCount, setCirclesCount] = useState(0)
 
@@ -45,27 +49,44 @@ const Header = () => {
     setShowLogoutBtn(!showLogoutBtn)
   }, [setShowLogoutBtn, showLogoutBtn])
 
+  const handleEnlightenMeClick = useCallback(() => {
+    setPageStatus(circlePageStatus.ENLIGHTEN_ME)
+  }, [setPageStatus])
+
   return (
     <div className="w-full flex justify-between items-center relative">
       <p className="text-xl font-extrabold leading-normal text-brand">Eden</p>
       {isAuthenticated ? (
-        <div
-          className="px-3 py-2 bg-secondary flex items-center gap-2 rounded-3xl text-primary cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            handleAvatarClick()
-          }}
-        >
-          <div className="flex gap-1 items-center justify-between">
-            <CircleIcon />
-            <p className="text-xs font-medium">{circlesCount}</p>
+        <div className="w-full flex gap-2 items-center flex-row-reverse">
+          <div
+            className="px-3 py-2 bg-secondary flex items-center gap-2 rounded-3xl text-primary cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              handleAvatarClick()
+            }}
+          >
+            <div className="flex gap-1 items-center justify-between">
+              <CircleIcon />
+              <p className="text-xs font-medium">{circlesCount}</p>
+            </div>
+            <div className="flex gap-1 items-center justify-between">
+              <UserIcon />
+              <p className="text-xs font-medium">{usersCount}</p>
+            </div>
+            <Avatar />
           </div>
-          <div className="flex gap-1 items-center justify-between">
-            <UserIcon />
-            <p className="text-xs font-medium">{usersCount}</p>
+          <div
+            className="px-3 py-2 bg-secondary flex items-center gap-1 rounded-3xl text-primary cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              handleEnlightenMeClick()
+            }}
+          >
+            <EnlightenIcon />
+            <p className="text-xs font-bold leading-normal">Enlighten Me</p>
           </div>
-          <Avatar />
         </div>
       ) : null}
       {showLogoutBtn ? (

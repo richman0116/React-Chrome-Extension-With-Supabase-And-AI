@@ -1,6 +1,6 @@
 import Circles from './Circles'
 import Login from './Login'
-import Loading from '../components/Loading'
+import LoadingPage from '../components/LoadingPage'
 import { useAuthContext } from '../context/AuthContext'
 
 const Main = () => {
@@ -12,8 +12,10 @@ const Main = () => {
       onClick={() => setShowLogoutBtn(false)}
     >
       {isChecking ? (
-        <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4">
-          <Loading />
+        <div className="w-full h-140 flex flex-col items-center justify-center">
+          <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4">
+            <LoadingPage />
+          </div>
         </div>
       ) : (
         <>{isAuthenticated ? <Circles /> : <Login />}</>

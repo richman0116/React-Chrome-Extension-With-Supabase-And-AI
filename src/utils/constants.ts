@@ -20,7 +20,7 @@ export const circleLoadingMessages = [
   'Digging through the page',
   'Ape trying to make sense of the page',
   'Imagining',
-  'Almost there',
+  // 'Almost there',
   'Hang on',
 ]
 

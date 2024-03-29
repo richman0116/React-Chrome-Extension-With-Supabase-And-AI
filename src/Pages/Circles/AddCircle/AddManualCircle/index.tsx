@@ -144,7 +144,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   }
 
   return (
-    <div className="w-full h-full py-5">
+    <div className="w-full h-140 py-5">
       <CreationHeader
         title="Create Circle"
         onBack={() => {

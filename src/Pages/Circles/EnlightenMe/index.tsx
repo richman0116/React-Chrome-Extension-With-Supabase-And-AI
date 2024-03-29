@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import Button from "../../../components/Buttons/Button"
 import CreationHeader from "../../../components/CreationHeader"
 import ScreenIcon from "../../../components/SVGIcons/ScreenIcon"
@@ -8,9 +8,11 @@ import { IHistory } from "../../../types/history"
 import { BJActions } from "../../../background/actions"
 
 const EnlightenMe = () => {
+  const [isLoading, setIsLoading] = useState(false)
   const { setPageStatus, currentTabId, getCircleGenerationStatus } = useCircleContext()
 
   const handleCreate = useCallback(() => {
+    setIsLoading(true)
     const microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
     const oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
     chrome.history.search({ text: '', startTime: oneMonthAgo }, function (items) {
@@ -35,7 +37,7 @@ const EnlightenMe = () => {
     });
   }, [currentTabId, getCircleGenerationStatus])
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-140 relative">
       <CreationHeader
         title="Create Circle"
         onBack={() => {
@@ -51,8 +53,8 @@ const EnlightenMe = () => {
         </p>
       </div>
       <div className="w-full flex flex-col gap-3 fixed left-1/2 -translate-x-1/2 bottom-8 justify-center items-center">
-        <Button type="submit" onClick={handleCreate}>
-          Permit and Create
+        <Button type="submit" onClick={handleCreate} disabled={isLoading}>
+          {isLoading ? 'Analyzing' : 'Permit and Create'}
         </Button>
         <button onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} className="text-sm font-bold leading-normal">Maybe next time</button>
       </div>

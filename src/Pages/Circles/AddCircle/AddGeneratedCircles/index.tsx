@@ -11,6 +11,8 @@ import GenerateButton from '../../../../components/Buttons/GenerateButton'
 import Refresh from '../../../../components/SVGIcons/Refresh'
 import RecommendedCircles from './RecommendedCircles'
 import { BJActions } from '../../../../background/actions'
+import Plus from '../../../../components/SVGIcons/Plus'
+import Loading from '../../../../components/Loading'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
@@ -130,58 +132,60 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
   }, [setPageStatus])
 
   return (
-    <div className="w-full h-full flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
-      <CreationHeader
-        title="Create Circle"
-        onBack={handlePrevClick}
-      />
-      <div className="w-full mb-20">
-        <div className="w-full flex flex-col gap-2 justify-between">
-          {isLoading && (
-            <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 flex flex-col gap-y-3">
-              <div className="-mt-6">
-                <p className="text-sm font-medium leading-normal text-center text-brand">Running on background</p>
-                <p className="text-base font-medium leading-normal text-center text-primary">{message}...</p>
-                <div className='h-1.5 w-full bg-secondary overflow-hidden rounded-xl'>
-                  <div className='animate-progress w-full h-full bg-brand origin-left-right rounded-xl' />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!isLoading && isFailed && (
-            <div className="w-full h-80 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>
-            </div>
-          )}
-
-          {!isLoading && circles.length > 0 && (
-            <div className="w-full flex flex-col gap-1">
-              {circles.map((circle, index) => (
-                <AutoCircleItem
-                  key={index}
-                  circle={circle}
-                  url={url}
-                  onAdd={() => handleAddClick(circle)}
-                />
-              ))}
-            </div>
-          )}
-          {!isLoading && (
-            <div className="w-full flex justify-center">
-              <GenerateButton type="button" onClick={getCircles}>
-                <Refresh />
-                <p>Generate {circles.length > 0 ? 'New' : ''}</p>
-              </GenerateButton>
-            </div>
-          )}
-          <RecommendedCircles circles={circles} tags={tags} />
-        </div>
+    isLoading ? <div className="w-full border-gray-600 flex flex-col gap-y-4">
+      <div className="w-full flex items-center gap-x-5">
+        <Loading size={20} />
+        <p className="text-sm font-bold leading-normal text-center text-primary">{message}...</p>
       </div>
-      <div className="fixed bottom-6 w-fit justify-center flex flex-col gap-5">
-        <Button onClick={handleManualClick}>Create manually</Button>
+      <div className="flex gap-x-1 px-3 py-2 bg-secondary rounded-full w-fit">
+        <div className='text-primary'>
+          <Plus />
+        </div>
+        <button onClick={handleManualClick} className="text-xs text-primary font-bold leading-normal">Create manually</button>
       </div>
     </div>
+      :
+      <div className="w-full h-140 flex flex-col items-center gap-5 overflow-y-auto overflow-x-hidden scrollbar-none">
+        <CreationHeader
+          title="Create Circle"
+          onBack={handlePrevClick}
+        />
+        <div className="w-full mb-20">
+          <div className="w-full flex flex-col gap-2 justify-between">
+
+            {!isLoading && isFailed && (
+              <div className="w-full h-80 flex flex-col items-center justify-center">
+                <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>
+              </div>
+            )}
+
+            {!isLoading && circles.length > 0 && (
+              <div className="w-full flex flex-col gap-1">
+                {circles.map((circle, index) => (
+                  <AutoCircleItem
+                    key={index}
+                    circle={circle}
+                    url={url}
+                    onAdd={() => handleAddClick(circle)}
+                  />
+                ))}
+              </div>
+            )}
+            {!isLoading && (
+              <div className="w-full flex justify-center">
+                <GenerateButton type="button" onClick={getCircles}>
+                  <Refresh />
+                  <p>Generate {circles.length > 0 ? 'New' : ''}</p>
+                </GenerateButton>
+              </div>
+            )}
+            <RecommendedCircles circles={circles} tags={tags} />
+          </div>
+        </div>
+        <div className="fixed bottom-6 w-fit justify-center flex flex-col gap-5">
+          <Button onClick={handleManualClick}>Create manually</Button>
+        </div>
+      </div>
   )
 }
 

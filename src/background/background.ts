@@ -6,6 +6,7 @@ import {
   getFromStorage,
   handleCircleCreation,
   handleCircleGeneration,
+  handleCircleGenerationWithHistory,
   removeItemFromStorage,
   setToStorage,
 } from './helpers'
@@ -418,6 +419,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       try {
         handleCircleGeneration(tabId, request.pageUrl, request.pageContent)
+        sendResponse(true)
+      } catch (err) {
+        sendResponse(false)
+      }
+    } else {
+      console.error('background.js: User not logged in when generating circles')
+      sendResponse({ error: 'User not logged in' })
+    }
+
+    return true
+  }
+  if (request.action === BJActions.GENERATE_CIRCLES_WITH_HISTORY) {
+    console.log(
+      'background.js: Getting generated circles with history from the Edge function and saving it to local storage'
+    )
+    if (supabaseUser) {
+      const tabId = request.tabId
+      const generatingCircles: ICircleGenerationStatus = {
+        type: 'auto',
+        status: CircleGenerationStatus.GENERATING,
+        result: [],
+      }
+      setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
+
+      try {
+        handleCircleGenerationWithHistory(tabId, request.histories)
         sendResponse(true)
       } catch (err) {
         sendResponse(false)

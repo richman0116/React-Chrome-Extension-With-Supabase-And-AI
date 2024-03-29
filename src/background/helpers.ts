@@ -1,8 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { CircleInterface } from '../types/circle'
 import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
-import { getGeneratedCircles } from '../utils/edgeFunctions'
+import {
+  getGeneratedCircles,
+  getGeneratedCirclesFromHistory,
+} from '../utils/edgeFunctions'
 import { getSpecificNumberOfWords, uploadImageToSupabase } from '../utils/helpers'
+import { IHistory } from '../types/history'
 
 // function to get a value from storage
 export const getFromStorage = (key: string): Promise<any> => {
@@ -78,6 +82,27 @@ export const handleCircleGeneration = (
             circleGenerationFailedHandler('auto', tabId)
           }
         })
+      } else {
+        if (res1.length > 0) {
+          circleGenerationSuccessHandler('auto', tabId, res1)
+        } else {
+          circleGenerationFailedHandler('auto', tabId)
+        }
+      }
+    })
+    .catch((error) => {
+      circleGenerationFailedHandler('auto', tabId)
+    })
+}
+
+export const handleCircleGenerationWithHistory = (
+  tabId: number,
+  histories: IHistory[]
+) => {
+  getGeneratedCirclesFromHistory(histories)
+    .then((res1: any) => {
+      if (res1?.error) {
+        circleGenerationFailedHandler('auto', tabId)
       } else {
         if (res1.length > 0) {
           circleGenerationSuccessHandler('auto', tabId, res1)

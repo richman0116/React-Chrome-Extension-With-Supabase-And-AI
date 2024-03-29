@@ -1,4 +1,7 @@
 // Kazuo: Please later on replace this token
+
+import { IHistory } from '../types/history'
+
 // it is unsafe since chrome extension's code is exposed to public
 const token =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5c21yZGJldnd4cGh0cnNldmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTUxNzkxNzMsImV4cCI6MjAxMDc1NTE3M30.gstQlVVRP6quLuDyM7pmtSY9HUoW8Igt3_ymgN3tZcA'
@@ -65,4 +68,16 @@ export const generateTags = async (name: string, description: string) => {
   const res = await callAPIRequest(url, data)
   const tagsString = res.replaceAll("'", '"')
   return JSON.parse(tagsString)
+}
+
+export const getGeneratedCirclesFromHistory = async (histories: IHistory[]) => {
+  console.log(histories, '========')
+  const url =
+    'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/analyzeHistoryForCircles'
+
+  const data = {
+    histories,
+  }
+  const res = await callAPIRequest(url, data)
+  return res
 }

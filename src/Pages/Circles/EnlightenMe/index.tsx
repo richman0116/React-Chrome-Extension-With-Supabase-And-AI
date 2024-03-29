@@ -1,11 +1,40 @@
+import { useCallback } from "react"
 import Button from "../../../components/Buttons/Button"
 import CreationHeader from "../../../components/CreationHeader"
 import ScreenIcon from "../../../components/SVGIcons/ScreenIcon"
 import { useCircleContext } from "../../../context/CircleContext"
 import { circlePageStatus } from "../../../utils/constants"
+import { IHistory } from "../../../types/history"
+import { BJActions } from "../../../background/actions"
 
 const EnlightenMe = () => {
-  const { setPageStatus } = useCircleContext()
+  const { setPageStatus, currentTabId, getCircleGenerationStatus } = useCircleContext()
+
+  const handleCreate = useCallback(() => {
+    const microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
+    const oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
+    chrome.history.search({ text: '', startTime: oneMonthAgo }, function (items) {
+      const histories: IHistory[] = items.map((item) => {
+        const { title = '', url = '', typedCount = 0, visitCount = 0 } = item
+        return {
+          title,
+          url,
+          visitCount,
+          typedCount
+        }
+      })
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.GENERATE_CIRCLES_WITH_HISTORY,
+          tabId: currentTabId,
+          histories
+        }
+      )
+
+      getCircleGenerationStatus()
+      setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+    });
+  }, [currentTabId, getCircleGenerationStatus, setPageStatus])
   return (
     <div className="w-full h-full relative">
       <CreationHeader
@@ -23,7 +52,7 @@ const EnlightenMe = () => {
         </p>
       </div>
       <div className="w-full flex flex-col gap-3 fixed left-1/2 -translate-x-1/2 bottom-8 justify-center items-center">
-        <Button type="submit" >
+        <Button type="submit" onClick={handleCreate}>
           Permit and Create
         </Button>
         <button onClick={() => setPageStatus(circlePageStatus.CIRCLE_LIST)} className="text-sm font-bold leading-normal">Maybe next time</button>

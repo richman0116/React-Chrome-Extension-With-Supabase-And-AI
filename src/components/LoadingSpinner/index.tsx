@@ -2,7 +2,7 @@ interface ILoading {
   size?: number
 }
 
-const Loading = ({ size = 32 }: ILoading) => {
+const LoadingSpinner = ({ size = 32 }: ILoading) => {
   return (
     <div role="status">
       <svg
@@ -26,4 +26,4 @@ const Loading = ({ size = 32 }: ILoading) => {
   )
 }
 
-export default Loading
+export default LoadingSpinner

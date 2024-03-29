@@ -12,7 +12,8 @@ import Refresh from '../../../../components/SVGIcons/Refresh'
 import RecommendedCircles from './RecommendedCircles'
 import { BJActions } from '../../../../background/actions'
 import Plus from '../../../../components/SVGIcons/Plus'
-import Loading from '../../../../components/Loading'
+import LoadingSpinner from '../../../../components/LoadingSpinner'
+import XIcon from '../../../../components/SVGIcons/XIcon'
 
 interface IAddGeneratedCircles {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
@@ -120,28 +121,51 @@ const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGene
       },
       (res) => {
         if (res) {
-          setCircleGenerationStatus(null)
           setPageStatus(circlePageStatus.CIRCLE_LIST)
         }
       }
     )
-  }, [currentTabId, setCircleGenerationStatus, setPageStatus])
+  }, [currentTabId, setPageStatus])
 
   const handleManualClick = useCallback(() => {
-    setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [setPageStatus])
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.SET_CIRCLE_GENERATION_STATUS,
+        tabId: currentTabId,
+        circleGenerationStatus: {
+          type: 'manual',
+          status: CircleGenerationStatus.INITIALIZED,
+          result: [],
+        }
+      },
+      (res: Boolean) => {
+        if (res) {
+          setCircleGenerationStatus({
+            type: 'manual',
+            status: CircleGenerationStatus.INITIALIZED,
+            result: []
+          })
+          setPageStatus(circlePageStatus.ADD_MANUALLY)
+        }
+      }
+    )
+
+  }, [currentTabId, setCircleGenerationStatus, setPageStatus])
 
   return (
     isLoading ? <div className="w-full border-gray-600 flex flex-col gap-y-4">
-      <div className="w-full flex items-center gap-x-5">
-        <Loading size={20} />
+      <div className="w-full flex items-center justify-between gap-x-5">
+        <LoadingSpinner size={20} />
         <p className="text-sm font-bold leading-normal text-center text-primary">{message}...</p>
+        <div onClick={handlePrevClick} className="cursor-pointer">
+          <XIcon />
+        </div>
       </div>
-      <div className="flex gap-x-1 px-3 py-2 bg-secondary rounded-full w-fit">
+      <div className="flex gap-x-1 px-3 py-2 bg-secondary rounded-full w-fit cursor-pointer" onClick={handleManualClick}>
         <div className='text-primary'>
           <Plus />
         </div>
-        <button onClick={handleManualClick} className="text-xs text-primary font-bold leading-normal">Create manually</button>
+        <button className="text-xs text-primary font-bold leading-normal">Create manually</button>
       </div>
     </div>
       :

@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { CircleInterface } from '../types/circle'
+import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
 import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
 import {
   getGeneratedCircles,
@@ -47,24 +47,32 @@ const circleGenerationSuccessHandler = (
   tabId: number,
   circles: CircleInterface[]
 ) => {
-  setToStorage(
-    tabId.toString(),
-    JSON.stringify({
-      type,
-      status: CircleGenerationStatus.SUCCEEDED,
-      result: circles,
-    })
-  )
+  getFromStorage(tabId?.toString()).then((generationStatus: ICircleGenerationStatus) => {
+    if (Object.keys(generationStatus).length > 0 && generationStatus.type === type) {
+      setToStorage(
+        tabId.toString(),
+        JSON.stringify({
+          type,
+          status: CircleGenerationStatus.SUCCEEDED,
+          result: circles,
+        })
+      )
+    }
+  })
 }
 const circleGenerationFailedHandler = (type: 'auto' | 'manual', tabId: number) => {
-  setToStorage(
-    tabId.toString(),
-    JSON.stringify({
-      type,
-      status: CircleGenerationStatus.FAILED,
-      result: [],
-    })
-  )
+  getFromStorage(tabId?.toString()).then((generationStatus: ICircleGenerationStatus) => {
+    if (Object.keys(generationStatus).length > 0 && generationStatus.type === type) {
+      setToStorage(
+        tabId.toString(),
+        JSON.stringify({
+          type,
+          status: CircleGenerationStatus.FAILED,
+          result: [],
+        })
+      )
+    }
+  })
 }
 export const handleCircleGeneration = (
   tabId: number,

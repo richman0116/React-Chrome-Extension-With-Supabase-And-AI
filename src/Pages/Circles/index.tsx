@@ -1,7 +1,7 @@
 import CircleList from './CircleList'
 import AddCircle from './AddCircle'
-import Loading from '../../components/Loading'
 import EnlightenMe from './EnlightenMe'
+import LoadingPage from '../../components/LoadingPage'
 
 import { useCircleContext } from '../../context/CircleContext'
 import { circlePageStatus } from '../../utils/constants'
@@ -12,7 +12,7 @@ const Circles = () => {
     isLoadingCGenerationStatus ? (
       <div className="w-full h-140 flex flex-col items-center justify-center">
         <div className="absolute left-1/2 -translate-x-1/2 transform self-center border-black py-4">
-          <Loading />
+          <LoadingPage />
         </div>
       </div>
     ) : (

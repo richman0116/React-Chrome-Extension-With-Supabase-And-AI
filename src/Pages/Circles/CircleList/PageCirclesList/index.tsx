@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import CircleItem from '../../../../components/CircleItem'
-import Loading from '../../../../components/Loading'
+import LoadingPage from '../../../../components/LoadingPage'
 
 import classNames from 'classnames'
 import { useCircleContext } from '../../../../context/CircleContext'
@@ -27,7 +27,7 @@ const PageCirclList = () => {
       <div className="w-full flex flex-col gap-2">
         {isLoading && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
-            <Loading />
+            <LoadingPage />
           </div>
         )}
 

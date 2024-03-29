@@ -71,7 +71,6 @@ export const generateTags = async (name: string, description: string) => {
 }
 
 export const getGeneratedCirclesFromHistory = async (histories: IHistory[]) => {
-  console.log(histories, '========')
   const url =
     'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/analyzeHistoryForCircles'
 

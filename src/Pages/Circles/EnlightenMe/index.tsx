@@ -32,9 +32,8 @@ const EnlightenMe = () => {
       )
 
       getCircleGenerationStatus()
-      setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
     });
-  }, [currentTabId, getCircleGenerationStatus, setPageStatus])
+  }, [currentTabId, getCircleGenerationStatus])
   return (
     <div className="w-full h-full relative">
       <CreationHeader

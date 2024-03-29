@@ -76,7 +76,7 @@ export const getGeneratedCirclesFromHistory = async (histories: IHistory[]) => {
     'https://fysmrdbevwxphtrsevkn.supabase.co/functions/v1/analyzeHistoryForCircles'
 
   const data = {
-    histories,
+    histories: JSON.stringify(histories),
   }
   const res = await callAPIRequest(url, data)
   return res

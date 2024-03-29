@@ -7,7 +7,7 @@ import CreationHeader from '../../../../components/CreationHeader'
 import Button from '../../../../components/Buttons/Button'
 import GenerateButton from '../../../../components/Buttons/GenerateButton'
 import Refresh from '../../../../components/SVGIcons/Refresh'
-import Loading from '../../../../components/Loading'
+import LoadingSpinner from '../../../../components/LoadingSpinner'
 
 import {
   getCircleLoadingMessage,
@@ -48,18 +48,16 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
     defaultValues: circleData,
   })
 
-  const { tags } = circleData
-
   useEffect(() => {
     reset(circleData)
   }, [circleData, reset])
 
   useEffect(() => {
-    if (circleData.circle_logo_image) {
+    if (circleData?.circle_logo_image) {
       setCircleImageUrl(circleData.circle_logo_image)
       setIsGeneratingImage(false)
     }
-  }, [circleData.circle_logo_image])
+  }, [circleData?.circle_logo_image])
 
   useEffect(() => {
     if (circleGenerationStatus?.status === CircleGenerationStatus.GENERATING) {
@@ -97,7 +95,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           circleName: name,
           circleDescription: description,
           imageData,
-          tags: tags,
+          tags: circleData?.tags,
         },
         (response: boolean) => {
           if (response) {
@@ -106,7 +104,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
         }
       )
     }
-  }, [circleImageUrl, currentTabId, getCircleGenerationStatus, tags, url])
+  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
@@ -119,18 +117,18 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           tabId: currentTabId,
           name,
           description,
-          tags
+          tags: circleData?.tags
         }
       )
       getCircleGenerationStatus()
     }
-  }, [currentTabId, getCircleGenerationStatus, getValues, tags])
+  }, [circleData?.tags, currentTabId, getCircleGenerationStatus, getValues])
 
   useEffect(() => {
-    if (!isGeneratingImage && !(circleData.circle_logo_image)) {
+    if (!isGeneratingImage && !(circleData?.circle_logo_image)) {
       handleGenerateImage()
     }
-  }, [circleData.circle_logo_image, handleGenerateImage, isGeneratingImage])
+  }, [circleData?.circle_logo_image, handleGenerateImage, isGeneratingImage])
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const imgFile = e.target.files?.[0]
@@ -143,14 +141,26 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
     }
   }
 
+  const handlePrevClick = useCallback(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      },
+      (res) => {
+        if (res) {
+          setCircleData(initialCircleData)
+          setPageStatus(circlePageStatus.CIRCLE_LIST)
+        }
+      }
+    )
+  }, [currentTabId, setCircleData, setPageStatus])
+
   return (
-    <div className="w-full h-full py-5">
+    <div className="w-full h-140 py-5">
       <CreationHeader
         title="Create Circle"
-        onBack={() => {
-          setCircleData(initialCircleData)
-          setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
-        }}
+        onBack={handlePrevClick}
       />
       <div className="w-full flex flex-col gap-2 justify-between">
         {isSaving && (
@@ -201,7 +211,7 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
             />
             {isGeneratingImage ? (
               <div className="w-25 h-25 flex items-center justify-center">
-                <Loading />
+                <LoadingSpinner />
               </div>
             ) : (
               <div className="w-25 h-25 ">
@@ -243,12 +253,12 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
             <div className="w-full flex justify-center">
               <GenerateButton type="button" onClick={handleGenerateImage} disabled={isGeneratingImage}>
                 <Refresh />
-                <p>{isGeneratingImage ? 'Generating' : 'Generate'}</p>
+                <p>{isGeneratingImage ? 'Generating Image' : 'Generate Image'}</p>
               </GenerateButton>
             </div>
 
             <div className="fixed bottom-6 w-fit justify-center">
-              <Button type="submit" disabled={isSaving}>
+              <Button type="submit" disabled={isSaving || isGeneratingImage}>
                 {isSaving ? 'Creating' : 'Create'}
               </Button>
             </div>

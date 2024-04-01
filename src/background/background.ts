@@ -54,7 +54,7 @@ let supabaseUser: SupabaseUserDataInterface = {} // store the user
 // log user in with email and password
 // if the result is success
 // we will set supabaseUser to the user
-async function loginWithEmailPassword(email: string, password: string) {
+const loginWithEmailPassword = async (email: string, password: string) => {
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -72,9 +72,60 @@ async function loginWithEmailPassword(email: string, password: string) {
   return true
 }
 
+// log user in with google
+// if the result is success
+// we will set supabaseUser to the user
+const loginWithGoogle = async () => {
+  const manifest = chrome.runtime.getManifest()
+  if (manifest && manifest.oauth2 && manifest.oauth2.scopes) {
+    const url = new URL('https://accounts.google.com/o/oauth2/auth')
+
+    url.searchParams.set('client_id', manifest.oauth2.client_id)
+    url.searchParams.set('response_type', 'id_token')
+    url.searchParams.set('access_type', 'offline')
+    url.searchParams.set('redirect_uri', `https://${chrome.runtime.id}.chromiumapp.org`)
+    url.searchParams.set('scope', manifest.oauth2.scopes.join(' '))
+
+    chrome.identity.launchWebAuthFlow(
+      {
+        url: url.href,
+        interactive: true,
+      },
+      async (redirectedTo) => {
+        if (chrome.runtime.lastError) {
+          // auth was not successful
+        } else {
+          // auth was successful, extract the ID token from the redirectedTo URL
+          const url = new URL(redirectedTo || '')
+          const params = new URLSearchParams(url.hash)
+
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: params.get('id_token') || '',
+          })
+          console.log(data, '==================')
+          if (error) {
+            console.log('background.js: Error logging in: ', error)
+            return false
+          }
+          userLoaded = true
+          supabaseUser = (await supabase.auth.getUser()) as SupabaseUserDataInterface
+          console.log('background.js: New supabase user: ', supabaseUser)
+          const session = await supabase.auth.getSession()
+          setToStorage('supabaseSession', JSON.stringify(session))
+          chrome.runtime.sendMessage({ loggedIn: true })
+          return true
+        }
+      }
+    )
+  } else {
+    return false
+  }
+}
+
 // this function tries to log in user with session
 // if the session exists
-async function loginUserWithSession() {
+const loginUserWithSession = async () => {
   console.log('Logging in with session')
   const session = await getFromStorage('supabaseSession')
   if (session) {
@@ -93,7 +144,7 @@ async function loginUserWithSession() {
   }
 }
 
-async function logout() {
+const logout = async () => {
   console.log('Supabase log out')
   const { error } = await supabase.auth.signOut()
   if (error) console.log('An error occurred on log out')
@@ -103,7 +154,7 @@ async function logout() {
 }
 
 // get user name from saved supabaseUser variable
-async function getUserAvatarUrl() {
+const getUserAvatarUrl = async () => {
   console.log(
     'background.js: Getting user avatar url with id: ',
     supabaseUser?.data?.user?.id
@@ -116,7 +167,7 @@ async function getUserAvatarUrl() {
 
 // this function tries to get user if user already logged in
 // if not it will try to log in with session
-async function getUser() {
+const getUser = async () => {
   if (userLoaded) {
     return supabaseUser
   } else {
@@ -203,6 +254,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
+
+  if (request.action === BJActions.LOGIN_WITH_GOOGLE) {
+    console.log('background.js: Logging in with google')
+    loginWithGoogle()
+      .then((result) => {
+        console.log('background.js: Result of loginWithGoogle: ', result)
+        sendResponse(result)
+      })
+      .catch((error) => {
+        console.log('background.js: Error loginWithGoogle: ', error)
+        sendResponse({ error: 'Error during sign in.' })
+      })
+    return true
+  }
+
   if (request.action === BJActions.LOGOUT) {
     logout().then(() => {
       sendResponse(true)

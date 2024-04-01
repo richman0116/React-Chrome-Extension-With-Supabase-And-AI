@@ -16,23 +16,14 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*/*"
-      ],
-      "js": [
-        "js/content.bundle.js"
-      ]
+      "matches": ["*://*/*"],
+      "js": ["js/content.bundle.js"]
     }
   ],
-  "permissions": [
-    "tabs",
-    "scripting",
-    "activeTab",
-    "storage",
-    "history"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ]
+  "permissions": ["tabs", "scripting", "activeTab", "storage", "history", "identity"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "oauth2": {
+    "client_id": "135731472785-s9i8q6hu7havhdskgjekscfmp6pr96rf.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  }
 }

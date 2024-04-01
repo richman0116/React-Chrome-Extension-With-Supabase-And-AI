@@ -1,6 +1,7 @@
 export enum BJActions {
   CHECK_LOGGED_IN = 'checkLoggedIn',
   LOGIN_WITH_EMAIL_PASSWORD = 'loginWithEmailPassword',
+  LOGIN_WITH_GOOGLE = 'loginWithGoogle',
   LOGOUT = 'logout',
   GET_USER_AVATAR_URL = 'getUserAvatarUrl',
   GET_PAGE_CONTENT = 'getPageContent',

@@ -54,12 +54,12 @@ const MyCircles = () => {
 
   return (
     <div
-      className={classNames('w-full flex flex-col justify-between mb-20', {
+      className={classNames('w-full flex flex-col justify-between mb-20 px-5', {
         hidden: claimAvailableCircles.length === 0,
       })}
     >
       <div className="w-full">
-        {!isLoading && <p className="text-xl font-medium text-primary">{resultText}</p>}
+        {!isLoading && <p className="text-xl font-medium text-primary pb-3">{resultText}</p>}
       </div>
       {isLoading && (
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">

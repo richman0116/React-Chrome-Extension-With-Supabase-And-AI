@@ -27,7 +27,7 @@ const AddCircle = () => {
   }, [circleGenerationStatus?.result, circleGenerationStatus?.status, circleGenerationStatus?.type])
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
+    <div className="w-full h-full flex flex-col items-center justify-center p-5">
       {pageStatus === circlePageStatus.ADD_AUTOMATICALLY && (
         <AddGeneratedCircles setCircleData={setCircleData} generatedCircles={generatedCircles} setGeneratedCircles={setGeneratedCircles} />
       )}

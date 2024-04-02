@@ -8,7 +8,7 @@ const Main = () => {
 
   return (
     <div
-      className="w-full h-full p-5 flex flex-col items-center justify-center"
+      className="w-full h-full flex flex-col items-center justify-center"
       onClick={() => setShowLogoutBtn(false)}
     >
       {isChecking ? (

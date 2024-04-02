@@ -20,7 +20,7 @@ const PageCirclList = () => {
 
   return (
     <div
-      className={classNames('w-full', {
+      className={classNames('w-full px-5', {
         hidden: circles.length === 0,
       })}
     >

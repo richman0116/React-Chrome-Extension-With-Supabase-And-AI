@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import FormLine from '../../components/FormLine'
 import LargeButton from '../../components/Buttons/LargeButton'
 import Header from '../../components/Header'
-// import ArrowBack from "../../components/ArrowBack.tsx";
 import { Paths } from '../../utils/constants'
 import GoogleIcon from '../../components/SVGIcons/GoogleIcon'
 import { useAuthContext } from '../../context/AuthContext'
@@ -27,7 +26,7 @@ const Login = () => {
     formState: { errors },
   } = useForm<LoginFormData>({})
 
-  const handleSignIn = useCallback(
+  const handleSignInWithEmailPassword = useCallback(
     (data: LoginFormData) => {
       try {
         setIsSubmitting(true)
@@ -40,32 +39,39 @@ const Login = () => {
           },
           (response) => {
             if (response.error) {
-              console.log('response.error', response.error)
               setErrorMsg(response.error)
               setIsSubmitting(false)
             } else {
-              console.log('response', response)
               if (response) {
-                // Kazuo: please have some notification system
-                // so that when the password is wrong or anything
-                // that make the response false, show a warning
                 setErrorMsg('')
                 setIsSubmitting(false)
                 setIsAuthenticated(true)
               } else {
-                // something is wrong that made the response falses
                 setErrorMsg('Invalid login credentials')
                 setIsSubmitting(false)
               }
             }
           }
         )
-      } catch (ex) {
-        console.log(ex, 'kkkkkkkk')
+      } catch (error) {
+        console.error(error)
       }
     },
     [setIsAuthenticated]
   )
+
+  const handleSignInWithGoogle = useCallback(() => {
+    try {
+      setIsSubmitting(true)
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.LOGIN_WITH_GOOGLE,
+        }
+      )
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -74,7 +80,7 @@ const Login = () => {
         <h2 className="text-3.5xl font-medium capitalize text-primary leading-normal">
           Browse, Explore, Connect.
         </h2>
-        <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleSignInWithEmailPassword)} className="space-y-4">
           <FormLine
             title="Email"
             id="email"
@@ -105,7 +111,7 @@ const Login = () => {
                 {isSubmitting ? 'Submitting...' : 'Login'}
               </LargeButton>
             </div>
-            <LargeButton>
+            <LargeButton type="button" onClick={handleSignInWithGoogle}>
               <div className="w-full flex justify-center items-center gap-2">
                 <GoogleIcon />
                 <p>Log in with Google</p>

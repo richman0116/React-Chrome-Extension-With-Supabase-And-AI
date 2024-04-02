@@ -54,7 +54,7 @@ let supabaseUser: SupabaseUserDataInterface = {} // store the user
 // log user in with email and password
 // if the result is success
 // we will set supabaseUser to the user
-async function loginWithEmailPassword(email: string, password: string) {
+const loginWithEmailPassword = async (email: string, password: string) => {
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -72,9 +72,80 @@ async function loginWithEmailPassword(email: string, password: string) {
   return true
 }
 
+const setTokens = async (
+  tabId: number,
+  changeInfo: chrome.tabs.TabChangeInfo,
+  tab: chrome.tabs.Tab
+) => {
+  // once the tab is loaded
+  if (tab.status === 'complete') {
+    if (!tab.url) return
+    const url = new URL(tab.url)
+
+    // at this point user is logged-in to the web app
+    // url should look like this: https://0xeden..com/#access_token=zI1NiIsInR5c&expires_in=3600&provider_token=ya29.a0AVelGEwL6L&refresh_token=GEBzW2vz0q0s2pww&token_type=bearer
+    // parse access_token and refresh_token from query string params
+    if (url.origin === 'https://0xeden.com') {
+      const hash = url.hash.substr(1)
+      const params = new URLSearchParams(hash)
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+
+      if (accessToken && refreshToken) {
+        if (!tab.id) return
+
+        // store access_token and refresh_token in storage as these will be used to authenticate user in chrome extension
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        // we can close that tab now
+        await chrome.tabs.remove(tab.id)
+
+        // remove tab listener as tokens are set
+        chrome.tabs.onUpdated.removeListener(setTokens)
+        userLoaded = true
+        supabaseUser = (await supabase.auth.getUser()) as SupabaseUserDataInterface
+        console.log('background.js: New supabase user: ', supabaseUser)
+        const session = await supabase.auth.getSession()
+        setToStorage('supabaseSession', JSON.stringify(session))
+        chrome.runtime.sendMessage({ loggedIn: true })
+      }
+    } else {
+      chrome.tabs.update(tabId, { active: true })
+      chrome.tabs.onUpdated.addListener(setTokens)
+    }
+  }
+}
+// log user in with google
+// if the result is success
+// we will set supabaseUser to the user
+const loginWithGoogle = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+  })
+  if (error) return
+  const url = data.url
+  if (url) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTabId = tabs[0]?.id
+      // create new tab with that url
+      chrome.tabs.onUpdated.removeListener(setTokens)
+      chrome.tabs.create({ url: url, active: true }, (tab) => {
+        // add listener to that url and watch for access_token and refresh_token query string params
+        chrome.tabs.onUpdated.addListener(setTokens)
+        if (currentTabId) {
+          chrome.tabs.update(currentTabId, { active: true })
+        }
+      })
+    })
+  }
+  return
+}
+
 // this function tries to log in user with session
 // if the session exists
-async function loginUserWithSession() {
+const loginUserWithSession = async () => {
   console.log('Logging in with session')
   const session = await getFromStorage('supabaseSession')
   if (session) {
@@ -93,7 +164,7 @@ async function loginUserWithSession() {
   }
 }
 
-async function logout() {
+const logout = async () => {
   console.log('Supabase log out')
   const { error } = await supabase.auth.signOut()
   if (error) console.log('An error occurred on log out')
@@ -103,7 +174,7 @@ async function logout() {
 }
 
 // get user name from saved supabaseUser variable
-async function getUserAvatarUrl() {
+const getUserAvatarUrl = async () => {
   console.log(
     'background.js: Getting user avatar url with id: ',
     supabaseUser?.data?.user?.id
@@ -116,7 +187,7 @@ async function getUserAvatarUrl() {
 
 // this function tries to get user if user already logged in
 // if not it will try to log in with session
-async function getUser() {
+const getUser = async () => {
   if (userLoaded) {
     return supabaseUser
   } else {
@@ -152,11 +223,11 @@ async function getUser() {
 
 const showCircleCount = async (url: string) => {
   if (url) {
-    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then((result) => {
+    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(async (result) => {
       if (result.data?.length > 0) {
-        chrome.action.setBadgeText({ text: result.data.length.toString() })
+        await chrome.action.setBadgeText({ text: result.data.length.toString() })
       } else {
-        chrome.action.setBadgeText({ text: '' })
+        await chrome.action.setBadgeText({ text: '' })
       }
     })
   }
@@ -203,6 +274,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
+
+  if (request.action === BJActions.LOGIN_WITH_GOOGLE) {
+    console.log('background.js: Logging in with google')
+    loginWithGoogle()
+  }
+
   if (request.action === BJActions.LOGOUT) {
     logout().then(() => {
       sendResponse(true)

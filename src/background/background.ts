@@ -223,11 +223,11 @@ const getUser = async () => {
 
 const showCircleCount = async (url: string) => {
   if (url) {
-    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then((result) => {
+    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(async (result) => {
       if (result.data?.length > 0) {
-        chrome.action.setBadgeText({ text: result.data.length.toString() })
+        await chrome.action.setBadgeText({ text: result.data.length.toString() })
       } else {
-        chrome.action.setBadgeText({ text: '' })
+        await chrome.action.setBadgeText({ text: '' })
       }
     })
   }

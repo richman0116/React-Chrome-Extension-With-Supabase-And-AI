@@ -16,6 +16,7 @@ module.exports = {
         stroke: '#E7E8E8',
         tertiary: '#A1A2A3',
         alert: '#F64F4F',
+        branding: '#DDF4E8'
       },
       fontSize: {
         '3.5xl': '2rem', //32px

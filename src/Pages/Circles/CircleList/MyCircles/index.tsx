@@ -54,7 +54,7 @@ const MyCircles = () => {
 
   return (
     <div
-      className={classNames('w-full flex flex-col justify-between mb-20 px-5', {
+      className={classNames('w-full flex flex-col justify-between mb-20', {
         hidden: claimAvailableCircles.length === 0,
       })}
     >

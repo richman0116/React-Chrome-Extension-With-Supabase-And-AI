@@ -8,6 +8,7 @@ import Button from '../../../components/Buttons/Button'
 import { circlePageStatus } from '../../../utils/constants'
 import Plus from '../../../components/SVGIcons/Plus'
 import Avatar from '../../../components/Avatar'
+import CommentBox from '../../../components/CommentBox'
 
 const CircleList = () => {
   const [showAvatar, setShowAvatar] = useState(false)
@@ -52,13 +53,16 @@ const CircleList = () => {
         <p>{resultText}</p>
         {showAvatar && <Avatar />}
       </div>
-      <p className="text-3.5xl font-medium leading-normal capitalize text-primary px-5">Any Thoughts About This Page?</p>
-      <PageCirclList />
-      <MyCircles />
-      <div className="fixed bottom-6 w-fit justify-center px-5">
-        <Button onClick={handlePlusClick}>
-          <Plus />
-        </Button>
+      <div className="w-full flex flex-col items-center gap-5 px-5">
+        <p className="text-3.5xl font-medium leading-normal capitalize text-primary">Any Thoughts About This Page?</p>
+        <CommentBox />
+        <PageCirclList />
+        <MyCircles />
+        <div className="fixed bottom-6 w-fit justify-center">
+          <Button onClick={handlePlusClick}>
+            <Plus />
+          </Button>
+        </div>
       </div>
     </div>
   )

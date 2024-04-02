@@ -72,55 +72,75 @@ const loginWithEmailPassword = async (email: string, password: string) => {
   return true
 }
 
+const setTokens = async (
+  tabId: number,
+  changeInfo: chrome.tabs.TabChangeInfo,
+  tab: chrome.tabs.Tab
+) => {
+  // once the tab is loaded
+  if (tab.status === 'complete') {
+    if (!tab.url) return
+    const url = new URL(tab.url)
+
+    // at this point user is logged-in to the web app
+    // url should look like this: https://0xeden..com/#access_token=zI1NiIsInR5c&expires_in=3600&provider_token=ya29.a0AVelGEwL6L&refresh_token=GEBzW2vz0q0s2pww&token_type=bearer
+    // parse access_token and refresh_token from query string params
+    if (url.origin === 'https://0xeden.com') {
+      const hash = url.hash.substr(1)
+      const params = new URLSearchParams(hash)
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+
+      if (accessToken && refreshToken) {
+        if (!tab.id) return
+
+        // store access_token and refresh_token in storage as these will be used to authenticate user in chrome extension
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        // we can close that tab now
+        await chrome.tabs.remove(tab.id)
+
+        // remove tab listener as tokens are set
+        chrome.tabs.onUpdated.removeListener(setTokens)
+        userLoaded = true
+        supabaseUser = (await supabase.auth.getUser()) as SupabaseUserDataInterface
+        console.log('background.js: New supabase user: ', supabaseUser)
+        const session = await supabase.auth.getSession()
+        setToStorage('supabaseSession', JSON.stringify(session))
+        chrome.runtime.sendMessage({ loggedIn: true })
+      }
+    } else {
+      chrome.tabs.update(tabId, { active: true })
+      chrome.tabs.onUpdated.addListener(setTokens)
+    }
+  }
+}
 // log user in with google
 // if the result is success
 // we will set supabaseUser to the user
 const loginWithGoogle = async () => {
-  const manifest = chrome.runtime.getManifest()
-  if (manifest && manifest.oauth2 && manifest.oauth2.scopes) {
-    const url = new URL('https://accounts.google.com/o/oauth2/auth')
-
-    url.searchParams.set('client_id', manifest.oauth2.client_id)
-    url.searchParams.set('response_type', 'id_token')
-    url.searchParams.set('access_type', 'offline')
-    url.searchParams.set('redirect_uri', `https://${chrome.runtime.id}.chromiumapp.org`)
-    url.searchParams.set('scope', manifest.oauth2.scopes.join(' '))
-
-    chrome.identity.launchWebAuthFlow(
-      {
-        url: url.href,
-        interactive: true,
-      },
-      async (redirectedTo) => {
-        if (chrome.runtime.lastError) {
-          // auth was not successful
-        } else {
-          // auth was successful, extract the ID token from the redirectedTo URL
-          const url = new URL(redirectedTo || '')
-          const params = new URLSearchParams(url.hash)
-
-          const { data, error } = await supabase.auth.signInWithIdToken({
-            provider: 'google',
-            token: params.get('id_token') || '',
-          })
-          console.log(data, '==================')
-          if (error) {
-            console.log('background.js: Error logging in: ', error)
-            return false
-          }
-          userLoaded = true
-          supabaseUser = (await supabase.auth.getUser()) as SupabaseUserDataInterface
-          console.log('background.js: New supabase user: ', supabaseUser)
-          const session = await supabase.auth.getSession()
-          setToStorage('supabaseSession', JSON.stringify(session))
-          chrome.runtime.sendMessage({ loggedIn: true })
-          return true
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+  })
+  if (error) return
+  const url = data.url
+  if (url) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTabId = tabs[0]?.id
+      // create new tab with that url
+      chrome.tabs.onUpdated.removeListener(setTokens)
+      chrome.tabs.create({ url: url, active: true }, (tab) => {
+        // add listener to that url and watch for access_token and refresh_token query string params
+        chrome.tabs.onUpdated.addListener(setTokens)
+        if (currentTabId) {
+          chrome.tabs.update(currentTabId, { active: true })
         }
-      }
-    )
-  } else {
-    return false
+      })
+    })
   }
+  return
 }
 
 // this function tries to log in user with session
@@ -258,15 +278,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === BJActions.LOGIN_WITH_GOOGLE) {
     console.log('background.js: Logging in with google')
     loginWithGoogle()
-      .then((result) => {
-        console.log('background.js: Result of loginWithGoogle: ', result)
-        sendResponse(result)
-      })
-      .catch((error) => {
-        console.log('background.js: Error loginWithGoogle: ', error)
-        sendResponse({ error: 'Error during sign in.' })
-      })
-    return true
   }
 
   if (request.action === BJActions.LOGOUT) {

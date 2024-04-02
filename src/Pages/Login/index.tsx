@@ -66,29 +66,12 @@ const Login = () => {
       chrome.runtime.sendMessage(
         {
           action: BJActions.LOGIN_WITH_GOOGLE,
-
-        },
-        (response: any) => {
-          if (response.error) {
-            setErrorMsg(response.error)
-            setIsSubmitting(false)
-          } else {
-            console.log('response', response)
-            if (response) {
-              setErrorMsg('')
-              setIsSubmitting(false)
-              setIsAuthenticated(true)
-            } else {
-              setErrorMsg('Invalid login credentials')
-              setIsSubmitting(false)
-            }
-          }
         }
       )
     } catch (error) {
       console.error(error)
     }
-  }, [setIsAuthenticated])
+  }, [])
 
   return (
     <div className="w-full h-full flex flex-col">

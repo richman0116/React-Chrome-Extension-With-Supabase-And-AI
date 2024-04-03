@@ -692,6 +692,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true
   }
+
+  if (request.action === BJActions.CREATE_POST) {
+    console.log('background.js: Creating a post')
+    const { context, circleId } = request
+    if (supabaseUser) {
+      supabase
+        .rpc('posts_create_post_with_post_image_url', {
+          context,
+          circle_id: circleId,
+          url: '',
+        })
+        .then((result) => {
+          console.log('background.js: result of getting user circles count : ', result)
+          const { data, error } = result
+          if (error) {
+            sendResponse({ error })
+          }
+          sendResponse(data)
+        })
+    } else {
+      console.error('background.js: User not logged in when calling getUserCircles')
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true
+  }
 })
 
 // whenever we update a tab, log the url

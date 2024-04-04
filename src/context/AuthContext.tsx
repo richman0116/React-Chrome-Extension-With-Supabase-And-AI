@@ -14,7 +14,6 @@ interface AuthContextType {
   setIsAuthenticated: Dispatch<SetStateAction<boolean>>
   isChecking: boolean
   avatarUrl: string
-  setAvatarUrl: Dispatch<SetStateAction<string>>
   showLogoutBtn: boolean
   setShowLogoutBtn: Dispatch<SetStateAction<boolean>>
 }
@@ -24,7 +23,6 @@ const AuthContext = createContext<AuthContextType>({
   setIsAuthenticated: () => { },
   isChecking: true,
   avatarUrl: '',
-  setAvatarUrl: () => { },
   showLogoutBtn: false,
   setShowLogoutBtn: () => { },
 })
@@ -62,6 +60,25 @@ export const AuthContextProvider = ({ children }: AuthContextProviderInterface) 
     checkIfLoggedIn()
   }, [checkIfLoggedIn])
 
+  useEffect(() => {
+    const getAvatarUrl = () => {
+      if (isAuthenticated) {
+        chrome.runtime.sendMessage(
+          {
+            action: BJActions.GET_USER_AVATAR_URL,
+          },
+          (res) => {
+            if (res) {
+              setAvatarUrl(res.avatar_url)
+            }
+          }
+        )
+      }
+    }
+
+    getAvatarUrl()
+  }, [isAuthenticated])
+
   return (
     <AuthContext.Provider
       value={{
@@ -69,7 +86,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderInterface) 
         setIsAuthenticated,
         isChecking,
         avatarUrl,
-        setAvatarUrl,
         showLogoutBtn,
         setShowLogoutBtn,
       }}

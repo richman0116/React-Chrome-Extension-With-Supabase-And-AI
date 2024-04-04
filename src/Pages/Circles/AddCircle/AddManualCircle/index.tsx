@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import FormLine from '../../../../components/FormLine'
@@ -15,8 +15,7 @@ import {
 } from '../../../../utils/helpers'
 import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
 
-import { CircleInterface } from '../../../../types/circle'
-import { initialCircleData } from '..'
+import { initialCircleData } from '../../../../context/CircleContext'
 import UploadIcon from '../../../../components/SVGIcons/UploadIcon'
 import classNames from 'classnames'
 import { BJActions } from '../../../../background/actions'
@@ -26,12 +25,8 @@ interface CircleFormData {
   description: string
 }
 
-interface IAddManualCIrcle {
-  circleData: CircleInterface
-  setCircleData: Dispatch<SetStateAction<CircleInterface>>
-}
-
-export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle) => {
+export const AddManualCircle = () => {
+  const { circleData, setCircleData } = useCircleContext()
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [circleImageUrl, setCircleImageUrl] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)

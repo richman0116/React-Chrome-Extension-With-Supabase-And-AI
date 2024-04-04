@@ -81,7 +81,7 @@ const CommentBox = () => {
         </div>
         {isFailed && <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>}
         {!isSharing && showCircles && <div className="px-2">
-          <CreateCircleItem />
+          <CreateCircleItem comment={comment} />
           <div className="w-full grid grid-cols-2 gap-2 pt-2">
             {circles.map((circle) => <ShareCircleItem circle={circle} key={circle.id} onShare={handleShare} />)}
           </div>

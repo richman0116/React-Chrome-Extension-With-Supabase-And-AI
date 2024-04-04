@@ -18,6 +18,7 @@ interface ICircleContext {
   currentTabId: number
   isLoading: boolean
   currentPageCircleIds: string[]
+  circleData: CircleInterface,
   getCircles: () => void
   pageStatus: number
   setPageStatus: Dispatch<SetStateAction<number>>
@@ -25,6 +26,15 @@ interface ICircleContext {
   circleGenerationStatus: ICircleGenerationStatus | null
   setCircleGenerationStatus: Dispatch<SetStateAction<ICircleGenerationStatus | null>>
   getCircleGenerationStatus: () => void
+  setCircleData: Dispatch<SetStateAction<CircleInterface>>
+}
+
+export const initialCircleData = {
+  id: '',
+  name: '',
+  description: '',
+  tags: [''],
+  circle_logo_image: '',
 }
 
 const CircleContext = createContext<ICircleContext>({
@@ -33,13 +43,15 @@ const CircleContext = createContext<ICircleContext>({
   currentTabId: NaN,
   isLoading: true,
   currentPageCircleIds: [],
+  circleData: initialCircleData,
   getCircles: () => { },
   pageStatus: 0,
   setPageStatus: () => { },
   isLoadingCGenerationStatus: false,
   circleGenerationStatus: null,
   setCircleGenerationStatus: () => { },
-  getCircleGenerationStatus: () => { }
+  getCircleGenerationStatus: () => { },
+  setCircleData: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -56,6 +68,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
+  const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -139,13 +152,15 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         currentTabId,
         currentPageCircleIds,
         getCircles,
+        circleData,
         isLoading,
         pageStatus,
         setPageStatus,
         isLoadingCGenerationStatus,
         circleGenerationStatus,
         setCircleGenerationStatus,
-        getCircleGenerationStatus
+        getCircleGenerationStatus,
+        setCircleData
       }}
     >
       {children}

@@ -16,17 +16,16 @@ import LoadingSpinner from '../../../../components/LoadingSpinner'
 import XIcon from '../../../../components/SVGIcons/XIcon'
 
 interface IAddGeneratedCircles {
-  setCircleData: Dispatch<SetStateAction<CircleInterface>>
   generatedCircles: CircleInterface[]
   setGeneratedCircles: Dispatch<SetStateAction<CircleInterface[]>>
 }
 
-const AddGeneratedCircles = ({ setCircleData, generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
+const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: setCircles }: IAddGeneratedCircles) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isFailed, setIsFailed] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, setCircleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, setCircleGenerationStatus, getCircleGenerationStatus, setCircleData } = useCircleContext()
 
   const tags: string[] = useMemo(() => {
     const allTags = circles.map((circle) => circle.tags).flat()

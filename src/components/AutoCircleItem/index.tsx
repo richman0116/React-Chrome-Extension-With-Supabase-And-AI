@@ -9,7 +9,7 @@ interface AutoCircleItemInterface {
 
 const AutoCircleItem = ({ circle, onAdd }: AutoCircleItemInterface) => {
   return (
-    <div className="p-4 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">
+    <div className="p-4 transition-transform transform border border-stroke hover:bg-gray-100 flex gap-4 items-center rounded-2xl group">
       <img
         src="../duck.jpg"
         alt="circle logo"

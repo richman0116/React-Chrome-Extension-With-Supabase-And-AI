@@ -5,14 +5,10 @@ import ShareCircleItem from "../ShareCircleItem"
 import Send from "../SVGIcons/Send"
 import XIcon from "../SVGIcons/XIcon"
 import { useCircleContext } from "../../context/CircleContext"
-import { BJActions } from "../../background/actions"
-import LoadingSpinner from "../LoadingSpinner"
 
 const CommentBox = () => {
   const [comment, setComment] = useState('')
   const [showCircles, setShowCircles] = useState(false)
-  const [isSharing, setIsSharing] = useState(false)
-  const [isFailed, setIsFailed] = useState(false)
 
   const { circles } = useCircleContext()
 
@@ -38,27 +34,6 @@ const CommentBox = () => {
     }
   }, [comment.length])
 
-  const handleShare = useCallback((circleId: string) => {
-    setIsSharing(true)
-    chrome.runtime.sendMessage(
-      {
-        action: BJActions.CREATE_POST,
-        context: comment,
-        circleId
-      },
-      (res) => {
-        if (res.error) {
-          setIsFailed(true)
-        } else {
-          setIsFailed(false)
-          setComment("")
-          setShowCircles(false)
-        }
-        setIsSharing(false)
-      }
-    )
-  }, [comment])
-
   return (
     <div className="w-full rounded-2xl bg-branding pb-5">
       <div className="pt-1 px-1">
@@ -79,14 +54,12 @@ const CommentBox = () => {
             <div className="cursor-pointer text-brand" onClick={handleSendIconClick}><Send /></div>
           }
         </div>
-        {isFailed && <p className="text-sm font-medium leading-normal text-center text-alert">Something went wrong!</p>}
-        {!isSharing && showCircles && <div className="px-2">
+        {showCircles && <div className="px-2">
           <CreateCircleItem comment={comment} />
           <div className="w-full grid grid-cols-2 gap-2 pt-2">
-            {circles.map((circle) => <ShareCircleItem circle={circle} key={circle.id} onShare={handleShare} />)}
+            {circles.map((circle) => <ShareCircleItem circle={circle} key={circle.id} comment={comment} setComment={setComment} setShowCircles={setShowCircles} />)}
           </div>
         </div>}
-        {isSharing && <div className="w-full flex items-center justify-center"><LoadingSpinner /></div>}
       </div>
     </div>
   )

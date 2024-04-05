@@ -11,15 +11,16 @@ interface ICreateCircleItem {
 }
 
 const CreateCircleItem = ({ comment }: ICreateCircleItem) => {
-  const { setCircleData, setPageStatus } = useCircleContext()
+  const { setCircleData, setPageStatus, setIsGenesisPost } = useCircleContext()
 
   const handleCreateClick = useCallback(() => {
     setCircleData({
       ...initialCircleData,
       description: comment
     })
+    setIsGenesisPost(true)
     setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [comment, setCircleData, setPageStatus])
+  }, [comment, setCircleData, setIsGenesisPost, setPageStatus])
 
   return (
     <button className="w-fit flex gap-x-2 items-center rounded-full px-3 py-4 bg-white cursor-pointer" onClick={handleCreateClick}>

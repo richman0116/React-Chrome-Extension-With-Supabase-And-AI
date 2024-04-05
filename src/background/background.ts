@@ -396,7 +396,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === BJActions.CREATE_CIRCLE) {
     if (supabaseUser) {
-      const { tabId, url, circleName, circleDescription, imageData, tags } = request
+      const {
+        tabId,
+        url,
+        circleName,
+        circleDescription,
+        imageData,
+        tags,
+        isGenesisPost,
+      } = request
 
       const generatingCircle: ICircleGenerationStatus = {
         type: 'manual',
@@ -416,7 +424,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   circleName,
                   circleDescription,
                   imageData,
-                  addedTagNames
+                  addedTagNames,
+                  isGenesisPost
                 )
               }
             )
@@ -432,7 +441,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             circleName,
             circleDescription,
             imageData,
-            tags
+            tags,
+            isGenesisPost
           )
         }
         sendResponse(true)

@@ -32,7 +32,7 @@ export const AddManualCircle = () => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost } = useCircleContext()
   const {
     handleSubmit,
     register,
@@ -91,15 +91,17 @@ export const AddManualCircle = () => {
           circleDescription: description,
           imageData,
           tags: circleData?.tags,
+          isGenesisPost
         },
         (response: boolean) => {
           if (response) {
+            setIsGenesisPost(false)
             getCircleGenerationStatus()
           }
         }
       )
     }
-  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, url])
+  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')

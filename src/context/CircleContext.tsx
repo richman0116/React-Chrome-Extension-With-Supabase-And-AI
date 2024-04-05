@@ -24,9 +24,11 @@ interface ICircleContext {
   setPageStatus: Dispatch<SetStateAction<number>>
   isLoadingCGenerationStatus: boolean
   circleGenerationStatus: ICircleGenerationStatus | null
+  isGenesisPost: boolean
   setCircleGenerationStatus: Dispatch<SetStateAction<ICircleGenerationStatus | null>>
   getCircleGenerationStatus: () => void
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
+  setIsGenesisPost: Dispatch<SetStateAction<boolean>>
 }
 
 export const initialCircleData = {
@@ -46,12 +48,14 @@ const CircleContext = createContext<ICircleContext>({
   circleData: initialCircleData,
   getCircles: () => { },
   pageStatus: 0,
+  isGenesisPost: false,
   setPageStatus: () => { },
   isLoadingCGenerationStatus: false,
   circleGenerationStatus: null,
   setCircleGenerationStatus: () => { },
   getCircleGenerationStatus: () => { },
-  setCircleData: () => { }
+  setCircleData: () => { },
+  setIsGenesisPost: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -69,6 +73,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
   const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
+  const [isGenesisPost, setIsGenesisPost] = useState(false)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -155,12 +160,14 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         circleData,
         isLoading,
         pageStatus,
+        isGenesisPost,
         setPageStatus,
         isLoadingCGenerationStatus,
         circleGenerationStatus,
         setCircleGenerationStatus,
         getCircleGenerationStatus,
-        setCircleData
+        setCircleData,
+        setIsGenesisPost
       }}
     >
       {children}

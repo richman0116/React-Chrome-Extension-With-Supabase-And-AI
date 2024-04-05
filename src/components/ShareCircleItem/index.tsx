@@ -9,7 +9,7 @@ interface IShareCircleItem {
 const ShareCircleItem = ({ circle, onShare }: IShareCircleItem) => {
   return (
     <button
-      className="w-full flex gap-x-2 items-center rounded-full px-3 py-4 bg-white hover:bg-brand cursor-pointer group"
+      className="w-full flex justify-between items-center rounded-full px-3 py-4 bg-white hover:bg-brand cursor-pointer group"
       type="button"
       onClick={() => onShare(circle.id)}
     >
@@ -19,12 +19,12 @@ const ShareCircleItem = ({ circle, onShare }: IShareCircleItem) => {
         className=" rounded-full min-w-[24px] h-6"
       />
       <p
-        className="text-ellipsis line-clamp-1 text-sm font-bold leading-normal text-primary group-hover:text-white"
+        className="w-full text-ellipsis line-clamp-1 text-xs font-bold leading-normal text-primary group-hover:text-white"
         title={circle.name}
       >
         {circle.name}
       </p>
-      <span className="text-white hidden group-hover:flex"><Send /></span>
+      <span className="text-white hidden group-hover:block"><Send /></span>
     </button>
   )
 }

@@ -29,19 +29,17 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
   )
 
   return (
-    <div className="p-3 transition-transform transform border border-stroke hover:bg-gray-100 flex gap-3 items-center rounded-2xl group hover:justify-between">
-      <a
-        href={`https://0xeden.com/circle/${circle.id}`}
-        rel="noreferrer"
-        target="_blank"
-        className="cursor-pointer"
-      >
-        <img
-          src={circle.circle_logo_image || `../duck.jpg`}
-          alt="circle logo"
-          className=" rounded-full min-w-[40px] h-10"
-        />
-      </a>
+    <a
+      href={`https://0xeden.com/circle/${circle.id}`}
+      rel="noreferrer"
+      target="_blank"
+      className="p-3 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-3 items-center rounded-2xl group hover:justify-between"
+    >
+      <img
+        src={circle.circle_logo_image || `../duck.jpg`}
+        alt="circle logo"
+        className=" rounded-full min-w-[40px] h-10"
+      />
       <p className="text-ellipsis line-clamp-2 group-hover:hidden text-xs font-medium text-primary">
         {circle.name}
       </p>
@@ -58,7 +56,7 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
           {isLinking ? 'Linking' : 'Link'}
         </RoundedButton>
       </div>
-    </div>
+    </a>
   )
 }
 

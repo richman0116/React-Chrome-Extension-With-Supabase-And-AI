@@ -48,12 +48,9 @@ const CircleItem = ({
           circleId: circle.id
         },
         (res) => {
-          setIsJoining(false)
           if (!res.error) {
             setIsCommenting(false)
-            setTimeout(() => {
-              setShowCommentBox(false)
-            }, 1000)
+            setShowCommentBox(false)
           }
         }
       )

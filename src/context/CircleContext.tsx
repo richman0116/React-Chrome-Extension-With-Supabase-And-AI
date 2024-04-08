@@ -18,13 +18,25 @@ interface ICircleContext {
   currentTabId: number
   isLoading: boolean
   currentPageCircleIds: string[]
+  circleData: CircleInterface,
   getCircles: () => void
   pageStatus: number
   setPageStatus: Dispatch<SetStateAction<number>>
   isLoadingCGenerationStatus: boolean
   circleGenerationStatus: ICircleGenerationStatus | null
+  isGenesisPost: boolean
   setCircleGenerationStatus: Dispatch<SetStateAction<ICircleGenerationStatus | null>>
   getCircleGenerationStatus: () => void
+  setCircleData: Dispatch<SetStateAction<CircleInterface>>
+  setIsGenesisPost: Dispatch<SetStateAction<boolean>>
+}
+
+export const initialCircleData = {
+  id: '',
+  name: '',
+  description: '',
+  tags: [''],
+  circle_logo_image: '',
 }
 
 const CircleContext = createContext<ICircleContext>({
@@ -33,13 +45,17 @@ const CircleContext = createContext<ICircleContext>({
   currentTabId: NaN,
   isLoading: true,
   currentPageCircleIds: [],
+  circleData: initialCircleData,
   getCircles: () => { },
   pageStatus: 0,
+  isGenesisPost: false,
   setPageStatus: () => { },
   isLoadingCGenerationStatus: false,
   circleGenerationStatus: null,
   setCircleGenerationStatus: () => { },
-  getCircleGenerationStatus: () => { }
+  getCircleGenerationStatus: () => { },
+  setCircleData: () => { },
+  setIsGenesisPost: () => { },
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -56,6 +72,8 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
+  const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
+  const [isGenesisPost, setIsGenesisPost] = useState(false)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -139,13 +157,17 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         currentTabId,
         currentPageCircleIds,
         getCircles,
+        circleData,
         isLoading,
         pageStatus,
+        isGenesisPost,
         setPageStatus,
         isLoadingCGenerationStatus,
         circleGenerationStatus,
         setCircleGenerationStatus,
-        getCircleGenerationStatus
+        getCircleGenerationStatus,
+        setCircleData,
+        setIsGenesisPost,
       }}
     >
       {children}

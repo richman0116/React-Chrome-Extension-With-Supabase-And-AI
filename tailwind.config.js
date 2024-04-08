@@ -16,11 +16,13 @@ module.exports = {
         stroke: '#E7E8E8',
         tertiary: '#A1A2A3',
         alert: '#F64F4F',
+        branding: '#DDF4E8'
       },
       fontSize: {
         '3.5xl': '2rem', //32px
       },
       spacing: {
+        2.5: '0.625rem',// 10px
         3.725: '0.9375rem', //15px
       },
       width: {

@@ -37,7 +37,7 @@ const EnlightenMe = () => {
     });
   }, [currentTabId, getCircleGenerationStatus])
   return (
-    <div className="w-full h-140 relative">
+    <div className="w-full h-140 relative p-5">
       <CreationHeader
         title="Create Circle"
         onBack={() => {

@@ -131,7 +131,8 @@ export const handleCircleCreation = (
   name: string,
   description: string,
   imageData: string,
-  tagNames: string[]
+  tagNames: string[],
+  isGenesisPost: boolean
 ) => {
   supabase
     .rpc('tags_add_new_return_all_ids', {
@@ -139,8 +140,13 @@ export const handleCircleCreation = (
     })
     .then(async (result) => {
       const addedTags = result.data
+
+      const genesisPostCircleCreationFuncName =
+        'circles_checkpoint_add_new_with_genesis_post'
+      const generalCircleCreationFuncName =
+        'circles_checkpoint_add_new_with_tags_return_id'
       const { data } = await supabase.rpc(
-        'circles_checkpoint_add_new_with_tags_return_id',
+        `${isGenesisPost ? genesisPostCircleCreationFuncName : generalCircleCreationFuncName}`,
         {
           p_circle_name: name,
           p_url: pageUrl,

@@ -396,7 +396,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === BJActions.CREATE_CIRCLE) {
     if (supabaseUser) {
-      const { tabId, url, circleName, circleDescription, imageData, tags } = request
+      const {
+        tabId,
+        url,
+        circleName,
+        circleDescription,
+        imageData,
+        tags,
+        isGenesisPost,
+      } = request
 
       const generatingCircle: ICircleGenerationStatus = {
         type: 'manual',
@@ -416,7 +424,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   circleName,
                   circleDescription,
                   imageData,
-                  addedTagNames
+                  addedTagNames,
+                  isGenesisPost
                 )
               }
             )
@@ -432,7 +441,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             circleName,
             circleDescription,
             imageData,
-            tags
+            tags,
+            isGenesisPost
           )
         }
         sendResponse(true)
@@ -685,6 +695,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then((result) => {
           console.log('background.js: result of getting user circles count : ', result)
           sendResponse(result.data)
+        })
+    } else {
+      console.error('background.js: User not logged in when calling getUserCircles')
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true
+  }
+
+  if (request.action === BJActions.CREATE_POST) {
+    console.log('background.js: Creating a post')
+    const { context, circleId } = request
+    if (supabaseUser) {
+      supabase
+        .rpc('posts_create_post_with_post_image_url', {
+          context,
+          circle_id: circleId,
+          url: '',
+        })
+        .then((result) => {
+          console.log('background.js: result of getting user circles count : ', result)
+          const { data, error } = result
+          if (error) {
+            sendResponse({ error })
+          }
+          sendResponse(data)
         })
     } else {
       console.error('background.js: User not logged in when calling getUserCircles')

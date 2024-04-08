@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import FormLine from '../../../../components/FormLine'
@@ -15,8 +15,7 @@ import {
 } from '../../../../utils/helpers'
 import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
 
-import { CircleInterface } from '../../../../types/circle'
-import { initialCircleData } from '..'
+import { initialCircleData } from '../../../../context/CircleContext'
 import UploadIcon from '../../../../components/SVGIcons/UploadIcon'
 import classNames from 'classnames'
 import { BJActions } from '../../../../background/actions'
@@ -26,18 +25,14 @@ interface CircleFormData {
   description: string
 }
 
-interface IAddManualCIrcle {
-  circleData: CircleInterface
-  setCircleData: Dispatch<SetStateAction<CircleInterface>>
-}
-
-export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle) => {
+export const AddManualCircle = () => {
+  const { circleData, setCircleData } = useCircleContext()
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [circleImageUrl, setCircleImageUrl] = useState('')
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost } = useCircleContext()
   const {
     handleSubmit,
     register,
@@ -96,15 +91,17 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
           circleDescription: description,
           imageData,
           tags: circleData?.tags,
+          isGenesisPost
         },
         (response: boolean) => {
           if (response) {
+            setIsGenesisPost(false)
             getCircleGenerationStatus()
           }
         }
       )
     }
-  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, url])
+  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
@@ -142,19 +139,9 @@ export const AddManualCircle = ({ circleData, setCircleData }: IAddManualCIrcle)
   }
 
   const handlePrevClick = useCallback(() => {
-    chrome.runtime.sendMessage(
-      {
-        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-        tabId: currentTabId
-      },
-      (res) => {
-        if (res) {
-          setCircleData(initialCircleData)
-          setPageStatus(circlePageStatus.CIRCLE_LIST)
-        }
-      }
-    )
-  }, [currentTabId, setCircleData, setPageStatus])
+    setCircleData(initialCircleData)
+    setPageStatus(circlePageStatus.CIRCLE_LIST)
+  }, [setCircleData, setPageStatus])
 
   return (
     <div className="w-full h-140 py-5">

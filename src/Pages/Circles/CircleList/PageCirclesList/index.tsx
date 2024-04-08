@@ -25,6 +25,9 @@ const PageCirclList = () => {
       })}
     >
       <div className="w-full flex flex-col gap-2">
+        <div className="w-full">
+          {!isLoading && <p className="text-xl font-medium text-primary pb-1">Existing Circles on this page</p>}
+        </div>
         {isLoading && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
             <LoadingPage />
@@ -32,7 +35,7 @@ const PageCirclList = () => {
         )}
 
         {!isLoading && circles.length > 0 && (
-          <div className="w-full flex flex-col gap-1">
+          <div className="w-full flex flex-col gap-y-2">
             {circles.map((circle, index) => (
               <CircleItem key={index} circle={circle} url={url} />
             ))}

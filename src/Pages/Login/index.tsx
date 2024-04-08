@@ -74,7 +74,7 @@ const Login = () => {
   }, [])
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col p-5">
       <div className="flex flex-col gap-5 w-full">
         <Header />
         <h2 className="text-3.5xl font-medium capitalize text-primary leading-normal">

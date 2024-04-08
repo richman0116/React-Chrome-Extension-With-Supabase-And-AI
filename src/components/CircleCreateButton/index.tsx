@@ -5,7 +5,7 @@ import { useCircleContext } from "../../context/CircleContext"
 import { circlePageStatus } from "../../utils/constants"
 
 const CircleCreateButton = () => {
-  const { setPageStatus, showOptions, setShowOptions } = useCircleContext()
+  const { setPageStatus } = useCircleContext()
 
   const handleAddGeneratedCircles = useCallback(() => {
     setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
@@ -16,18 +16,14 @@ const CircleCreateButton = () => {
   }, [setPageStatus])
 
   return (
-    <div className="relative inline-block">
-      <Button onClick={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        setShowOptions((prev) => !prev)
-      }}>
+    <div className="relative inline-block group">
+      <Button>
         <Plus />
       </Button>
-      {showOptions && <div className="absolute left-1/2 -translate-x-1/2 -top-20 z-10 w-44 bg-white border border-stroke rounded-lg flex flex-col cursor-pointer divide-y divide-solid divide-stroke" >
-        <button onClick={handleAddGeneratedCircles} className="w-full hover:bg-gray-100 p-2 text-black font-medium text-sm leading-normal">AI generated circles</button>
-        <button onClick={handleAddManually} className="w-full hover:bg-gray-100 p-2 text-black font-medium text-sm leading-normal">Manually</button>
-      </div>}
+      <div className="hidden group-hover:flex absolute left-1/2 -translate-x-1/2 -top-[85px] z-10 w-44 bg-white border border-stroke rounded-lg flex-col cursor-pointer divide-y divide-solid divide-stroke" >
+        <button onClick={handleAddGeneratedCircles} className="w-full hover:bg-gray-100 p-2.5 text-black font-medium text-sm leading-normal">AI generated circles</button>
+        <button onClick={handleAddManually} className="w-full hover:bg-gray-100 p-2.5 text-black font-medium text-sm leading-normal">Manually</button>
+      </div>
     </div>
   )
 }

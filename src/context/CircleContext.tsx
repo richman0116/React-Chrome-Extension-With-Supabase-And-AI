@@ -25,12 +25,10 @@ interface ICircleContext {
   isLoadingCGenerationStatus: boolean
   circleGenerationStatus: ICircleGenerationStatus | null
   isGenesisPost: boolean
-  showOptions: boolean
   setCircleGenerationStatus: Dispatch<SetStateAction<ICircleGenerationStatus | null>>
   getCircleGenerationStatus: () => void
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
   setIsGenesisPost: Dispatch<SetStateAction<boolean>>
-  setShowOptions: Dispatch<SetStateAction<boolean>>
 }
 
 export const initialCircleData = {
@@ -51,7 +49,6 @@ const CircleContext = createContext<ICircleContext>({
   getCircles: () => { },
   pageStatus: 0,
   isGenesisPost: false,
-  showOptions: false,
   setPageStatus: () => { },
   isLoadingCGenerationStatus: false,
   circleGenerationStatus: null,
@@ -59,7 +56,6 @@ const CircleContext = createContext<ICircleContext>({
   getCircleGenerationStatus: () => { },
   setCircleData: () => { },
   setIsGenesisPost: () => { },
-  setShowOptions: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -78,7 +74,6 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
   const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
   const [isGenesisPost, setIsGenesisPost] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -166,7 +161,6 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         isLoading,
         pageStatus,
         isGenesisPost,
-        showOptions,
         setPageStatus,
         isLoadingCGenerationStatus,
         circleGenerationStatus,
@@ -174,7 +168,6 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         getCircleGenerationStatus,
         setCircleData,
         setIsGenesisPost,
-        setShowOptions
       }}
     >
       {children}

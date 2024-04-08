@@ -6,12 +6,13 @@ import LoadingSpinner from "../LoadingSpinner"
 
 
 interface ICommentBox {
-  onShare: (comment: string) => void
+  circleImageUrl: string
+  onComment: (comment: string) => void
   onClose: () => void
-  isSharing: boolean
+  isCommenting: boolean
 }
 
-const CommentBox = ({ onShare, onClose, isSharing }: ICommentBox) => {
+const CommentBox = ({ circleImageUrl, onComment, onClose, isCommenting }: ICommentBox) => {
   const [comment, setComment] = useState('')
 
   const handleCommentChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -19,11 +20,11 @@ const CommentBox = ({ onShare, onClose, isSharing }: ICommentBox) => {
   }, [])
 
   const handleSendIconClick = useCallback(() => {
-    onShare(comment)
-  }, [comment, onShare])
+    onComment(comment)
+  }, [comment, onComment])
 
   return (
-    <div className="w-full rounded-2xl bg-branding pb-5">
+    <div className="w-[333px] rounded-2xl bg-branding pb-5">
       <div className="pt-1 px-1">
         <input
           type="text"
@@ -35,8 +36,15 @@ const CommentBox = ({ onShare, onClose, isSharing }: ICommentBox) => {
       </div>
       <div className="w-full flex flex-col gap-y-4">
         <div className="w-full pt-4 px-5 flex justify-between items-center">
-          <p className="text-base font-semibold leading-normal text-brand">{`${isSharing ? 'Sharing' : 'Share'}`} to</p>
-          {isSharing ?
+          <div className="flex items-center gap-x-2">
+            <p className="text-base font-semibold leading-normal text-brand">{`${isCommenting ? 'Sharing' : 'Share'}`} to</p>
+            <img
+              src={circleImageUrl || `../duck.jpg`}
+              alt="circle logo"
+              className=" rounded-full min-w-[24px] h-6"
+            />
+          </div>
+          {isCommenting ?
             <LoadingSpinner size={24} />
             :
             <div className="flex gap-x-2">

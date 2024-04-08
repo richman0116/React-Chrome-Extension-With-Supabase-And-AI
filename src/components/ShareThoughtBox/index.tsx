@@ -49,7 +49,7 @@ const ShareThoughtBox = () => {
         <div className="w-full pt-4 px-5 flex justify-between items-center">
           <p className="text-base font-semibold leading-normal text-brand">{commentBoxTitle}</p>
           {showCircles ?
-            <div className="cursor-pointer" onClick={() => setShowCircles(false)}><XIcon /></div>
+            <div className="cursor-pointer text-brand" onClick={() => setShowCircles(false)}><XIcon /></div>
             :
             <div className="cursor-pointer text-brand" onClick={handleSendIconClick}><Send /></div>
           }

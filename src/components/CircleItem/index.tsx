@@ -22,6 +22,7 @@ const CircleItem = ({
   const [isJoined, setIsJoined] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [showComment, setShowCommentBox] = useState(false)
+  const [isCommenting, setIsCommenting] = useState(false)
 
   const checkIfJoined = useCallback(async () => {
     chrome.runtime.sendMessage(
@@ -37,43 +38,41 @@ const CircleItem = ({
     checkIfJoined()
   }, [checkIfJoined])
 
-  const handlePost = useCallback((comment: string, circleId: string) => {
+  const handlePost = useCallback((comment: string) => {
     if (comment.length > 0) {
+      setIsCommenting(true)
       chrome.runtime.sendMessage(
         {
           action: BJActions.CREATE_POST,
           context: comment,
-          circleId
+          circleId: circle.id
         },
         (res) => {
           setIsJoining(false)
           if (!res.error) {
+            setIsCommenting(false)
             setTimeout(() => {
               setShowCommentBox(false)
             }, 1000)
           }
         }
       )
-    } else {
-      setIsJoining(false)
-      setShowCommentBox(false)
     }
-  }, [])
+  }, [circle.id])
 
-  const handleShare = useCallback((comment: string) => {
-    setIsJoining(true)
-    if (!isJoined) {
-      chrome.runtime.sendMessage({ action: BJActions.JOIN_CIRCLE, circleId: circle.id, url }, async (response) => {
+  const handleJoin = useCallback(
+    (circleId: string) => {
+      setIsJoining(true)
+      chrome.runtime.sendMessage({ action: BJActions.JOIN_CIRCLE, circleId, url }, async (response) => {
         if (response === true) {
-          handlePost(comment, circle.id)
           await checkIfJoined()
+          setShowCommentBox(true)
         }
         setIsJoining(false)
       })
-    } else {
-      handlePost(comment, circle.id)
-    }
-  }, [checkIfJoined, circle.id, handlePost, isJoined, url])
+    },
+    [checkIfJoined, url]
+  )
 
   return (
     <div className="w-full flex flex-col gap-y-1">
@@ -123,13 +122,17 @@ const CircleItem = ({
             :
             <RoundedButton
               disabled={isJoining}
-              onClick={() => setShowCommentBox(true)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleJoin(circle.id)
+              }}
             >
               {isJoining ? 'Joining' : 'Join'}
             </RoundedButton>
         }
       </div>
-      {showComment && <CommentBox onShare={handleShare} onClose={() => setShowCommentBox(false)} isSharing={isJoining} />}
+      {showComment && <CommentBox circleImageUrl={circle.circle_logo_image} onComment={handlePost} onClose={() => setShowCommentBox(false)} isCommenting={isCommenting} />}
     </div>
   )
 }

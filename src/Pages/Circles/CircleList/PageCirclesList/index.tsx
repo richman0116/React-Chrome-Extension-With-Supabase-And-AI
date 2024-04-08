@@ -35,7 +35,7 @@ const PageCirclList = () => {
         )}
 
         {!isLoading && circles.length > 0 && (
-          <div className="w-full flex flex-col gap-1">
+          <div className="w-full flex flex-col gap-y-2">
             {circles.map((circle, index) => (
               <CircleItem key={index} circle={circle} url={url} />
             ))}

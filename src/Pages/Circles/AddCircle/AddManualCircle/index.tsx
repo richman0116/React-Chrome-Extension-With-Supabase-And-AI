@@ -140,7 +140,7 @@ export const AddManualCircle = () => {
 
   const handlePrevClick = useCallback(() => {
     setCircleData(initialCircleData)
-    setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+    setPageStatus(circlePageStatus.CIRCLE_LIST)
   }, [setCircleData, setPageStatus])
 
   return (

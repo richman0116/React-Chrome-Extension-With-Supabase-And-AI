@@ -5,8 +5,8 @@ import MyCircles from './MyCircles'
 import { useCircleContext } from '../../../context/CircleContext'
 import PageCirclList from './PageCirclesList'
 import Avatar from '../../../components/Avatar'
-import CommentBox from '../../../components/CommentBox'
 import CircleCreateButton from '../../../components/CircleCreateButton'
+import ShareThoughtBox from '../../../components/ShareThoughtBox'
 
 const CircleList = () => {
   const [showAvatar, setShowAvatar] = useState(false)
@@ -49,7 +49,7 @@ const CircleList = () => {
       </div>
       <div className="w-full flex flex-col items-center gap-5 px-5">
         <p className="text-3.5xl font-medium leading-normal capitalize text-primary">Any Thoughts About This Page?</p>
-        <CommentBox />
+        <ShareThoughtBox />
         <PageCirclList />
         <MyCircles />
         <div className="fixed bottom-6 w-fit justify-center">

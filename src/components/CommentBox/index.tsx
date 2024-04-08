@@ -1,38 +1,26 @@
-import { ChangeEvent, useCallback, useMemo, useState } from "react"
+import { ChangeEvent, useCallback, useState } from "react"
 
-import CreateCircleItem from "../CreateCircleItem"
-import ShareCircleItem from "../ShareCircleItem"
 import Send from "../SVGIcons/Send"
 import XIcon from "../SVGIcons/XIcon"
-import { useCircleContext } from "../../context/CircleContext"
+import LoadingSpinner from "../LoadingSpinner"
 
-const CommentBox = () => {
+
+interface ICommentBox {
+  onShare: (comment: string) => void
+  onClose: () => void
+  isSharing: boolean
+}
+
+const CommentBox = ({ onShare, onClose, isSharing }: ICommentBox) => {
   const [comment, setComment] = useState('')
-  const [showCircles, setShowCircles] = useState(false)
-
-  const { circles } = useCircleContext()
-
-  const commentBoxTitle = useMemo(() => {
-    if (showCircles) {
-      return "Choose a circle to share"
-    } else {
-      if (circles.length > 0) {
-        return "Share to circle"
-      } else {
-        return "SHare ideas & create circle"
-      }
-    }
-  }, [circles.length, showCircles])
 
   const handleCommentChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value)
   }, [])
 
   const handleSendIconClick = useCallback(() => {
-    if (comment.length > 0) {
-      setShowCircles(true)
-    }
-  }, [comment.length])
+    onShare(comment)
+  }, [comment, onShare])
 
   return (
     <div className="w-full rounded-2xl bg-branding pb-5">
@@ -47,19 +35,15 @@ const CommentBox = () => {
       </div>
       <div className="w-full flex flex-col gap-y-4">
         <div className="w-full pt-4 px-5 flex justify-between items-center">
-          <p className="text-base font-semibold leading-normal text-brand">{commentBoxTitle}</p>
-          {showCircles ?
-            <div className="cursor-pointer" onClick={() => setShowCircles(false)}><XIcon /></div>
+          <p className="text-base font-semibold leading-normal text-brand">{`${isSharing ? 'Sharing' : 'Share'}`} to</p>
+          {isSharing ?
+            <LoadingSpinner size={24} />
             :
-            <div className="cursor-pointer text-brand" onClick={handleSendIconClick}><Send /></div>
-          }
+            <div className="flex gap-x-2">
+              <div className="cursor-pointer text-brand" onClick={handleSendIconClick}><Send /></div>
+              <div className="cursor-pointer text-brand" onClick={onClose}><XIcon width={24} height={24} /></div>
+            </div>}
         </div>
-        {showCircles && <div className="px-2">
-          <CreateCircleItem comment={comment} />
-          <div className="w-full grid grid-cols-2 gap-2 pt-2">
-            {circles.map((circle) => <ShareCircleItem circle={circle} key={circle.id} comment={comment} setComment={setComment} setShowCircles={setShowCircles} />)}
-          </div>
-        </div>}
       </div>
     </div>
   )

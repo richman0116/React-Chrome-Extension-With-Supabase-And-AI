@@ -139,9 +139,19 @@ export const AddManualCircle = () => {
   }
 
   const handlePrevClick = useCallback(() => {
-    setCircleData(initialCircleData)
-    setPageStatus(circlePageStatus.CIRCLE_LIST)
-  }, [setCircleData, setPageStatus])
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      },
+      (res) => {
+        if (res) {
+          setPageStatus(circlePageStatus.CIRCLE_LIST)
+          setCircleData(initialCircleData)
+        }
+      }
+    )
+  }, [currentTabId, setCircleData, setPageStatus])
 
   return (
     <div className="w-full h-140 py-5">

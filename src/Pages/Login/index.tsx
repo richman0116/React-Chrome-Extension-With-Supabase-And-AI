@@ -63,15 +63,18 @@ const Login = () => {
   const handleSignInWithGoogle = useCallback(() => {
     try {
       setIsSubmitting(true)
-      chrome.runtime.sendMessage(
-        {
-          action: BJActions.LOGIN_WITH_GOOGLE,
+      chrome.runtime.sendMessage({ action: BJActions.LOGIN_WITH_GOOGLE })
+      chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.message === 'googleLogInResult') {
+          const loggedIn = request.loggedIn
+          setIsSubmitting(false)
+          setIsAuthenticated(loggedIn)
         }
-      )
+      })
     } catch (error) {
       console.error(error)
     }
-  }, [])
+  }, [setIsAuthenticated])
 
   return (
     <div className="w-full h-full flex flex-col p-5">

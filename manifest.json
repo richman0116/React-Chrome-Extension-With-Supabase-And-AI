@@ -29,8 +29,13 @@
     "scripting",
     "activeTab",
     "storage",
-    "history"
+    "history",
+    "identity"
   ],
+  "oauth2": {
+    "client_id": "135731472785-ki2qtvcmtm4f462dtr99lnvm8jg94u2m.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  },
   "host_permissions": [
     "http://*/*",
     "https://*/*"

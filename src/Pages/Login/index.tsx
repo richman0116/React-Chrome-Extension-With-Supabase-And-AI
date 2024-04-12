@@ -7,7 +7,7 @@ import Header from '../../components/Header'
 import { Paths } from '../../utils/constants'
 import GoogleIcon from '../../components/SVGIcons/GoogleIcon'
 import { useAuthContext } from '../../context/AuthContext'
-import { BJActions } from '../../background/actions'
+import { BJActions, BJMessages } from '../../background/actions'
 
 interface LoginFormData {
   email: string
@@ -63,15 +63,18 @@ const Login = () => {
   const handleSignInWithGoogle = useCallback(() => {
     try {
       setIsSubmitting(true)
-      chrome.runtime.sendMessage(
-        {
-          action: BJActions.LOGIN_WITH_GOOGLE,
+      chrome.runtime.sendMessage({ action: BJActions.LOGIN_WITH_GOOGLE })
+      chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.message === BJMessages.GOOGLE_LOGIN_RESULT) {
+          const loggedIn = request.loggedIn
+          setIsSubmitting(false)
+          setIsAuthenticated(loggedIn)
         }
-      )
+      })
     } catch (error) {
       console.error(error)
     }
-  }, [])
+  }, [setIsAuthenticated])
 
   return (
     <div className="w-full h-full flex flex-col p-5">

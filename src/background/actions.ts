@@ -25,3 +25,7 @@ export enum BJActions {
   GET_USER_CIRCLE_COUNT = 'getUserCirclesCount',
   CREATE_POST = 'createPost',
 }
+
+export enum BJMessages {
+  GOOGLE_LOGIN_RESULT = 'googleLogInResult',
+}

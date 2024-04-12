@@ -10,7 +10,7 @@ import {
   removeItemFromStorage,
   setToStorage,
 } from './helpers'
-import { BJActions } from './actions'
+import { BJActions, BJMessages } from './actions'
 import { generateCircleImage, generateTags } from '../utils/edgeFunctions'
 
 const bannedURLList: string[] = [
@@ -74,15 +74,15 @@ const loginWithEmailPassword = async (email: string, password: string) => {
 
 const loginWithGoogle = async () => {
   try {
-    const manifest: any = chrome.runtime.getManifest() as chrome.runtime.Manifest;
-    console.log(chrome.runtime.id);
+    const manifest: any = chrome.runtime.getManifest() as chrome.runtime.Manifest
+    console.log(chrome.runtime.id)
 
-    const url = new URL('https://accounts.google.com/o/oauth2/auth');
-    url.searchParams.set('client_id', manifest.oauth2.client_id);
-    url.searchParams.set('response_type', 'id_token');
-    url.searchParams.set('access_type', 'offline');
-    url.searchParams.set('redirect_uri', `https://${chrome.runtime.id}.chromiumapp.org`);
-    url.searchParams.set('scope', manifest.oauth2.scopes.join(' '));
+    const url = new URL('https://accounts.google.com/o/oauth2/auth')
+    url.searchParams.set('client_id', manifest.oauth2.client_id)
+    url.searchParams.set('response_type', 'id_token')
+    url.searchParams.set('access_type', 'offline')
+    url.searchParams.set('redirect_uri', `https://${chrome.runtime.id}.chromiumapp.org`)
+    url.searchParams.set('scope', manifest.oauth2.scopes.join(' '))
 
     chrome.identity.launchWebAuthFlow(
       {
@@ -91,49 +91,63 @@ const loginWithGoogle = async () => {
       },
       async (redirectedTo: any) => {
         if (chrome.runtime.lastError) {
-          console.error('Authentication failed:', chrome.runtime.lastError.message);
-          chrome.runtime.sendMessage({ message: 'googleLogInResult', loggedIn: false })
+          console.error('Authentication failed:', chrome.runtime.lastError.message)
+          chrome.runtime.sendMessage({
+            message: BJMessages.GOOGLE_LOGIN_RESULT,
+            loggedIn: false,
+          })
           return
         }
 
-        const redirectedURL = new URL(redirectedTo);
-        const params = new URLSearchParams(redirectedURL.hash.substring(1)); // Remove the leading '#'
+        const redirectedURL = new URL(redirectedTo)
+        const params = new URLSearchParams(redirectedURL.hash.substring(1)) // Remove the leading '#'
 
-        const idToken = params.get('id_token');
+        const idToken = params.get('id_token')
         if (idToken) {
           const { data, error } = await supabase.auth.signInWithIdToken({
             provider: 'google',
             token: idToken,
-          });
+          })
 
           if (error) {
-            console.error('Sign-in error:', error);
-            chrome.runtime.sendMessage({ message: 'googleLogInResult', loggedIn: false })
+            console.error('Sign-in error:', error)
+            chrome.runtime.sendMessage({
+              message: BJMessages.GOOGLE_LOGIN_RESULT,
+              loggedIn: false,
+            })
             return
           }
 
-          console.log('Sign-in data:', data);
           userLoaded = true
           const { session, user } = data
           await supabase.auth.setSession(session)
           supabaseUser = {
             data: {
-              user
-            }
+              user,
+            },
           } as SupabaseUserDataInterface
           console.log('background.js: New supabase user: ', supabaseUser)
           setToStorage('supabaseSession', JSON.stringify(session))
-          chrome.runtime.sendMessage({ message: 'googleLogInResult', loggedIn: true })
+          chrome.runtime.sendMessage({
+            message: BJMessages.GOOGLE_LOGIN_RESULT,
+            loggedIn: true,
+          })
         } else {
-          console.error('No ID token found in URL hash.');
-          chrome.runtime.sendMessage({ message: 'googleLogInResult', loggedIn: false })
+          console.error('No ID token found in URL hash.')
+          chrome.runtime.sendMessage({
+            message: BJMessages.GOOGLE_LOGIN_RESULT,
+            loggedIn: false,
+          })
           return
         }
       }
-    );
+    )
   } catch (error) {
-    console.error('Error during login:', error);
-    chrome.runtime.sendMessage({ message: 'googleLogInResult', loggedIn: false })
+    console.error('Error during login:', error)
+    chrome.runtime.sendMessage({
+      message: BJMessages.GOOGLE_LOGIN_RESULT,
+      loggedIn: false,
+    })
   }
 }
 

@@ -19,7 +19,7 @@ const ShareThoughtBox = () => {
       if (circles.length > 0) {
         return "Share to circle"
       } else {
-        return "SHare ideas & create circle"
+        return "Share ideas & create circle"
       }
     }
   }, [circles.length, showCircles])

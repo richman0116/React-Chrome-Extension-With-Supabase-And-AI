@@ -4,6 +4,7 @@ import { CircleInterface } from '../../types/circle'
 import RoundedButton from '../Buttons/RoundedButton'
 import { useCircleContext } from '../../context/CircleContext'
 import { BJActions } from '../../background/actions'
+import { edenUrl } from '../../utils/constants'
 
 interface ILinkCircleItem {
   circle: CircleInterface
@@ -30,7 +31,7 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
 
   return (
     <a
-      href={`https://0xeden.com/circle/${circle.id}`}
+      href={`${edenUrl}/circle/${circle.id}`}
       rel="noreferrer"
       target="_blank"
       className="p-3 transition-transform transform hover:cursor-pointer border border-stroke hover:bg-gray-100 flex gap-3 items-center rounded-2xl group hover:justify-between"

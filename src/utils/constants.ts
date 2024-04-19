@@ -7,8 +7,10 @@ export const circlePageStatus = {
   ENLIGHTEN_ME: 3,
 }
 
+export const edenUrl = 'https://app.0xeden.com'
+
 export const Paths = {
-  SIGNUP: 'https://0xeden.com/signup',
+  SIGNUP: `${edenUrl}/signup`,
 }
 
 export const supabaseSotrageUrl = `${SUPABASE_URL}/storage/v1/object/public`

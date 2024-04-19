@@ -7,6 +7,7 @@ import LoadingSpinner from '../LoadingSpinner'
 import MessageIcon from '../SVGIcons/MessageIcon/MessageIcon'
 import CommentBox from '../CommentBox'
 import classNames from 'classnames'
+import { edenUrl } from '../../utils/constants'
 
 interface CircleItemInterface {
   circle: CircleInterface
@@ -80,7 +81,7 @@ const CircleItem = ({
           <p className="text-xs font-bold leading-normal text-white">Joined</p>
         </div>}
         <a
-          href={`https://0xeden.com/circle/${circle.id}`}
+          href={`${edenUrl}/circle/${circle.id}`}
           rel="noreferrer"
           target="_blank"
           className="cursor-pointer"

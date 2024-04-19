@@ -7,7 +7,6 @@ import {
   handleCircleCreation,
   handleCircleGeneration,
   handleCircleGenerationWithHistory,
-  removeItemFromStorage,
   setToStorage,
 } from './helpers'
 import { BJActions, BJMessages } from './actions'
@@ -50,6 +49,11 @@ interface SupabaseUserDataInterface {
 
 let userLoaded = false // check if we are loading the user
 let supabaseUser: SupabaseUserDataInterface = {} // store the user
+
+let circleGeneratedStatus = {
+  autoGeneratingCircles: {},
+  manualCreatingCircle: {},
+}
 
 // log user in with email and password
 // if the result is success
@@ -419,7 +423,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         status: CircleGenerationStatus.GENERATING,
         result: [],
       }
-      setToStorage(tabId.toString(), JSON.stringify(generatingCircle))
+
+      circleGeneratedStatus.manualCreatingCircle = generatingCircle
+
+      setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
       try {
         if (tags.length === 1 && tags[0] === '') {
           try {
@@ -510,7 +517,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         status: CircleGenerationStatus.GENERATING,
         result: [],
       }
-      setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
+
+      circleGeneratedStatus.autoGeneratingCircles = generatingCircles
+
+      setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
 
       try {
         handleCircleGeneration(tabId, request.pageUrl, request.pageContent)
@@ -536,7 +546,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         status: CircleGenerationStatus.GENERATING,
         result: [],
       }
-      setToStorage(tabId.toString(), JSON.stringify(generatingCircles))
+
+      circleGeneratedStatus.autoGeneratingCircles = generatingCircles
+
+      setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
 
       try {
         handleCircleGenerationWithHistory(tabId, request.histories)
@@ -558,10 +571,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     )
 
     const { tabId, name, description, tags } = request
-    // initialize the status
-    setToStorage(
-      tabId.toString(),
-      JSON.stringify({
+    getFromStorage(tabId?.toString()).then((generationStatus: any) => {
+      circleGeneratedStatus = generationStatus
+      // initialize the status
+      circleGeneratedStatus.manualCreatingCircle = {
         type: 'manual',
         status: CircleGenerationStatus.INITIALIZED,
         result: [
@@ -572,43 +585,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             tags,
           },
         ],
-      })
-    )
+      }
+      setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+    })
 
     generateCircleImage(undefined, name, description).then((result) => {
-      if (result.error) {
-        setToStorage(
-          tabId.toString(),
-          JSON.stringify({
-            type: 'manual',
-            status: CircleGenerationStatus.FAILED,
-            result: [
-              {
-                id: '',
-                name,
-                description,
-                tags,
-              },
-            ],
-          })
-        )
-      } else if (result.url) {
-        const imageUrl = result?.url?.replaceAll('"', '')
-        const newCircleGenerationStatus: ICircleGenerationStatus = {
-          type: 'manual',
-          status: CircleGenerationStatus.INITIALIZED,
-          result: [
-            {
-              id: '',
-              name,
-              description,
-              tags,
-              circle_logo_image: imageUrl,
-            },
-          ],
+      getFromStorage(tabId?.toString()).then((generationStatus: any) => {
+        circleGeneratedStatus = generationStatus
+        if (Object.keys(circleGeneratedStatus.manualCreatingCircle).length > 0) {
+          if (result.error) {
+            setToStorage(
+              tabId.toString(),
+              JSON.stringify({
+                type: 'manual',
+                status: CircleGenerationStatus.FAILED,
+                result: [
+                  {
+                    id: '',
+                    name,
+                    description,
+                    tags,
+                  },
+                ],
+              })
+            )
+          } else if (result.url) {
+            const imageUrl = result?.url?.replaceAll('"', '')
+            const newCircleGenerationStatus: ICircleGenerationStatus = {
+              type: 'manual',
+              status: CircleGenerationStatus.INITIALIZED,
+              result: [
+                {
+                  id: '',
+                  name,
+                  description,
+                  tags,
+                  circle_logo_image: imageUrl,
+                },
+              ],
+            }
+
+            circleGeneratedStatus.manualCreatingCircle = newCircleGenerationStatus
+
+            setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+          }
+        } else {
+          circleGeneratedStatus = generationStatus
+          circleGeneratedStatus.manualCreatingCircle = {}
+          setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
         }
-        setToStorage(tabId.toString(), JSON.stringify(newCircleGenerationStatus))
-      }
+      })
     })
 
     return true
@@ -618,8 +644,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('background.js: Getting saved circles from the storage')
     const tabId = request.tabId
     getFromStorage(tabId?.toString())
-      .then((generationStatus: ICircleGenerationStatus) => {
-        sendResponse(Object.keys(generationStatus).length > 0 ? generationStatus : null)
+      .then((generationStatus: any) => {
+        console.log(generationStatus, 'That is localStorage data!!!!!!')
+        const autoLength = Object.keys(generationStatus.autoGeneratingCircles).length
+        const manualLength = Object.keys(generationStatus.manualCreatingCircle).length
+        if (
+          generationStatus.autoGeneratingCircles.type === 'auto' &&
+          autoLength > 0 &&
+          manualLength === 0
+        )
+          sendResponse(generationStatus.autoGeneratingCircles)
+        if (generationStatus.manualCreatingCircle.type === 'manual' && manualLength > 0)
+          sendResponse(generationStatus.manualCreatingCircle)
+        if (autoLength === 0 && manualLength === 0) sendResponse({})
       })
       .catch(() => {
         sendResponse(null)
@@ -627,21 +664,42 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === BJActions.SET_CIRCLE_GENERATION_STATUS) {
-    console.log('background.js: Saving circle generation status to storage')
-    const tabId = request.tabId
-    setToStorage(tabId.toString(), JSON.stringify(request.circleGenerationStatus))
-    sendResponse(true)
-
-    return true
-  }
-
   if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
     const tabId = request.tabId
     console.log('background.js: Removing circles from the storage. TabId: ', tabId)
     try {
-      removeItemFromStorage(tabId.toString())
-      sendResponse(true)
+      getFromStorage(tabId?.toString())
+        .then((generationStatus: any) => {
+          circleGeneratedStatus = generationStatus
+          const autoLength = Object.keys(generationStatus.autoGeneratingCircles).length
+          const manualLength = Object.keys(generationStatus.manualCreatingCircle).length
+          if (
+            generationStatus.autoGeneratingCircles.type === 'auto' &&
+            generationStatus.manualCreatingCircle.type === 'manual' &&
+            autoLength > 0 &&
+            manualLength > 0
+          ) {
+            circleGeneratedStatus.manualCreatingCircle = {}
+          } else if (
+            autoLength === 0 &&
+            manualLength > 0 &&
+            generationStatus.manualCreatingCircle.type === 'manual'
+          ) {
+            circleGeneratedStatus.manualCreatingCircle = {}
+          } else if (
+            manualLength === 0 &&
+            autoLength > 0 &&
+            generationStatus.autoGeneratingCircles.type === 'auto'
+          ) {
+            circleGeneratedStatus.autoGeneratingCircles = {}
+          }
+
+          setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+          sendResponse(circleGeneratedStatus)
+        })
+        .catch(() => {
+          sendResponse(null)
+        })
     } catch (err) {
       sendResponse(false)
     }

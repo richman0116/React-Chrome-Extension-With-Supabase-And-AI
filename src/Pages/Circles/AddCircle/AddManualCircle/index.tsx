@@ -32,7 +32,7 @@ export const AddManualCircle = () => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const [message, setMessage] = useState(getCircleLoadingMessage());
 
-  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost } = useCircleContext()
+  const { currentUrl: url, currentTabId, setPageStatus, circleGenerationStatus, getCircleGenerationStatus, setCircleGenerationStatus, isGenesisPost, setIsGenesisPost } = useCircleContext()
   const {
     handleSubmit,
     register,
@@ -146,12 +146,24 @@ export const AddManualCircle = () => {
       },
       (res) => {
         if (res) {
-          setPageStatus(circlePageStatus.CIRCLE_LIST)
-          setCircleData(initialCircleData)
+          const autoLength = Object.keys(res.autoGeneratingCircles).length
+          const manualLength = Object.keys(res.manualCreatingCircle).length
+          if (autoLength === 0 && manualLength === 0)
+          {
+            setCircleGenerationStatus(null)
+            setPageStatus(circlePageStatus.CIRCLE_LIST)
+            setCircleData(initialCircleData)
+          }
+          else if (autoLength > 0 && manualLength === 0)
+          {
+            setCircleGenerationStatus(res.autoGeneratingCircles)
+            setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
+            setCircleData(initialCircleData)
+          }
         }
       }
     )
-  }, [currentTabId, setCircleData, setPageStatus])
+  }, [currentTabId, setCircleData, setCircleGenerationStatus, setPageStatus])
 
   return (
     <div className="w-full h-140 py-5">

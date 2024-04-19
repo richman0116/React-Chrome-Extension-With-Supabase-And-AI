@@ -47,31 +47,40 @@ const circleGenerationSuccessHandler = (
   tabId: number,
   circles: CircleInterface[]
 ) => {
-  getFromStorage(tabId?.toString()).then((generationStatus: ICircleGenerationStatus) => {
-    if (Object.keys(generationStatus).length > 0 && generationStatus.type === type) {
-      setToStorage(
-        tabId.toString(),
-        JSON.stringify({
-          type,
-          status: CircleGenerationStatus.SUCCEEDED,
-          result: circles,
-        })
-      )
+  getFromStorage(tabId?.toString()).then((generationStatus: any) => {
+    if (
+      generationStatus &&
+      generationStatus.autoGeneratingCircles &&
+      Object.keys(generationStatus.autoGeneratingCircles).length > 0 &&
+      generationStatus.autoGeneratingCircles.type === type
+    ) {
+      let circleGeneratedStatus = generationStatus
+      circleGeneratedStatus.autoGeneratingCircles = {
+        type,
+        status: CircleGenerationStatus.SUCCEEDED,
+        result: circles,
+      }
+      setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
     }
   })
 }
 const circleGenerationFailedHandler = (type: 'auto' | 'manual', tabId: number) => {
-  getFromStorage(tabId?.toString()).then((generationStatus: ICircleGenerationStatus) => {
-    if (Object.keys(generationStatus).length > 0 && generationStatus.type === type) {
-      setToStorage(
-        tabId.toString(),
-        JSON.stringify({
-          type,
-          status: CircleGenerationStatus.FAILED,
-          result: [],
-        })
-      )
+  getFromStorage(tabId?.toString()).then((generationStatus) => {
+    const circleGeneratedStatus = generationStatus
+    if (type === 'auto') {
+      circleGeneratedStatus.autoGeneratingCircles = {
+        type,
+        status: CircleGenerationStatus.FAILED,
+        result: [],
+      }
+    } else if (type === 'manual') {
+      circleGeneratedStatus.manualCreatingCircle = {
+        type,
+        status: CircleGenerationStatus.FAILED,
+        result: [],
+      }
     }
+    setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
   })
 }
 export const handleCircleGeneration = (

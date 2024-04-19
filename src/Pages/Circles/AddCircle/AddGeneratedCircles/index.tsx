@@ -33,7 +33,7 @@ const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: s
   }, [circles])
 
   useEffect(() => {
-    if (circleGenerationStatus?.status === CircleGenerationStatus.GENERATING) {
+    if (!circleGenerationStatus || circleGenerationStatus?.status === CircleGenerationStatus.GENERATING || Object.keys(circleGenerationStatus).length === 0) {
       setIsLoading(true)
     } else if (circleGenerationStatus?.status === CircleGenerationStatus.FAILED) {
       setIsFailed(true)
@@ -42,7 +42,7 @@ const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: s
       setIsFailed(false)
       setIsLoading(false)
     }
-  }, [circleGenerationStatus?.status])
+  }, [circleGenerationStatus, circleGenerationStatus?.status])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -81,7 +81,7 @@ const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: s
   }, [currentTabId, getCircleGenerationStatus, setCircles, url])
 
   useEffect(() => {
-    if (circles.length === 0 && (!circleGenerationStatus || circleGenerationStatus.type === 'manual')) {
+    if (circles.length === 0 && (!circleGenerationStatus || Object.keys(circleGenerationStatus).length === 0)) {
       getCircles()
     }
   }, [circleGenerationStatus, circles.length, getCircles])
@@ -105,36 +105,16 @@ const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: s
       },
       (res) => {
         if (res) {
+          setCircleGenerationStatus(null)
           setPageStatus(circlePageStatus.CIRCLE_LIST)
         }
       }
     )
-  }, [currentTabId, setPageStatus])
+  }, [currentTabId, setCircleGenerationStatus, setPageStatus])
 
   const handleManualClick = useCallback(() => {
-    chrome.runtime.sendMessage(
-      {
-        action: BJActions.SET_CIRCLE_GENERATION_STATUS,
-        tabId: currentTabId,
-        circleGenerationStatus: {
-          type: 'manual',
-          status: CircleGenerationStatus.INITIALIZED,
-          result: [],
-        }
-      },
-      (res: Boolean) => {
-        if (res) {
-          setCircleGenerationStatus({
-            type: 'manual',
-            status: CircleGenerationStatus.INITIALIZED,
-            result: []
-          })
-          setPageStatus(circlePageStatus.ADD_MANUALLY)
-        }
-      }
-    )
-
-  }, [currentTabId, setCircleGenerationStatus, setPageStatus])
+    setPageStatus(circlePageStatus.ADD_MANUALLY)
+  }, [setPageStatus])
 
   return (
     isLoading ? <div className="w-full border-gray-600 flex flex-col gap-y-4">

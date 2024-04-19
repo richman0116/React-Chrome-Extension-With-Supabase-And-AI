@@ -120,10 +120,13 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
           setIsLoadingCGenerationStatus(false)
           if (res) {
             const { type, result, status } = res
+            if (Object.keys(res).length === 0 && !type) {
+              setPageStatus(circlePageStatus.CIRCLE_LIST)
+              clearInterval(getCircleGenerationStatusInterval)
+            }
             if (JSON.stringify(res) !== JSON.stringify(circleGenerationStatus)) {
               setCircleGenerationStatus(res)
             }
-
             if (type === "auto") {
               setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
               if (status !== CircleGenerationStatus.GENERATING) {

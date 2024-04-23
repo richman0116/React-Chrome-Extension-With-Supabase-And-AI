@@ -95,12 +95,19 @@ const CircleItem = ({
         <div className="w-full flex items-center">
           <div className="flex flex-col justify-between gap-1 group-hover:text-gray-900 w-full">
             <div className="flex justify-between items-center w-full">
-              <p
-                className="text-base font-bold text-primary line-clamp-1"
-                title={circle.name}
+              <a
+                href={`${edenUrl}/circle/${circle.id}`}
+                rel="noreferrer"
+                target="_blank"
+                className="cursor-pointer"
               >
-                {circle.name}
-              </p>
+                <p
+                  className="text-base font-bold text-primary line-clamp-1"
+                  title={circle.name}
+                >
+                  {circle.name}
+                </p>
+              </a>
             </div>
             <p
               className="text-ellipsis line-clamp-2 text-sm font-medium text-tertiary"

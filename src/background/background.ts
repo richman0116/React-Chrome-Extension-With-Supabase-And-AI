@@ -124,14 +124,18 @@ const loginWithGoogle = async () => {
 
           userLoaded = true
           const { session, user } = data
-          await supabase.auth.setSession(session)
           supabaseUser = {
             data: {
               user,
             },
           } as SupabaseUserDataInterface
           console.log('background.js: New supabase user: ', supabaseUser)
-          setToStorage('supabaseSession', JSON.stringify(session))
+          const newSession = {
+            data: {
+              session,
+            },
+          }
+          setToStorage('supabaseSession', JSON.stringify(newSession))
           chrome.runtime.sendMessage({
             message: BJMessages.GOOGLE_LOGIN_RESULT,
             loggedIn: true,

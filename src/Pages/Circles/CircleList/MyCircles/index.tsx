@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
 import LoadingSpinner from '../../../../components/LoadingSpinner'
-import { CircleInterface } from '../../../../types/circle'
+import { CircleInterface } from '../../../types/circle'
 import classNames from 'classnames'
 import LinkCircleItem from '../../../../components/LinkCircleItem'
 import { useCircleContext } from '../../../../context/CircleContext'
@@ -45,7 +45,7 @@ const MyCircles = () => {
   const resultText = useMemo(() => {
     if (!isLoading && claimAvailableCircles.length > 0) {
       if (claimAvailableCircles.length > 0) {
-        return 'Link your circles to this page'
+        return 'Link ur Circles to this page'
       } else {
         return ''
       }

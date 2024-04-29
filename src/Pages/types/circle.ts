@@ -1,4 +1,4 @@
-import { CircleGenerationStatus } from '../utils/constants'
+import { CircleGenerationStatus } from '../../utils/constants'
 
 export interface CircleInterface {
   id: string

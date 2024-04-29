@@ -67,7 +67,7 @@ const Header = () => {
             }}
           >
             <div className="flex gap-1 items-center justify-between">
-              <CircleIcon />
+              <CircleIcon width='12' height='12' viewBox='0 0 12 12' color='#424547' />
               <p className="text-xs font-medium">{circlesCount}</p>
             </div>
             <div className="flex gap-1 items-center justify-between">

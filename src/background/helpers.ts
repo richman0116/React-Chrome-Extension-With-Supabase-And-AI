@@ -1,12 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
+import { CircleInterface } from '../Pages/types/circle'
 import { CircleGenerationStatus, supabaseSotrageUrl } from '../utils/constants'
 import {
   getGeneratedCircles,
   getGeneratedCirclesFromHistory,
 } from '../utils/edgeFunctions'
 import { getSpecificNumberOfWords, uploadImageToSupabase } from '../utils/helpers'
-import { IHistory } from '../types/history'
+import { IHistory } from '../Pages/types/history'
 
 // function to get a value from storage
 export const getFromStorage = (key: string): Promise<any> => {

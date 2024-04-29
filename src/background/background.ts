@@ -1,7 +1,7 @@
 import supabase from '../utils/supabase'
 
 import { CircleGenerationStatus } from '../utils/constants'
-import { ICircleGenerationStatus } from '../types/circle'
+import { ICircleGenerationStatus } from '../Pages/types/circle'
 import {
   getFromStorage,
   handleCircleCreation,

@@ -1,6 +1,6 @@
 // Kazuo: Please later on replace this token
 
-import { IHistory } from '../types/history'
+import { IHistory } from '../Pages/types/history'
 
 // it is unsafe since chrome extension's code is exposed to public
 const token =

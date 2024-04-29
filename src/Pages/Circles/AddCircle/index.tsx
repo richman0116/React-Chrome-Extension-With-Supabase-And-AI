@@ -3,7 +3,7 @@ import { useCircleContext } from '../../../context/CircleContext'
 import AddGeneratedCircles from './AddGeneratedCircles'
 import AddManualCircle from './AddManualCircle'
 import { useEffect, useState } from 'react'
-import { CircleInterface } from '../../../types/circle'
+import { CircleInterface } from '../../types/circle'
 
 
 

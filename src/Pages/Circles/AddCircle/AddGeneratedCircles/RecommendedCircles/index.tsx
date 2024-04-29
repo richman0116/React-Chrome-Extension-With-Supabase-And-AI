@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
 import CircleItem from '../../../../../components/CircleItem'
-import { CircleInterface } from '../../../../../types/circle'
+import { CircleInterface } from '../../../../types/circle'
 import { useCircleContext } from '../../../../../context/CircleContext'
 import { BJActions } from '../../../../../background/actions'
 

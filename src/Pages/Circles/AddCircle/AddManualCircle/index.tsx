@@ -115,9 +115,11 @@ export const AddManualCircle = () => {
           name,
           description,
           tags: circleData?.tags
+        },
+        (res) => {
+          getCircleGenerationStatus()
         }
       )
-      getCircleGenerationStatus()
     }
   }, [circleData?.tags, currentTabId, getCircleGenerationStatus, getValues])
 
@@ -145,6 +147,7 @@ export const AddManualCircle = () => {
         tabId: currentTabId
       },
       (res) => {
+        if (res === null) setPageStatus(circlePageStatus.CIRCLE_LIST);
         if (res) {
           const autoLength = Object.keys(res.autoGeneratingCircles).length
           const manualLength = Object.keys(res.manualCreatingCircle).length
@@ -159,6 +162,9 @@ export const AddManualCircle = () => {
             setCircleGenerationStatus(res.autoGeneratingCircles)
             setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
             setCircleData(initialCircleData)
+          }
+          else {
+            setPageStatus(circlePageStatus.CIRCLE_LIST)
           }
         }
       }

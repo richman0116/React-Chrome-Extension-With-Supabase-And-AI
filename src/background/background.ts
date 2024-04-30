@@ -421,7 +421,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         tags,
         isGenesisPost,
       } = request
-
       const generatingCircle: ICircleGenerationStatus = {
         type: 'manual',
         status: CircleGenerationStatus.GENERATING,
@@ -444,30 +443,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   circleDescription,
                   imageData,
                   addedTagNames,
-                  isGenesisPost
+                  isGenesisPost,
                 )
               }
             )
           } catch (err) {
-            console.error('An error occurred on generating tags')
-            sendResponse(false)
+            sendResponse({error: err})
           }
         } else {
-          handleCircleCreation(
-            supabase,
-            tabId,
-            url,
-            circleName,
-            circleDescription,
-            imageData,
-            tags,
-            isGenesisPost
-          )
+          try {
+            handleCircleCreation(
+              supabase,
+              tabId,
+              url,
+              circleName,
+              circleDescription,
+              imageData,
+              tags,
+              isGenesisPost,
+            )
+          } catch (err) {
+            sendResponse({error: err})
+          }
         }
-        sendResponse(true)
       } catch (err) {
-        sendResponse(false)
+        sendResponse({error: err})
       }
+      sendResponse(true)
     } else {
       console.error('background.js: User not logged in when creating a circle')
       sendResponse({ error: 'User not logged in' })
@@ -613,6 +615,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 ],
               })
             )
+            sendResponse({error: result.error})
           } else if (result.url) {
             const imageUrl = result?.url?.replaceAll('"', '')
             const newCircleGenerationStatus: ICircleGenerationStatus = {
@@ -632,6 +635,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             circleGeneratedStatus.manualCreatingCircle = newCircleGenerationStatus
 
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+            sendResponse({imageUrl: imageUrl})
           }
         } else {
           circleGeneratedStatus = generationStatus

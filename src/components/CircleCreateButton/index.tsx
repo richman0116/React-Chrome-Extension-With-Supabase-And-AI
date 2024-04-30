@@ -3,17 +3,32 @@ import Button from "../Buttons/Button"
 import Plus from "../SVGIcons/Plus"
 import { useCircleContext } from "../../context/CircleContext"
 import { circlePageStatus } from "../../utils/constants"
+import { BJActions } from "../../background/actions"
+import { initialCircleData } from "../../context/CircleContext"
 
 const CircleCreateButton = () => {
-  const { setPageStatus } = useCircleContext()
+  const { setPageStatus, currentTabId, setCircleData } = useCircleContext()
 
   const handleAddGeneratedCircles = useCallback(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      }
+    )
     setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
-  }, [setPageStatus])
+  }, [currentTabId, setPageStatus])
 
   const handleAddManually = useCallback(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      }
+    )
+    setCircleData(initialCircleData)
     setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [setPageStatus])
+  }, [currentTabId, setCircleData, setPageStatus])
 
   return (
     <div className="relative inline-block group">

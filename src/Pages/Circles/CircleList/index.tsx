@@ -30,8 +30,6 @@ const CircleList = () => {
   }, [circles, isLoading])
 
   const handleScroll = useCallback(() => {
-    console.log(resultTextRef.current?.offsetTop)
-      
     if (resultTextRef.current && resultTextRef.current?.offsetTop === 228) {
       resultTextRef.current?.classList.remove("border-b", "border-b-stroke")
       resultTextRef.current?.children?.item(1)?.classList.remove("font-medium", "capitalize", "text-lg", "justify-between")

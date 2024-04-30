@@ -7,6 +7,7 @@ import {
 } from '../utils/edgeFunctions'
 import { getSpecificNumberOfWords, uploadImageToSupabase } from '../utils/helpers'
 import { IHistory } from '../Pages/types/history'
+// import { BJActions } from './actions'
 
 // function to get a value from storage
 export const getFromStorage = (key: string): Promise<any> => {
@@ -163,8 +164,11 @@ export const handleCircleCreation = (
           circle_tags: addedTags,
         }
       )
+      if (!data) {
+        console.log(data, "ssssssssssssssssssssssssssssssssssssssssssss")
+        throw new Error('circle name is already exist')
+      }
       const addedCircleId = data
-      console.log(addedCircleId, '===== addedCircleid')
       try {
         // upload the converted image to Supabase storage
         const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
@@ -175,13 +179,13 @@ export const handleCircleCreation = (
           'media_bucket',
           `circle_images/${addedCircleId}.webp`
         )
-
         const status = await updateCircleImageUrl(supabase, addedCircleId)
         if (status === 204) {
           removeItemFromStorage(tabId.toString())
         } else {
           circleGenerationFailedHandler('manual', tabId)
         }
+        return addedCircleId;
       } catch (err) {
         circleGenerationFailedHandler('manual', tabId)
         console.error(err)

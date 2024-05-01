@@ -45,7 +45,7 @@ const MyCircles = () => {
   const resultText = useMemo(() => {
     if (!isLoading && claimAvailableCircles.length > 0) {
       if (claimAvailableCircles.length > 0) {
-        return 'Link your circles to this page'
+        return 'Link ur Circles to this page'
       } else {
         return ''
       }

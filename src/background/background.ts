@@ -421,7 +421,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         tags,
         isGenesisPost,
       } = request
-
       const generatingCircle: ICircleGenerationStatus = {
         type: 'manual',
         status: CircleGenerationStatus.GENERATING,
@@ -444,30 +443,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   circleDescription,
                   imageData,
                   addedTagNames,
-                  isGenesisPost
+                  isGenesisPost,
                 )
               }
             )
           } catch (err) {
-            console.error('An error occurred on generating tags')
-            sendResponse(false)
+            sendResponse({error: err})
           }
         } else {
-          handleCircleCreation(
-            supabase,
-            tabId,
-            url,
-            circleName,
-            circleDescription,
-            imageData,
-            tags,
-            isGenesisPost
-          )
+          try {
+            handleCircleCreation(
+              supabase,
+              tabId,
+              url,
+              circleName,
+              circleDescription,
+              imageData,
+              tags,
+              isGenesisPost,
+            )
+          } catch (err) {
+            sendResponse({error: err})
+          }
         }
-        sendResponse(true)
       } catch (err) {
-        sendResponse(false)
+        sendResponse({error: err})
       }
+      sendResponse(true)
     } else {
       console.error('background.js: User not logged in when creating a circle')
       sendResponse({ error: 'User not logged in' })
@@ -613,6 +615,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 ],
               })
             )
+            sendResponse({error: result.error})
           } else if (result.url) {
             const imageUrl = result?.url?.replaceAll('"', '')
             const newCircleGenerationStatus: ICircleGenerationStatus = {
@@ -632,6 +635,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             circleGeneratedStatus.manualCreatingCircle = newCircleGenerationStatus
 
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+            sendResponse({imageUrl: imageUrl})
           }
         } else {
           circleGeneratedStatus = generationStatus
@@ -645,26 +649,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === BJActions.GET_CIRCLE_GENERATION_STATUS) {
-    console.log('background.js: Getting saved circles from the storage')
-    const tabId = request.tabId
-    getFromStorage(tabId?.toString())
-      .then((generationStatus: any) => {
-        console.log(generationStatus, 'That is localStorage data!!!!!!')
-        const autoLength = Object.keys(generationStatus.autoGeneratingCircles).length
-        const manualLength = Object.keys(generationStatus.manualCreatingCircle).length
-        if (
-          generationStatus.autoGeneratingCircles.type === 'auto' &&
-          autoLength > 0 &&
-          manualLength === 0
-        )
-          sendResponse(generationStatus.autoGeneratingCircles)
-        if (generationStatus.manualCreatingCircle.type === 'manual' && manualLength > 0)
-          sendResponse(generationStatus.manualCreatingCircle)
-        if (autoLength === 0 && manualLength === 0) sendResponse({})
-      })
-      .catch(() => {
-        sendResponse(null)
-      })
+    try {
+      console.log('background.js: Getting saved circles from the storage')
+      const tabId = request.tabId
+      getFromStorage(tabId?.toString())
+        .then((generationStatus: any) => {
+          if (!generationStatus.hasOwnProperty('autoGeneratingCircles') || !generationStatus.hasOwnProperty('manualCreatingCircle')) {
+            generationStatus = circleGeneratedStatus
+          }
+          console.log('Chrome localstorage data : ', generationStatus)
+          const autoLength: number = Object.keys(generationStatus.autoGeneratingCircles).length || 0
+          const manualLength: number = Object.keys(generationStatus.manualCreatingCircle).length || 0
+          if (
+            generationStatus.autoGeneratingCircles.type === 'auto' &&
+            autoLength > 0 &&
+            manualLength === 0
+          )
+            sendResponse(generationStatus.autoGeneratingCircles)
+          if (generationStatus.manualCreatingCircle.type === 'manual' && manualLength > 0)
+            sendResponse(generationStatus.manualCreatingCircle)
+          if (autoLength === 0 && manualLength === 0) sendResponse({})
+        })
+        .catch(() => {
+          sendResponse(null)
+        })
+    } catch (error) {
+      console.error('An error occurred while getting circle generation status:', error);
+      sendResponse(null);
+    }
     return true
   }
 

@@ -16,6 +16,7 @@ interface ICircleContext {
   circles: CircleInterface[]
   currentUrl: string
   currentTabId: number
+  currentTabTitle: string
   isLoading: boolean
   currentPageCircleIds: string[]
   circleData: CircleInterface,
@@ -43,6 +44,7 @@ const CircleContext = createContext<ICircleContext>({
   circles: [],
   currentUrl: '',
   currentTabId: NaN,
+  currentTabTitle: '',
   isLoading: true,
   currentPageCircleIds: [],
   circleData: initialCircleData,
@@ -68,6 +70,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circles, setCircles] = useState<CircleInterface[]>([])
   const [currentUrl, setCurrentUrl] = useState<string>('')
   const [currentTabId, setCurrentTabId] = useState<number>(NaN)
+  const [currentTabTitle, setCurrentTabTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
@@ -84,6 +87,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       setCurrentUrl(tabs[0]?.url || '')
       setCurrentTabId(tabs[0].id || NaN)
+      setCurrentTabTitle(tabs[0].title || '')
     })
   }, [])
 
@@ -144,7 +148,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
           }
         }
       )
-    }, 1500)
+    }, 500)
   }, [circleGenerationStatus, currentTabId])
 
   useEffect(() => {
@@ -158,6 +162,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         circles,
         currentUrl,
         currentTabId,
+        currentTabTitle,
         currentPageCircleIds,
         getCircles,
         circleData,

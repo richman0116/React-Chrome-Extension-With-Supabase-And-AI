@@ -147,7 +147,6 @@ export const AddManualCircle = () => {
         tabId: currentTabId
       },
       (res) => {
-        if (res === null) setPageStatus(circlePageStatus.CIRCLE_LIST);
         if (res) {
           const autoLength = Object.keys(res.autoGeneratingCircles).length
           const manualLength = Object.keys(res.manualCreatingCircle).length
@@ -166,6 +165,9 @@ export const AddManualCircle = () => {
           else {
             setPageStatus(circlePageStatus.CIRCLE_LIST)
           }
+        }
+        else {
+          setPageStatus(circlePageStatus.CIRCLE_LIST);
         }
       }
     )

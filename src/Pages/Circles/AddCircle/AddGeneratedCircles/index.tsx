@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } f
 
 import Button from '../../../../components/Buttons/Button'
 import { useCircleContext } from '../../../../context/CircleContext'
-import { CircleInterface } from '../../../types/circle'
+import { CircleInterface } from '../../../../types/circle'
 import { getCircleLoadingMessage } from '../../../../utils/helpers'
 import { CircleGenerationStatus, circlePageStatus } from '../../../../utils/constants'
 import AutoCircleItem from '../../../../components/AutoCircleItem'

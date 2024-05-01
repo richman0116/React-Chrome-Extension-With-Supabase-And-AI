@@ -1,5 +1,5 @@
 import Send from "../SVGIcons/Send"
-import { CircleInterface } from "../../Pages/types/circle"
+import { CircleInterface } from "../../types/circle"
 import { Dispatch, SetStateAction, useCallback, useState } from "react"
 import { BJActions } from "../../background/actions"
 import LoadingSpinner from "../LoadingSpinner"

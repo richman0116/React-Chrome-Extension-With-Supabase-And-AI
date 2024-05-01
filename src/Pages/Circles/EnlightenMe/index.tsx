@@ -4,7 +4,7 @@ import CreationHeader from "../../../components/CreationHeader"
 import ScreenIcon from "../../../components/SVGIcons/ScreenIcon"
 import { useCircleContext } from "../../../context/CircleContext"
 import { circlePageStatus } from "../../../utils/constants"
-import { IHistory } from "../../types/history"
+import { IHistory } from "../../../types/history"
 import { BJActions } from "../../../background/actions"
 
 const EnlightenMe = () => {

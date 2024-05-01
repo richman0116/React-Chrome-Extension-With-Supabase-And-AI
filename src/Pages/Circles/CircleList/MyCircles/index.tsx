@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 
 import LoadingSpinner from '../../../../components/LoadingSpinner'
-import { CircleInterface } from '../../../types/circle'
+import { CircleInterface } from '../../../../types/circle'
 import classNames from 'classnames'
 import LinkCircleItem from '../../../../components/LinkCircleItem'
 import { useCircleContext } from '../../../../context/CircleContext'

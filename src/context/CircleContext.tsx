@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { CircleInterface, ICircleGenerationStatus } from '../Pages/types/circle'
+import { CircleInterface, ICircleGenerationStatus } from '../types/circle'
 import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
 import { BJActions } from '../background/actions'
 

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { CircleInterface } from '../../Pages/types/circle'
+import { CircleInterface } from '../../types/circle'
 import RoundedButton from '../Buttons/RoundedButton'
 import { useCircleContext } from '../../context/CircleContext'
 import { BJActions } from '../../background/actions'

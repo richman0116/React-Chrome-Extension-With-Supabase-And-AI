@@ -32,24 +32,11 @@ const ShareThoughtBox = () => {
     setComment(e.target.value)
   }, [])
 
-  // const handleSendIconClick = useCallback(() => {
-  //   if (comment.length > 0) {
-  //     setShowCircles(true)
-  //   }
-  // }, [comment.length])
+  const handleDropDownClick = useCallback(() => {
+    setShowCircles(!showCircles)
+  }, [showCircles])
 
-
-  const handleHideCircles = () => {
-    setShowCircles(false)
-  }
-
-  const handleShowCircles = () => {
-    if (comment.length) {
-      setShowCircles(true)
-    }
-  }
-
-  const handleCircleIconClick = useCallback(() => {
+  const handleSendIconClick = useCallback(() => {
     if (comment.length > 0) {
       setIsDirectPost(true)
       const name = currentTabTitle + " comments";
@@ -83,9 +70,10 @@ const ShareThoughtBox = () => {
                 if (!response || response.error) {
                   console.log(response || response.error);
                   setErrorMessage(response.error)
+                  setIsDirectPost(false)
                 }
                 else {
-                  console.log('circle was created!')
+                  setComment("")
                   setIsDirectPost(false);
                   setIsGenesisPost(false)
                   setCircleData(initialCircleData)
@@ -122,20 +110,17 @@ const ShareThoughtBox = () => {
         <div className="w-full pt-4 pl-5 pr-2 flex justify-between items-center">
           <div className="flex flex-row gap-2">
             <p className="text-base font-semibold leading-normal text-brand">{commentBoxTitle}</p>
-            { showCircles ? '' : <div className="text-brand"><Send /></div> }
+            { showCircles ? '' : (isDirectPost ? <LoadingSpinner size={24} /> : <div className="text-brand cursor-pointer" onClick={handleSendIconClick}><Send /></div>) }
           </div>
-          <div className="flex px-3 py-2 rounded-2xl items-center justify-center gap-2 bg-brand/10">
-            <div className="cursor-pointer text-brand" onClick={handleCircleIconClick}>
-              {isDirectPost ?
-                <LoadingSpinner size={20} />
-                :
-                <CircleIcon width="20" height="20" viewBox="0 0 20 20" color="#134D2E" />}
+          <div className="flex px-3 py-2 rounded-2xl items-center justify-center gap-2 bg-brand/10" onClick={handleDropDownClick}>
+            <div className="cursor-pointer text-brand">
+                <CircleIcon width="20" height="20" viewBox="0 0 20 20" color="#134D2E" />
             </div>
             {
               showCircles ? 
-                <div className="cursor-pointer text-brand" onClick={handleHideCircles}><XIcon /></div>
+                <div className="cursor-pointer text-brand"><XIcon /></div>
                 :
-                <div className="cursor-pointer text-brand" onClick={handleShowCircles}><Chevron width="16" height="16" color="#134D2E" viewBox="0 0 16 16" /></div>
+                <div className="cursor-pointer text-brand"><Chevron width="16" height="16" color="#134D2E" viewBox="0 0 16 16" /></div>
             }
             
           </div>

@@ -165,8 +165,7 @@ export const handleCircleCreation = (
         }
       )
       if (!data) {
-        console.log(data, "ssssssssssssssssssssssssssssssssssssssssssss")
-        throw new Error('circle name is already exist')
+        return
       }
       const addedCircleId = data
       try {
@@ -185,7 +184,7 @@ export const handleCircleCreation = (
         } else {
           circleGenerationFailedHandler('manual', tabId)
         }
-        return addedCircleId;
+        
       } catch (err) {
         circleGenerationFailedHandler('manual', tabId)
         console.error(err)

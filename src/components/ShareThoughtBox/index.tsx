@@ -38,50 +38,62 @@ const ShareThoughtBox = () => {
 
   const handleSendIconClick = useCallback(() => {
     if (comment.length > 0) {
-      setIsDirectPost(true)
       const name = currentTabTitle + " comments";
+      setIsDirectPost(true)
       chrome.runtime.sendMessage(
         {
-          action: BJActions.GENERATE_CIRCLE_IMAGE,
-          tabId: currentTabId,
-          name: name,
-          description: comment,
-          tags: circleData?.tags
+          action: BJActions.CHECK_IF_CIRCLE_EXIST,
+          name,
+          context: comment
         },
-        async (res) => {
-          if (!res || res.error) {
-            setIsDirectPost(false)
-          }
-          else if (res.imageUrl) {
-            const imageBuffer = await resizeAndConvertImageToBuffer(res.imageUrl)
-            const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
+        (res) => {
+          if (res) console.log('Post was created')
+          else {
             chrome.runtime.sendMessage(
               {
-                action: BJActions.CREATE_CIRCLE,
+                action: BJActions.GENERATE_CIRCLE_IMAGE,
                 tabId: currentTabId,
-                url: currentUrl,
-                circleName: name,
-                circleDescription: comment,
-                imageData,
-                tags: circleData?.tags,
-                isGenesisPost: true,
+                name,
+                description: comment,
+                tags: circleData?.tags
               },
-              (response) => {
-                if (!response || response.error) {
-                  console.log(response || response.error);
-                  setErrorMessage(response.error)
+              async (res) => {
+                if (!res || res.error) {
                   setIsDirectPost(false)
                 }
-                else {
-                  setComment("")
-                  setIsDirectPost(false);
-                  setIsGenesisPost(false)
-                  setCircleData(initialCircleData)
-                  getCircles();
+                else if (res.imageUrl) {
+                  const imageBuffer = await resizeAndConvertImageToBuffer(res.imageUrl)
+                  const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
                   chrome.runtime.sendMessage(
                     {
-                      action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-                      tabId: currentTabId
+                      action: BJActions.CREATE_CIRCLE,
+                      tabId: currentTabId,
+                      url: currentUrl,
+                      circleName: name,
+                      circleDescription: comment,
+                      imageData,
+                      tags: circleData?.tags,
+                      isGenesisPost: true,
+                    },
+                    (response) => {
+                      if (!response || response.error) {
+                        console.log(response || response.error);
+                        setErrorMessage(response.error)
+                        setIsDirectPost(false)
+                      }
+                      else {
+                        setComment("")
+                        setIsDirectPost(false);
+                        setIsGenesisPost(false)
+                        setCircleData(initialCircleData)
+                        getCircles();
+                        chrome.runtime.sendMessage(
+                          {
+                            action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+                            tabId: currentTabId
+                          }
+                        )
+                      }
                     }
                   )
                 }
@@ -90,7 +102,6 @@ const ShareThoughtBox = () => {
           }
         }
       )
-
     }
   }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircles, setCircleData, setIsGenesisPost])
 

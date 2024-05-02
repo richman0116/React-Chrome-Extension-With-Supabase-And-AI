@@ -282,7 +282,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('background.js: Check if circle already exist')
     if (supabaseUser) {
       supabase
-        .rpc('check_if_circle_exist', { circle_name: request.name, p_circle_context: request.context })
+        .rpc('check_if_circle_exist', { circle_name: request.name })
         .then((result) => {
           sendResponse(result.data)
         })

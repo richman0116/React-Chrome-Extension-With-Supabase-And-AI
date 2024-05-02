@@ -43,11 +43,20 @@ const ShareThoughtBox = () => {
       chrome.runtime.sendMessage(
         {
           action: BJActions.CHECK_IF_CIRCLE_EXIST,
-          name,
-          context: comment
+          name
         },
         (res) => {
-          if (res) console.log('Post was created')
+          if (res) {
+            const circleId = res;
+            chrome.runtime.sendMessage(
+              {
+                action: BJActions.CREATE_POST,
+                context: comment,
+                circleId
+              }
+            )
+            setIsDirectPost(false)
+          }
           else {
             chrome.runtime.sendMessage(
               {
@@ -77,7 +86,6 @@ const ShareThoughtBox = () => {
                     },
                     (response) => {
                       if (!response || response.error) {
-                        console.log(response || response.error);
                         setErrorMessage(response.error)
                         setIsDirectPost(false)
                       }

@@ -23,6 +23,7 @@ export enum BJActions {
   GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES = 'getUniqueUsersCountInUserCircles',
   GET_USER_CIRCLE_COUNT = 'getUserCirclesCount',
   CREATE_POST = 'createPost',
+  CHECK_IF_CIRCLE_EXIST = 'checkIfCircleExist'
 }
 
 export enum BJMessages {

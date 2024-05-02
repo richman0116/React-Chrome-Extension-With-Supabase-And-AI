@@ -17,6 +17,7 @@ const ShareCircleItem = ({ circle, comment, setComment, setShowCircles }: IShare
   const [isShared, setIsShared] = useState(false)
 
   const handleShare = useCallback(() => {
+    if (comment.length === 0) return;
     setIsSharing(true)
     chrome.runtime.sendMessage(
       {

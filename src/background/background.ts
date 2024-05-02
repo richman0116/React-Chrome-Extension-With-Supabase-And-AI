@@ -277,6 +277,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true // This will keep the message channel open until sendResponse is executed
   }
+
+  if (request.action === BJActions.CHECK_IF_CIRCLE_EXIST) {
+    console.log('background.js: Check if circle already exist')
+    if (supabaseUser) {
+      supabase
+        .rpc('check_if_circle_exist', { circle_name: request.name })
+        .then((result) => {
+          sendResponse(result.data)
+        })
+    }
+    return true // This will keep the message channel open until sendResponse is executed
+  }
+
   if (request.action === BJActions.LOGIN_WITH_EMAIL_PASSWORD) {
     console.log('background.js: Logging in with email and password')
     loginWithEmailPassword(request.email, request.password)

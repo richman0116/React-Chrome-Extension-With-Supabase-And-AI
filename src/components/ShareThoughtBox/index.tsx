@@ -32,68 +32,76 @@ const ShareThoughtBox = () => {
     setComment(e.target.value)
   }, [])
 
-  // const handleSendIconClick = useCallback(() => {
-  //   if (comment.length > 0) {
-  //     setShowCircles(true)
-  //   }
-  // }, [comment.length])
+  const handleDropDownClick = useCallback(() => {
+    setShowCircles(!showCircles)
+  }, [showCircles])
 
-
-  const handleHideCircles = () => {
-    setShowCircles(false)
-  }
-
-  const handleShowCircles = () => {
-    if (comment.length) {
-      setShowCircles(true)
-    }
-  }
-
-  const handleCircleIconClick = useCallback(() => {
+  const handleSendIconClick = useCallback(() => {
     if (comment.length > 0) {
-      setIsDirectPost(true)
       const name = currentTabTitle + " comments";
+      setIsDirectPost(true)
       chrome.runtime.sendMessage(
         {
-          action: BJActions.GENERATE_CIRCLE_IMAGE,
-          tabId: currentTabId,
-          name: name,
-          description: comment,
-          tags: circleData?.tags
+          action: BJActions.CHECK_IF_CIRCLE_EXIST,
+          name
         },
-        async (res) => {
-          if (!res || res.error) {
-            setIsDirectPost(false)
-          }
-          else if (res.imageUrl) {
-            const imageBuffer = await resizeAndConvertImageToBuffer(res.imageUrl)
-            const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
+        (res) => {
+          if (res) {
+            const circleId = res;
             chrome.runtime.sendMessage(
               {
-                action: BJActions.CREATE_CIRCLE,
+                action: BJActions.CREATE_POST,
+                context: comment,
+                circleId
+              }
+            )
+            setIsDirectPost(false)
+          }
+          else {
+            chrome.runtime.sendMessage(
+              {
+                action: BJActions.GENERATE_CIRCLE_IMAGE,
                 tabId: currentTabId,
-                url: currentUrl,
-                circleName: name,
-                circleDescription: comment,
-                imageData,
-                tags: circleData?.tags,
-                isGenesisPost: true,
+                name,
+                description: comment,
+                tags: circleData?.tags
               },
-              (response) => {
-                if (!response || response.error) {
-                  console.log(response || response.error);
-                  setErrorMessage(response.error)
+              async (res) => {
+                if (!res || res.error) {
+                  setIsDirectPost(false)
                 }
-                else {
-                  console.log('circle was created!')
-                  setIsDirectPost(false);
-                  setIsGenesisPost(false)
-                  setCircleData(initialCircleData)
-                  getCircles();
+                else if (res.imageUrl) {
+                  const imageBuffer = await resizeAndConvertImageToBuffer(res.imageUrl)
+                  const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
                   chrome.runtime.sendMessage(
                     {
-                      action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-                      tabId: currentTabId
+                      action: BJActions.CREATE_CIRCLE,
+                      tabId: currentTabId,
+                      url: currentUrl,
+                      circleName: name,
+                      circleDescription: comment,
+                      imageData,
+                      tags: circleData?.tags,
+                      isGenesisPost: true,
+                    },
+                    (response) => {
+                      if (!response || response.error) {
+                        setErrorMessage(response.error)
+                        setIsDirectPost(false)
+                      }
+                      else {
+                        setComment("")
+                        setIsDirectPost(false);
+                        setIsGenesisPost(false)
+                        setCircleData(initialCircleData)
+                        getCircles();
+                        chrome.runtime.sendMessage(
+                          {
+                            action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+                            tabId: currentTabId
+                          }
+                        )
+                      }
                     }
                   )
                 }
@@ -102,7 +110,6 @@ const ShareThoughtBox = () => {
           }
         }
       )
-
     }
   }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircles, setCircleData, setIsGenesisPost])
 
@@ -122,20 +129,17 @@ const ShareThoughtBox = () => {
         <div className="w-full pt-4 pl-5 pr-2 flex justify-between items-center">
           <div className="flex flex-row gap-2">
             <p className="text-base font-semibold leading-normal text-brand">{commentBoxTitle}</p>
-            { showCircles ? '' : <div className="text-brand"><Send /></div> }
+            { showCircles ? '' : (isDirectPost ? <LoadingSpinner size={24} /> : <div className="text-brand cursor-pointer" onClick={handleSendIconClick}><Send /></div>) }
           </div>
-          <div className="flex px-3 py-2 rounded-2xl items-center justify-center gap-2 bg-brand/10">
-            <div className="cursor-pointer text-brand" onClick={handleCircleIconClick}>
-              {isDirectPost ?
-                <LoadingSpinner size={20} />
-                :
-                <CircleIcon width="20" height="20" viewBox="0 0 20 20" color="#134D2E" />}
+          <div className="flex px-3 py-2 rounded-2xl items-center justify-center gap-2 bg-brand/10" onClick={handleDropDownClick}>
+            <div className="cursor-pointer text-brand">
+                <CircleIcon width="20" height="20" viewBox="0 0 20 20" color="#134D2E" />
             </div>
             {
               showCircles ? 
-                <div className="cursor-pointer text-brand" onClick={handleHideCircles}><XIcon /></div>
+                <div className="cursor-pointer text-brand"><XIcon /></div>
                 :
-                <div className="cursor-pointer text-brand" onClick={handleShowCircles}><Chevron width="16" height="16" color="#134D2E" viewBox="0 0 16 16" /></div>
+                <div className="cursor-pointer text-brand"><Chevron width="16" height="16" color="#134D2E" viewBox="0 0 16 16" /></div>
             }
             
           </div>

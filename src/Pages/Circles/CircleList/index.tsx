@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Header from '../../../components/Header'
 import MyCircles from './MyCircles'
 import { useCircleContext } from '../../../context/CircleContext'
-import PageCirclList from './PageCirclesList'
+import PageCircleList from './PageCirclesList'
 import Avatar from '../../../components/Avatar'
 import CircleCreateButton from '../../../components/CircleCreateButton'
 import ShareThoughtBox from '../../../components/ShareThoughtBox'
@@ -30,7 +30,7 @@ const CircleList = () => {
   }, [circles, isLoading])
 
   const handleScroll = useCallback(() => {
-    if (resultTextRef.current && resultTextRef.current?.offsetTop === 228) {
+    if (resultTextRef.current && resultTextRef.current?.getClientRects().item(0)?.top) {
       resultTextRef.current?.classList.remove("border-b", "border-b-stroke")
       resultTextRef.current?.children?.item(1)?.classList.remove("font-medium", "capitalize", "text-lg", "justify-between")
       resultTextRef.current?.children?.item(1)?.classList.add("justify-center")
@@ -58,7 +58,7 @@ const CircleList = () => {
           </div>
           {!showAvatar && <div className='w-full border-b border-b-stroke'></div>}
         </div>
-        <PageCirclList />
+        <PageCircleList />
         <MyCircles />
         <div className="fixed bottom-6 w-fit justify-center">
           <CircleCreateButton />

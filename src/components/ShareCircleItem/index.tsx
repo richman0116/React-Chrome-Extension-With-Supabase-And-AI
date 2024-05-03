@@ -10,14 +10,18 @@ interface IShareCircleItem {
   comment: string
   setComment: Dispatch<SetStateAction<string>>
   setShowCircles: Dispatch<SetStateAction<boolean>>
+  setErrorMessage: Dispatch<SetStateAction<string>>
 }
 
-const ShareCircleItem = ({ circle, comment, setComment, setShowCircles }: IShareCircleItem) => {
+const ShareCircleItem = ({ circle, comment, setComment, setShowCircles, setErrorMessage }: IShareCircleItem) => {
   const [isSharing, setIsSharing] = useState(false)
   const [isShared, setIsShared] = useState(false)
 
   const handleShare = useCallback(() => {
-    if (comment.length === 0) return;
+    if (comment.length === 0) {
+      setErrorMessage('Please put your thought.');
+      return;
+    }
     setIsSharing(true)
     chrome.runtime.sendMessage(
       {
@@ -37,7 +41,7 @@ const ShareCircleItem = ({ circle, comment, setComment, setShowCircles }: IShare
         }
       }
     )
-  }, [circle.id, comment, setComment, setShowCircles])
+  }, [circle.id, comment, setComment, setErrorMessage, setShowCircles])
 
   return (
     <button

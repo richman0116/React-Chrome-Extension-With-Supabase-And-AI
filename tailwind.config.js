@@ -3,6 +3,9 @@ module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      borderRadius: {
+        '2.5xl': '1.25rem'
+      },
       backgroundColor: {
         cream: '#FAF3E0',
         gold: '#F0C808',

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.11",
+  "version": "1.0.12",
   "manifest_version": 3,
   "name": "Eden - Build Circles Anywhere",
   "description": "Chrome extension for Eden",
@@ -16,14 +16,32 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
-      "js": ["js/content.bundle.js"]
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "js/content.bundle.js"
+      ]
     }
   ],
-  "permissions": ["tabs", "scripting", "activeTab", "storage", "history", "identity"],
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab",
+    "storage",
+    "history",
+    "identity"
+  ],
   "oauth2": {
     "client_id": "135731472785-ob6o8e1ovl91dlecs88bther817a99mn.apps.googleusercontent.com",
-    "scopes": ["openid", "email", "profile"]
+    "scopes": [
+      "openid",
+      "email",
+      "profile"
+    ]
   },
-  "host_permissions": ["http://*/*", "https://*/*"]
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
 }

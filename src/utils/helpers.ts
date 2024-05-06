@@ -101,6 +101,7 @@ export const uploadImageToSupabase = async (
     if (error) {
       console.error(error)
     }
+    return data;
   } catch (ex) {
     console.error('An error occurred on image uploading', ex)
   }

@@ -137,9 +137,14 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
                 clearInterval(getCircleGenerationStatusInterval)
               }
             } else if (type === "manual") {
-              setPageStatus(circlePageStatus.ADD_MANUALLY)
-              if (result[0].circle_logo_image || status === CircleGenerationStatus.SUCCEEDED || status === CircleGenerationStatus.FAILED) {
+              if (result[0]?.circle_logo_image || status === CircleGenerationStatus.FAILED) {
                 clearInterval(getCircleGenerationStatusInterval)
+              }
+              console.log(status);
+              if (status === CircleGenerationStatus.SUCCEEDED)
+              {
+                setPageStatus(circlePageStatus.CIRCLE_LIST)
+                clearInterval(getCircleGenerationStatusInterval)      
               }
             }
           } else {
@@ -148,7 +153,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
           }
         }
       )
-    }, 500)
+    }, 1500)
   }, [circleGenerationStatus, currentTabId])
 
   useEffect(() => {

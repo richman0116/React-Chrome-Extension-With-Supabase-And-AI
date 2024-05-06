@@ -15,6 +15,7 @@ export enum BJActions {
   GENERATE_CIRCLES = 'generatedCircles',
   GENERATE_CIRCLES_WITH_HISTORY = 'generateCirclesWithHistory',
   GET_CIRCLE_GENERATION_STATUS = 'getCircleGenerationStatus',
+  GET_DIRECT_CIRCLE_GENERATION_RESULT = 'getCircleGenerationResult',
   GENERATE_CIRCLE_IMAGE = 'generateCircleImage',
   REMOVE_CIRCLES_FROM_STORAGE = 'removeCirclesFromStorage',
   ADD_TAGS = 'addTags',

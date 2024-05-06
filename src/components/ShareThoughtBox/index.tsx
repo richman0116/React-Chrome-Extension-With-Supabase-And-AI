@@ -10,8 +10,7 @@ import { useCircleContext } from "../../context/CircleContext"
 import LoadingSpinner from "../LoadingSpinner"
 import { BJActions } from "../../background/actions"
 import { resizeAndConvertImageToBuffer } from "../../utils/helpers"
-import { circlePageStatus } from "../../utils/constants"
-import { initialCircleData } from "../../context/CircleContext"
+// import { initialCircleData } from "../../context/CircleContext"
 import classNames from "classnames"
 
 const ShareThoughtBox = () => {
@@ -22,7 +21,7 @@ const ShareThoughtBox = () => {
   const [statusMessage, setStatusMessage] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, setPageStatus, setCircleData } = useCircleContext()
+  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles } = useCircleContext()
 
   const commentBoxTitle = useMemo(() => {
     if (showCircles) {
@@ -105,21 +104,29 @@ const ShareThoughtBox = () => {
                         setIsDirectPost(false)
                       }
                       else {
-                        setComment("")
-                        setIsDirectPost(false);
-                        setStatusMessage('Done!')
-                        setCircleData(initialCircleData)
-                        chrome.runtime.sendMessage(
-                          {
-                            action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-                            tabId: currentTabId
-                          }
-                        )
-
-                        setTimeout(() => {
-                          setIsStatusMessage(false);
-                        }, 3000);
-                        setPageStatus(circlePageStatus.CIRCLE_LIST)
+                        const circleGenerationResult = setInterval(() => {
+                          chrome.runtime.sendMessage(
+                            {
+                              action: BJActions.GET_DIRECT_CIRCLE_GENERATION_RESULT,
+                              tabId: currentTabId
+                            },
+                            (res) => {
+                              if (res) {
+                                clearInterval(circleGenerationResult)
+                                setComment("")
+                                setIsDirectPost(false);
+                                setStatusMessage('Done!')
+                                getCircles();
+                                chrome.runtime.sendMessage({
+                                  action: BJActions.REMOVE_CIRCLES_FROM_STORAGE
+                                })
+                                setTimeout(() => {
+                                  setIsStatusMessage(false);
+                                }, 3000);
+                              }
+                            }
+                          )
+                        }, 1500)
                       }
                     }
                   )
@@ -132,7 +139,7 @@ const ShareThoughtBox = () => {
     } else {
       setErrorMessage('Please put your thought.')
     }
-  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, setCircleData, setPageStatus])
+  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircles])
 
   return (
     <div className="w-full rounded-2.5xl bg-branding pb-2">

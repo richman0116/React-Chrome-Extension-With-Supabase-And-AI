@@ -96,12 +96,20 @@ export const AddManualCircle = () => {
         (response: boolean) => {
           if (response) {
             setIsGenesisPost(false)
-            getCircleGenerationStatus()
+            const manualCircleGenerationResult = setInterval(() => {
+              chrome.runtime.sendMessage({ action: BJActions.GET_DIRECT_CIRCLE_GENERATION_RESULT, tabId: currentTabId }, (res) => {
+                if (res) {
+                  chrome.runtime.sendMessage({ action: BJActions.REMOVE_CIRCLES_FROM_STORAGE })
+                  setPageStatus(circlePageStatus.CIRCLE_LIST)
+                  clearInterval(manualCircleGenerationResult)
+                }
+              })
+              },1500)
           }
         }
       )
     }
-  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost, url])
+  }, [circleData?.tags, circleImageUrl, currentTabId, isGenesisPost, setIsGenesisPost, setPageStatus, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')

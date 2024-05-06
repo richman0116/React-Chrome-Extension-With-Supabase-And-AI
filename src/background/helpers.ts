@@ -173,18 +173,27 @@ export const handleCircleCreation = (
         const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
           c.charCodeAt(0)
         ).buffer
-        await uploadImageToSupabase(
+        const result = await uploadImageToSupabase(
           imageBuffer,
           'media_bucket',
           `circle_images/${addedCircleId}.webp`
         )
-        const status = await updateCircleImageUrl(supabase, addedCircleId)
-        if (status === 204) {
-          removeItemFromStorage(tabId.toString())
-        } else {
-          circleGenerationFailedHandler('manual', tabId)
+        if (result) {
+          getFromStorage(tabId?.toString()).then((generationStatus) => {
+            const circleGeneratedStatus = generationStatus
+            circleGeneratedStatus.manualCreatingCircle = {
+              type:'manual',
+              status: CircleGenerationStatus.SUCCEEDED,
+              result: [],
+            }
+            circleGeneratedStatus.autoGeneratingCircles = {}
+            setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+          })
         }
-        
+        const status = await updateCircleImageUrl(supabase, addedCircleId)
+        if (!(status === 204)) {
+          circleGenerationFailedHandler('manual', tabId)
+        }         
       } catch (err) {
         circleGenerationFailedHandler('manual', tabId)
         console.error(err)

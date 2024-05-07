@@ -15,7 +15,6 @@ export enum BJActions {
   GENERATE_CIRCLES = 'generatedCircles',
   GENERATE_CIRCLES_WITH_HISTORY = 'generateCirclesWithHistory',
   GET_CIRCLE_GENERATION_STATUS = 'getCircleGenerationStatus',
-  GET_DIRECT_CIRCLE_GENERATION_RESULT = 'getCircleGenerationResult',
   GENERATE_CIRCLE_IMAGE = 'generateCircleImage',
   REMOVE_CIRCLES_FROM_STORAGE = 'removeCirclesFromStorage',
   ADD_TAGS = 'addTags',
@@ -24,7 +23,11 @@ export enum BJActions {
   GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES = 'getUniqueUsersCountInUserCircles',
   GET_USER_CIRCLE_COUNT = 'getUserCirclesCount',
   CREATE_POST = 'createPost',
-  CHECK_IF_CIRCLE_EXIST = 'checkIfCircleExist'
+  CHECK_IF_CIRCLE_EXIST = 'checkIfCircleExist',
+  SAVE_COMMENT_TO_STORAGE = 'saveCommentToStorage',
+  GET_COMMENT_FROM_SOTRAGE = 'getCommentFromStorage',
+  REMOVE_COMMENT_FROM_STORAGE = 'removeCommentFromStorage',
+  GENERATE_DIRECT_CIRCLE = "generateDirectCircle"
 }
 
 export enum BJMessages {

@@ -22,15 +22,8 @@ const CircleCreateButton = () => {
   }, [currentTabId, setCircleData, setCircleGenerationStatus, setPageStatus])
 
   const handleAddManually = useCallback(() => {
-    chrome.runtime.sendMessage(
-      {
-        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
-        tabId: currentTabId
-      }
-    )
-    setCircleData(initialCircleData)
     setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [currentTabId, setCircleData, setPageStatus])
+  }, [setPageStatus])
 
   return (
     <div className="relative inline-block group">

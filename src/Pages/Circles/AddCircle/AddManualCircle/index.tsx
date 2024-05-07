@@ -78,7 +78,7 @@ export const AddManualCircle = () => {
   const handleCreateCircle = useCallback(async (data: CircleFormData) => {
     if (circleImageUrl) {
       setIsSaving(true)
-      const imageBuffer = await resizeAndConvertImageToBuffer(circleImageUrl)
+      const imageBuffer = await resizeAndConvertImageToBuffer(circleImageUrl, 'popup')
       const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
 
       const { name, description } = data
@@ -91,25 +91,18 @@ export const AddManualCircle = () => {
           circleDescription: description,
           imageData,
           tags: circleData?.tags,
-          isGenesisPost
+          isGenesisPost,
+          type: 'manual'
         },
         (response: boolean) => {
           if (response) {
             setIsGenesisPost(false)
-            const manualCircleGenerationResult = setInterval(() => {
-              chrome.runtime.sendMessage({ action: BJActions.GET_DIRECT_CIRCLE_GENERATION_RESULT, tabId: currentTabId }, (res) => {
-                if (res) {
-                  chrome.runtime.sendMessage({ action: BJActions.REMOVE_CIRCLES_FROM_STORAGE })
-                  setPageStatus(circlePageStatus.CIRCLE_LIST)
-                  clearInterval(manualCircleGenerationResult)
-                }
-              })
-              },1500)
+            getCircleGenerationStatus();
           }
         }
       )
     }
-  }, [circleData?.tags, circleImageUrl, currentTabId, isGenesisPost, setIsGenesisPost, setPageStatus, url])
+  }, [circleData?.tags, circleImageUrl, currentTabId, getCircleGenerationStatus, isGenesisPost, setIsGenesisPost, url])
 
   const handleGenerateImage = useCallback(async () => {
     const name = getValues('name')
@@ -122,7 +115,8 @@ export const AddManualCircle = () => {
           tabId: currentTabId,
           name,
           description,
-          tags: circleData?.tags
+          tags: circleData?.tags,
+          type: 'manual'
         },
         (res) => {
           getCircleGenerationStatus()

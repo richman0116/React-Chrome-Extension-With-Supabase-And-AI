@@ -7,10 +7,12 @@ import {
   handleCircleCreation,
   handleCircleGeneration,
   handleCircleGenerationWithHistory,
+  removeItemFromStorage,
   setToStorage,
 } from './helpers'
 import { BJActions, BJMessages } from './actions'
 import { generateCircleImage, generateTags } from '../utils/edgeFunctions'
+import { resizeAndConvertImageToBuffer } from '../utils/helpers'
 
 const bannedURLList: string[] = [
   'https://twitter.com/home',
@@ -53,6 +55,7 @@ let supabaseUser: SupabaseUserDataInterface = {} // store the user
 let circleGeneratedStatus = {
   autoGeneratingCircles: {},
   manualCreatingCircle: {},
+  directCreatingCircle: {},
 }
 
 // log user in with email and password
@@ -424,6 +427,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === BJActions.CREATE_CIRCLE) {
+    console.log('background.js: CREATE_CIRCLE was invoked!')
     if (supabaseUser) {
       const {
         tabId,
@@ -433,14 +437,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         imageData,
         tags,
         isGenesisPost,
+        type
       } = request
       const generatingCircle: ICircleGenerationStatus = {
-        type: 'manual',
+        type: type,
         status: CircleGenerationStatus.GENERATING,
         result: [],
       }
 
-      circleGeneratedStatus.manualCreatingCircle = generatingCircle
+      circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = generatingCircle
 
       setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
       try {
@@ -457,6 +462,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   imageData,
                   addedTagNames,
                   isGenesisPost,
+                  type
                 )
               }
             )
@@ -474,6 +480,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               imageData,
               tags,
               isGenesisPost,
+              type
             )
           } catch (err) {
             sendResponse({error: err})
@@ -589,12 +596,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       'background.js: Getting generate circle image from the Edge function and saving it to local storage'
     )
 
-    const { tabId, name, description, tags } = request
+    const { tabId, name, description, tags, type } = request
     getFromStorage(tabId?.toString()).then((generationStatus: any) => {
       circleGeneratedStatus = generationStatus
-      // initialize the status
-      circleGeneratedStatus.manualCreatingCircle = {
-        type: 'manual',
+      const newCircle = {
+        type,
         status: CircleGenerationStatus.INITIALIZED,
         result: [
           {
@@ -604,35 +610,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             tags,
           },
         ],
-      }
+      };
+      circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = newCircle;
       setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
     })
 
     generateCircleImage(undefined, name, description).then((result) => {
       getFromStorage(tabId?.toString()).then((generationStatus: any) => {
         circleGeneratedStatus = generationStatus
-        if (Object.keys(circleGeneratedStatus.manualCreatingCircle).length > 0) {
+        if ((circleGeneratedStatus.manualCreatingCircle && Object.keys(circleGeneratedStatus.manualCreatingCircle).length > 0) || (circleGeneratedStatus.directCreatingCircle && Object.keys(circleGeneratedStatus.directCreatingCircle).length > 0)) {
           if (result.error) {
+            const failedCircle = {
+              type,
+              status: CircleGenerationStatus.FAILED,
+              result: [
+                {
+                  id: '',
+                  name,
+                  description,
+                  tags,
+                },
+              ],
+            }
+            circleGeneratedStatus[type==="manual" ? "manualCreatingCircle" : "directCreatingCircle"] = failedCircle
             setToStorage(
               tabId.toString(),
-              JSON.stringify({
-                type: 'manual',
-                status: CircleGenerationStatus.FAILED,
-                result: [
-                  {
-                    id: '',
-                    name,
-                    description,
-                    tags,
-                  },
-                ],
-              })
+              JSON.stringify(circleGeneratedStatus)
             )
             sendResponse({error: result.error})
           } else if (result.url) {
             const imageUrl = result?.url?.replaceAll('"', '')
             const newCircleGenerationStatus: ICircleGenerationStatus = {
-              type: 'manual',
+              type: type,
               status: CircleGenerationStatus.INITIALIZED,
               result: [
                 {
@@ -645,7 +654,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               ],
             }
 
-            circleGeneratedStatus.manualCreatingCircle = newCircleGenerationStatus
+            circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = newCircleGenerationStatus
 
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
             sendResponse({imageUrl: imageUrl})
@@ -653,6 +662,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         } else {
           circleGeneratedStatus = generationStatus
           circleGeneratedStatus.manualCreatingCircle = {}
+          circleGeneratedStatus.directCreatingCircle = {}
           setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
         }
       })
@@ -661,33 +671,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === BJActions.GET_DIRECT_CIRCLE_GENERATION_RESULT) {
-    const tabId = request.tabId
-    getFromStorage(tabId.toString())
-      .then((result) => {
-        if (result.manualCreatingCircle.type === "manual" && result.manualCreatingCircle.status === CircleGenerationStatus.SUCCEEDED) sendResponse(true);
-      })
-    return true;
-  }
-
   if (request.action === BJActions.GET_CIRCLE_GENERATION_STATUS) {
     try {
       console.log('background.js: Getting saved circles from the storage')
       const tabId = request.tabId
       getFromStorage(tabId?.toString())
         .then((generationStatus: any) => {
-          if (!generationStatus.hasOwnProperty('autoGeneratingCircles') && !generationStatus.hasOwnProperty('manualCreatingCircle')) {
+          if (!generationStatus) generationStatus = circleGeneratedStatus;
+          else if (!generationStatus.hasOwnProperty('autoGeneratingCircles') && !generationStatus.hasOwnProperty('manualCreatingCircle') && !generationStatus.hasOwnProperty('directCreatingCircle')) {
             generationStatus = circleGeneratedStatus
           }
-          console.log('Chrome localstorage data : ', generationStatus)
-          const autoLength: number = Object.keys(generationStatus.autoGeneratingCircles).length || 0;
-          const manualLength: number = Object.keys(generationStatus.manualCreatingCircle).length || 0;
-          if (generationStatus.autoGeneratingCircles.type === 'auto' && autoLength > 0 && manualLength === 0)
-            sendResponse(generationStatus.autoGeneratingCircles)
-          else if (generationStatus.manualCreatingCircle.type === 'manual') {
-            sendResponse(generationStatus.manualCreatingCircle)
+          else {
+            console.log('Chrome localstorage data : ', generationStatus)
+            let autoLength = 0, manualLength = 0, directLength = 0; 
+            if(generationStatus.autoGeneratingCircles) autoLength = Object.keys(generationStatus.autoGeneratingCircles).length;
+            if(generationStatus.manualCreatingCircle) manualLength = Object.keys(generationStatus.manualCreatingCircle).length;
+            if(generationStatus.directCreatingCircle) directLength = Object.keys(generationStatus.directCreatingCircle).length;
+            if (autoLength > 0 && manualLength === 0) {
+              sendResponse(generationStatus.autoGeneratingCircles)
+            }
+            if (manualLength > 0 && autoLength === 0) {
+              sendResponse(generationStatus.manualCreatingCircle)
+            }
+            if (generationStatus.directCreatingCircle.type === 'direct') {
+              sendResponse(generationStatus.directCreatingCircle)
+            }
+            if (autoLength === 0 && manualLength === 0 && directLength === 0) sendResponse({})
+            if (autoLength > 0 && manualLength > 0) {
+              if(generationStatus.autoGeneratingCircles.status === CircleGenerationStatus.SUCCEEDED && generationStatus.manualCreatingCircle.status === CircleGenerationStatus.INITIALIZED)
+                sendResponse(generationStatus.manualCreatingCircle)
+            }
           }
-          else if (autoLength === 0 && manualLength === 0) sendResponse({})
         })
         .catch(() => {
           sendResponse(null)
@@ -706,26 +720,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       getFromStorage(tabId?.toString())
         .then((generationStatus: any) => {
           circleGeneratedStatus = generationStatus
-          const autoLength = Object.keys(generationStatus.autoGeneratingCircles).length
-          const manualLength = Object.keys(generationStatus.manualCreatingCircle).length
-          if (
-            generationStatus.autoGeneratingCircles.type === 'auto' &&
-            generationStatus.manualCreatingCircle.type === 'manual' &&
-            autoLength > 0 &&
-            manualLength > 0
-          ) {
+          let autoLength = 0, manualLength = 0, directLength = 0;
+          if(generationStatus.autoGeneratingCircles) autoLength = Object.keys(generationStatus.autoGeneratingCircles).length
+          if(generationStatus.manualCreatingCircle) manualLength = Object.keys(generationStatus.manualCreatingCircle).length
+          if(generationStatus.directCreatingCircle) directLength = Object.keys(generationStatus.directCreatingCircle).length
+          
+          if (directLength) circleGeneratedStatus.directCreatingCircle = {}
+          if (autoLength > 0 && manualLength > 0) {
             circleGeneratedStatus.manualCreatingCircle = {}
-          } else if (
-            autoLength === 0 &&
-            manualLength > 0 &&
-            generationStatus.manualCreatingCircle.type === 'manual'
-          ) {
+          } else if (autoLength === 0 && manualLength > 0) {
             circleGeneratedStatus.manualCreatingCircle = {}
-          } else if (
-            manualLength === 0 &&
-            autoLength > 0 &&
-            generationStatus.autoGeneratingCircles.type === 'auto'
-          ) {
+          } else if (manualLength === 0 && autoLength > 0) {
             circleGeneratedStatus.autoGeneratingCircles = {}
           }
 
@@ -827,6 +832,161 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ error: 'User not logged in' })
     }
     return true
+  }
+
+  if (request.action === BJActions.SAVE_COMMENT_TO_STORAGE) {
+    console.log('background.js: Saving comment to storage.')
+    const { comment } = request
+    setToStorage("comment", JSON.stringify(comment))
+    return true;
+  }
+
+  if (request.action === BJActions.GET_COMMENT_FROM_SOTRAGE) {
+    console.log('background.js: Getting comment from storage.')
+    getFromStorage('comment').then((result) => {
+      sendResponse(result)
+    })
+    return true
+  }
+
+  if (request.action === BJActions.REMOVE_COMMENT_FROM_STORAGE) {
+    console.log('background.js: Removing comment from storage.')
+    removeItemFromStorage('comment');
+  }
+
+  if (request.action === BJActions.GENERATE_DIRECT_CIRCLE) {
+    console.log('background.js: Generating direct circle.')
+    const { tabId, name, description, tags, url, circleName, circleDescription, isGenesisPost, type } = request;
+    if (supabaseUser) {
+      getFromStorage(tabId?.toString()).then((generationStatus: any) => {
+        circleGeneratedStatus = generationStatus
+        const newCircle = {
+          type: 'direct',
+          status: CircleGenerationStatus.INITIALIZED,
+          result: [
+            {
+              id: '',
+              name,
+              description,
+              tags,
+            },
+          ],
+        };
+        circleGeneratedStatus["directCreatingCircle"] = newCircle;
+        setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+      })
+
+      generateCircleImage(undefined, name, description).then((result) => {
+        getFromStorage(tabId?.toString()).then(async (generationStatus: any) => {
+          circleGeneratedStatus = generationStatus
+          if ((circleGeneratedStatus.directCreatingCircle && Object.keys(circleGeneratedStatus.directCreatingCircle).length > 0)) {
+            if (result.error) {
+              const failedCircle = {
+                type: 'direct',
+                status: CircleGenerationStatus.FAILED,
+                result: [
+                  {
+                    id: '',
+                    name,
+                    description,
+                    tags,
+                  },
+                ],
+              }
+              circleGeneratedStatus["directCreatingCircle"] = failedCircle
+              setToStorage(
+                tabId.toString(),
+                JSON.stringify(circleGeneratedStatus)
+              )
+              sendResponse({ error: result.error })
+            } else if (result.url) {
+              const imageUrl = result?.url?.replaceAll('"', '')
+              const newCircleGenerationStatus: ICircleGenerationStatus = {
+                type: 'direct',
+                status: CircleGenerationStatus.INITIALIZED,
+                result: [
+                  {
+                    id: '',
+                    name,
+                    description,
+                    tags,
+                    circle_logo_image: imageUrl,
+                  },
+                ],
+              }
+
+              circleGeneratedStatus["directCreatingCircle"] = newCircleGenerationStatus
+
+              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+              
+              const imageData = await resizeAndConvertImageToBuffer(imageUrl, 'background')
+              
+              const generatingCircle: ICircleGenerationStatus = {
+                type: 'direct',
+                status: CircleGenerationStatus.GENERATING,
+                result: [],
+              }
+
+              circleGeneratedStatus["directCreatingCircle"] = generatingCircle
+
+              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+              try {
+                if (tags.length === 1 && tags[0] === '') {
+                  try {
+                    generateTags(circleName, circleDescription).then(
+                      (addedTagNames: string[]) => {
+                        handleCircleCreation(
+                          supabase,
+                          tabId,
+                          url,
+                          circleName,
+                          circleDescription,
+                          imageData,
+                          addedTagNames,
+                          isGenesisPost,
+                          type
+                        )
+                      }
+                    )
+                  } catch (err) {
+                    sendResponse({ error: err })
+                  }
+                } else {
+                  try {
+                    handleCircleCreation(
+                      supabase,
+                      tabId,
+                      url,
+                      circleName,
+                      circleDescription,
+                      imageData,
+                      tags,
+                      isGenesisPost,
+                      type
+                    )
+                  } catch (err) {
+                    sendResponse({ error: err })
+                  }
+                }
+              } catch (err) {
+                sendResponse({ error: err })
+              }
+              sendResponse(true)
+            } else {
+              circleGeneratedStatus = generationStatus
+              circleGeneratedStatus.manualCreatingCircle = {}
+              circleGeneratedStatus.directCreatingCircle = {}
+              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+              sendResponse({ error: 'something went wrong!' })
+            }
+          }
+        })
+      })
+    } else {
+      console.error('background.js: User not logged in when creating a circle')
+      sendResponse({ error: 'User not logged in' })
+    }
+    return true;
   }
 })
 

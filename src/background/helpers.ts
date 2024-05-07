@@ -140,10 +140,12 @@ export const handleCircleCreation = (
   pageUrl: string,
   name: string,
   description: string,
-  imageData: string,
+  imageData: any,
   tagNames: string[],
-  isGenesisPost: boolean
+  isGenesisPost: boolean,
+  type: string
 ) => {
+  console.log("handleCircleCreation function was invoked!");
   supabase
     .rpc('tags_add_new_return_all_ids', {
       tag_names: tagNames,
@@ -170,22 +172,34 @@ export const handleCircleCreation = (
       const addedCircleId = data
       try {
         // upload the converted image to Supabase storage
-        const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
-          c.charCodeAt(0)
-        ).buffer
-        const result = await uploadImageToSupabase(
-          imageBuffer,
-          'media_bucket',
-          `circle_images/${addedCircleId}.webp`
-        )
+        let result;
+        if (typeof (imageData) === 'string') {
+          const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
+            c.charCodeAt(0)
+          ).buffer
+          result = await uploadImageToSupabase(
+            imageBuffer,
+            'media_bucket',
+            `circle_images/${addedCircleId}.webp`
+          )
+        } else {
+          result = await uploadImageToSupabase(
+            imageData,
+            'media_bucket',
+            `circle_images/${addedCircleId}.webp`
+          )
+        }
+
         if (result) {
           getFromStorage(tabId?.toString()).then((generationStatus) => {
             const circleGeneratedStatus = generationStatus
-            circleGeneratedStatus.manualCreatingCircle = {
-              type:'manual',
+            const newCircle = {
+              type,
               status: CircleGenerationStatus.SUCCEEDED,
               result: [],
             }
+            console.log('circle was created successfully')
+            circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = newCircle
             circleGeneratedStatus.autoGeneratingCircles = {}
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
           })

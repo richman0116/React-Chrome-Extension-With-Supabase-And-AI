@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useMemo, useState } from "react"
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react"
 
 import CreateCircleItem from "../CreateCircleItem"
 import ShareCircleItem from "../ShareCircleItem"
@@ -9,11 +9,11 @@ import CircleIcon from "../SVGIcons/CircleIcon"
 import { useCircleContext } from "../../context/CircleContext"
 import LoadingSpinner from "../LoadingSpinner"
 import { BJActions } from "../../background/actions"
-import { resizeAndConvertImageToBuffer } from "../../utils/helpers"
-// import { initialCircleData } from "../../context/CircleContext"
 import classNames from "classnames"
+import { CircleGenerationStatus } from "../../utils/constants"
 
 const ShareThoughtBox = () => {
+
   const [comment, setComment] = useState<string>('')
   const [showCircles, setShowCircles] = useState<boolean>(false)
   const [isDirectPost, setIsDirectPost] = useState<boolean>(false)
@@ -21,7 +21,7 @@ const ShareThoughtBox = () => {
   const [statusMessage, setStatusMessage] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles } = useCircleContext()
+  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus } = useCircleContext()
 
   const commentBoxTitle = useMemo(() => {
     if (showCircles) {
@@ -30,6 +30,7 @@ const ShareThoughtBox = () => {
       return "Send"
     }
   }, [showCircles])
+
 
   const handleCommentChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setErrorMessage('')
@@ -43,6 +44,12 @@ const ShareThoughtBox = () => {
 
   const handleSendIconClick = useCallback(() => {
     if (comment.length > 0) {
+      chrome.runtime.sendMessage(
+        {
+          action: BJActions.SAVE_COMMENT_TO_STORAGE,
+          comment: comment
+        }
+      )
       const name = currentTabTitle + " comments";
       setIsDirectPost(true)
       setIsStatusMessage(true)
@@ -52,7 +59,7 @@ const ShareThoughtBox = () => {
           action: BJActions.CHECK_IF_CIRCLE_EXIST,
           name
         },
-        (res) => {
+        async (res) => {
           if (res) {
             const circleId = res;
             setStatusMessage('Posting comment in existed circle ...')
@@ -71,75 +78,62 @@ const ShareThoughtBox = () => {
             }, 3000);
           }
           else {
-            setStatusMessage('Creating circle ...')
-            chrome.runtime.sendMessage(
-              {
-                action: BJActions.GENERATE_CIRCLE_IMAGE,
-                tabId: currentTabId,
-                name,
-                description: comment,
-                tags: circleData?.tags
-              },
-              async (res) => {
-                if (!res || res.error) {
-                  setIsDirectPost(false)
-                }
-                else if (res.imageUrl) {
-                  const imageBuffer = await resizeAndConvertImageToBuffer(res.imageUrl)
-                  const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
-                  chrome.runtime.sendMessage(
-                    {
-                      action: BJActions.CREATE_CIRCLE,
-                      tabId: currentTabId,
-                      url: currentUrl,
-                      circleName: name,
-                      circleDescription: comment,
-                      imageData,
-                      tags: circleData?.tags,
-                      isGenesisPost: true,
-                    },
-                    (response) => {
-                      if (!response || response.error) {
-                        setErrorMessage(response.error)
-                        setIsDirectPost(false)
-                      }
-                      else {
-                        const circleGenerationResult = setInterval(() => {
-                          chrome.runtime.sendMessage(
-                            {
-                              action: BJActions.GET_DIRECT_CIRCLE_GENERATION_RESULT,
-                              tabId: currentTabId
-                            },
-                            (res) => {
-                              if (res) {
-                                clearInterval(circleGenerationResult)
-                                setComment("")
-                                setIsDirectPost(false);
-                                setStatusMessage('Done!')
-                                getCircles();
-                                chrome.runtime.sendMessage({
-                                  action: BJActions.REMOVE_CIRCLES_FROM_STORAGE
-                                })
-                                setTimeout(() => {
-                                  setIsStatusMessage(false);
-                                }, 3000);
-                              }
-                            }
-                          )
-                        }, 1500)
-                      }
-                    }
-                  )
-                }
+            setStatusMessage('Creating Circle...')
+            chrome.runtime.sendMessage({
+              action: BJActions.GENERATE_DIRECT_CIRCLE,
+              tabId: currentTabId,
+              name,
+              description: comment,
+              tags: circleData?.tags,
+              url: currentUrl,
+              circleName: name,
+              circleDescription: comment,
+              isGenesisPost: true,
+              type: 'direct'
+            },
+            (res) => {
+              if (res.error) {
+                setStatusMessage('');
+                setErrorMessage(res.error)
+                setIsDirectPost(false)
               }
-            )
+              if (res === true) {
+                getCircleGenerationStatus();
+              }
+            })
           }
         }
       )
     } else {
       setErrorMessage('Please put your thought.')
     }
-  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircles])
+  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircleGenerationStatus])
+
+  useEffect(() => {
+    if (circleGenerationStatus?.type === 'direct') {
+      setIsStatusMessage(true)
+      setComment(commentData)
+      setIsDirectPost(true);
+      setStatusMessage('Creating Circle...')
+    }
+    if (circleGenerationStatus?.type === 'direct' && circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
+      setComment("");
+      setIsDirectPost(false);
+      setStatusMessage('Done!');
+      setCommentData('');
+      getCircles();
+      chrome.runtime.sendMessage({
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      });
+      chrome.runtime.sendMessage({
+        action: BJActions.REMOVE_COMMENT_FROM_STORAGE,
+      });
+      setTimeout(() => {
+        setIsStatusMessage(false);
+      }, 3000);
+    }
+  }, [circleData.tags, circleGenerationStatus, commentData, currentTabId, currentTabTitle, currentUrl, getCircles, setCommentData])
 
   return (
     <div className="w-full rounded-2.5xl bg-branding pb-2">

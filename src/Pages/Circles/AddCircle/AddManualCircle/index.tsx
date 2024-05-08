@@ -78,7 +78,7 @@ export const AddManualCircle = () => {
   const handleCreateCircle = useCallback(async (data: CircleFormData) => {
     if (circleImageUrl) {
       setIsSaving(true)
-      const imageBuffer = await resizeAndConvertImageToBuffer(circleImageUrl)
+      const imageBuffer = await resizeAndConvertImageToBuffer(circleImageUrl, 'popup')
       const imageData = btoa(String.fromCharCode(...Array.from(imageBuffer)))
 
       const { name, description } = data
@@ -91,12 +91,13 @@ export const AddManualCircle = () => {
           circleDescription: description,
           imageData,
           tags: circleData?.tags,
-          isGenesisPost
+          isGenesisPost,
+          type: 'manual'
         },
         (response: boolean) => {
           if (response) {
             setIsGenesisPost(false)
-            getCircleGenerationStatus()
+            getCircleGenerationStatus();
           }
         }
       )
@@ -114,7 +115,8 @@ export const AddManualCircle = () => {
           tabId: currentTabId,
           name,
           description,
-          tags: circleData?.tags
+          tags: circleData?.tags,
+          type: 'manual'
         },
         (res) => {
           getCircleGenerationStatus()
@@ -148,9 +150,11 @@ export const AddManualCircle = () => {
       },
       (res) => {
         if (res) {
-          const autoLength = Object.keys(res.autoGeneratingCircles).length
-          const manualLength = Object.keys(res.manualCreatingCircle).length
-          if (autoLength === 0 && manualLength === 0)
+          let autoLength = 0, manualLength = 0, directLength = 0;
+          if(res.autoLength) autoLength = Object.keys(res.autoGeneratingCircles).length
+          if(res.manualLength) manualLength = Object.keys(res.manualCreatingCircle).length
+          if(res.directLength) directLength = Object.keys(res.directCreatingCircle).length
+          if (directLength === 0 && autoLength === 0 && manualLength === 0)
           {
             setCircleGenerationStatus(null)
             setPageStatus(circlePageStatus.CIRCLE_LIST)

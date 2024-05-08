@@ -53,36 +53,47 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
 
 // Define a function to resize and convert an image to WebP format, returning the result as a Uint8Array
 export const resizeAndConvertImageToBuffer = async (
-  imageUrl: string
+  imageUrl: string,
+  status: string
 ): Promise<Uint8Array> => {
-  // Load the image
-  const img = await loadImage(imageUrl)
+  if (status === 'popup') {
+    // Load the image
+    const img = await loadImage(imageUrl)
 
-  // Create a canvas and context
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    throw new Error('Unable to get canvas context')
+    // Create a canvas and context
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('Unable to get canvas context')
+    }
+
+    // Set the canvas size to the desired dimensions
+    canvas.width = 256
+    canvas.height = 256
+
+    // Draw the image onto the canvas, resizing it
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+    // Convert the canvas content to a WebP blob
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/webp')
+    )
+    if (!blob) {
+      throw new Error('Unable to convert canvas to Blob')
+    }
+
+    // Convert the blob to an ArrayBuffer then to a Uint8Array
+    const buffer = await blob.arrayBuffer()
+    return new Uint8Array(buffer)
   }
-
-  // Set the canvas size to the desired dimensions
-  canvas.width = 256
-  canvas.height = 256
-
-  // Draw the image onto the canvas, resizing it
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-  // Convert the canvas content to a WebP blob
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/webp')
-  )
-  if (!blob) {
-    throw new Error('Unable to convert canvas to Blob')
+  const response = await fetch(imageUrl);
+  if (!response.ok) {
+    throw new Error(`Network response was not ok for URL: ${imageUrl}`);
   }
-
-  // Convert the blob to an ArrayBuffer then to a Uint8Array
-  const buffer = await blob.arrayBuffer()
-  return new Uint8Array(buffer)
+  const blob = await response.blob();
+  // Convert the Blob to an ArrayBuffer then to a Uint8Array
+  const buffer = await blob.arrayBuffer();
+  return new Uint8Array(buffer);
 }
 
 export const uploadImageToSupabase = async (
@@ -101,6 +112,7 @@ export const uploadImageToSupabase = async (
     if (error) {
       console.error(error)
     }
+    return data;
   } catch (ex) {
     console.error('An error occurred on image uploading', ex)
   }

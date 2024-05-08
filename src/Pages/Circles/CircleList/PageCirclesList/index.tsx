@@ -7,13 +7,13 @@ import classNames from 'classnames'
 import { useCircleContext } from '../../../../context/CircleContext'
 import { BJActions } from '../../../../background/actions'
 
-const PageCirclList = () => {
+const PageCircleList = () => {
   const { circles, isLoading, currentUrl: url } = useCircleContext()
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0].url
       chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
-        console.log('circle bagdge number has been updated')
+        console.log('circle badge number has been updated')
       })
     })
   }, [])
@@ -29,7 +29,7 @@ const PageCirclList = () => {
           {!isLoading && <p className="text-xl font-medium text-primary pb-1">Existing Circles on this page</p>}
         </div>
         {isLoading && (
-          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center nborder-gray-600 py-4 ">
+          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-gray-600 py-4 ">
             <LoadingPage />
           </div>
         )}
@@ -46,4 +46,4 @@ const PageCirclList = () => {
   )
 }
 
-export default PageCirclList
+export default PageCircleList

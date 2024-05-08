@@ -140,10 +140,12 @@ export const handleCircleCreation = (
   pageUrl: string,
   name: string,
   description: string,
-  imageData: string,
+  imageData: any,
   tagNames: string[],
-  isGenesisPost: boolean
+  isGenesisPost: boolean,
+  type: string
 ) => {
+  console.log("handleCircleCreation function was invoked!");
   supabase
     .rpc('tags_add_new_return_all_ids', {
       tag_names: tagNames,
@@ -170,21 +172,42 @@ export const handleCircleCreation = (
       const addedCircleId = data
       try {
         // upload the converted image to Supabase storage
-        const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
-          c.charCodeAt(0)
-        ).buffer
-        await uploadImageToSupabase(
-          imageBuffer,
-          'media_bucket',
-          `circle_images/${addedCircleId}.webp`
-        )
-        const status = await updateCircleImageUrl(supabase, addedCircleId)
-        if (status === 204) {
-          removeItemFromStorage(tabId.toString())
+        let result;
+        if (typeof (imageData) === 'string') {
+          const imageBuffer = Uint8Array.from(atob(imageData), (c) =>
+            c.charCodeAt(0)
+          ).buffer
+          result = await uploadImageToSupabase(
+            imageBuffer,
+            'media_bucket',
+            `circle_images/${addedCircleId}.webp`
+          )
         } else {
-          circleGenerationFailedHandler('manual', tabId)
+          result = await uploadImageToSupabase(
+            imageData,
+            'media_bucket',
+            `circle_images/${addedCircleId}.webp`
+          )
         }
-        
+
+        if (result) {
+          getFromStorage(tabId?.toString()).then((generationStatus) => {
+            const circleGeneratedStatus = generationStatus
+            const newCircle = {
+              type,
+              status: CircleGenerationStatus.SUCCEEDED,
+              result: [],
+            }
+            console.log('circle was created successfully')
+            circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = newCircle
+            circleGeneratedStatus.autoGeneratingCircles = {}
+            setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+          })
+        }
+        const status = await updateCircleImageUrl(supabase, addedCircleId)
+        if (!(status === 204)) {
+          circleGenerationFailedHandler('manual', tabId)
+        }         
       } catch (err) {
         circleGenerationFailedHandler('manual', tabId)
         console.error(err)

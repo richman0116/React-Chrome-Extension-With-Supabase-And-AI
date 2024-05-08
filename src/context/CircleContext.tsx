@@ -126,7 +126,6 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
           tabId: currentTabId
         },
         (res) => {
-          console.log(res, 'ressssssssssssssssssssssres')
           setIsLoadingCGenerationStatus(false)
           if (res) {
             const { type, result, status } = res

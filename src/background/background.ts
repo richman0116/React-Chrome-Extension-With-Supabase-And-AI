@@ -733,7 +733,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           } else if (manualLength === 0 && autoLength > 0) {
             circleGeneratedStatus.autoGeneratingCircles = {}
           }
-
+          
           setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
           sendResponse(circleGeneratedStatus)
         })

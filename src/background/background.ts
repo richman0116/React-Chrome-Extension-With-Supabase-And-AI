@@ -275,6 +275,97 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
   return data
 }
 
+async function handleGenerateDirectCircle(request: any, sendResponse: any) {
+  const { tabId, name, description, tags } = request;
+
+  if (!supabaseUser) {
+    console.error('User not logged in when creating a circle');
+    sendResponse({ error: 'User not logged in' });
+    return;
+  }
+
+  try {
+    // Retrieve the generation status from storage
+    let generationStatus = await getFromStorage(tabId.toString());
+    if (!generationStatus) {
+      generationStatus = {
+        autoGeneratingCircles: {},
+        manualCreatingCircle: {},
+        directCreatingCircle: {}
+      };
+    }
+
+    // Initialize the circle generation object
+    const newCircle = {
+      type: 'direct',
+      status: CircleGenerationStatus.INITIALIZED,
+      result: [
+        {
+          id: '',
+          name,
+          description,
+          tags,
+        },
+      ],
+    };
+
+    // Update the storage status
+    generationStatus.directCreatingCircle = newCircle;
+    setToStorage(tabId.toString(), JSON.stringify(generationStatus));
+
+    // Call an asynchronous function to generate the circle image
+    const imageResult = await generateCircleImage(undefined, name, description);
+    if (imageResult.error) {
+      generationStatus.directCreatingCircle = {
+        ...newCircle,
+        status: CircleGenerationStatus.FAILED,
+      };
+      setToStorage(tabId.toString(), JSON.stringify(generationStatus));
+      sendResponse({ error: imageResult.error });
+      return;
+    }
+
+    // Proceed with further processing and update the storage status
+    const imageUrl = imageResult.url.replace(/"/g, '');
+    const imageData = await resizeAndConvertImageToBuffer(imageUrl, 'background');
+
+    generationStatus.directCreatingCircle = {
+      type: 'direct',
+      status: CircleGenerationStatus.GENERATING,
+      result: [
+        {
+          id: '',
+          name,
+          description,
+          tags,
+          circle_logo_image: imageUrl,
+        },
+      ],
+    };
+    setToStorage(tabId.toString(), JSON.stringify(generationStatus));
+
+    // Add your logic for circle creation here
+    // Replace `handleCircleCreation` with your specific circle creation logic
+    handleCircleCreation(
+      supabase,
+      tabId,
+      request.url,
+      request.circleName,
+      request.circleDescription,
+      imageData,
+      tags.length ? tags : await generateTags(request.circleName, request.circleDescription),
+      request.isGenesisPost,
+      request.type
+    );
+
+    // Final success response
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Error during direct circle generation:', error);
+    sendResponse({ error: 'Error during circle generation.' });
+  }
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === BJActions.CHECK_LOGGED_IN) {
     // This is an example async function, replace with your own
@@ -878,136 +969,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === BJActions.GENERATE_DIRECT_CIRCLE) {
     console.log('background.js: Generating direct circle.')
-    const { tabId, name, description, tags, url, circleName, circleDescription, isGenesisPost, type } = request;
-    if (supabaseUser) {
-      getFromStorage(tabId?.toString()).then((generationStatus: any) => {
-        circleGeneratedStatus = generationStatus
-        const newCircle = {
-          type: 'direct',
-          status: CircleGenerationStatus.INITIALIZED,
-          result: [
-            {
-              id: '',
-              name,
-              description,
-              tags,
-            },
-          ],
-        };
-        circleGeneratedStatus["directCreatingCircle"] = newCircle;
-        setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
-      })
-
-      generateCircleImage(undefined, name, description).then((result) => {
-        getFromStorage(tabId?.toString()).then(async (generationStatus: any) => {
-          circleGeneratedStatus = generationStatus
-          if ((circleGeneratedStatus.directCreatingCircle && Object.keys(circleGeneratedStatus.directCreatingCircle).length > 0)) {
-            if (result.error) {
-              const failedCircle = {
-                type: 'direct',
-                status: CircleGenerationStatus.FAILED,
-                result: [
-                  {
-                    id: '',
-                    name,
-                    description,
-                    tags,
-                  },
-                ],
-              }
-              circleGeneratedStatus["directCreatingCircle"] = failedCircle
-              setToStorage(
-                tabId.toString(),
-                JSON.stringify(circleGeneratedStatus)
-              )
-              sendResponse({ error: result.error })
-            } else if (result.url) {
-              const imageUrl = result?.url?.replaceAll('"', '')
-              const newCircleGenerationStatus: ICircleGenerationStatus = {
-                type: 'direct',
-                status: CircleGenerationStatus.INITIALIZED,
-                result: [
-                  {
-                    id: '',
-                    name,
-                    description,
-                    tags,
-                    circle_logo_image: imageUrl,
-                  },
-                ],
-              }
-
-              circleGeneratedStatus["directCreatingCircle"] = newCircleGenerationStatus
-
-              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
-              
-              const imageData = await resizeAndConvertImageToBuffer(imageUrl, 'background')
-              
-              const generatingCircle: ICircleGenerationStatus = {
-                type: 'direct',
-                status: CircleGenerationStatus.GENERATING,
-                result: [],
-              }
-
-              circleGeneratedStatus["directCreatingCircle"] = generatingCircle
-
-              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
-              try {
-                if (tags.length === 1 && tags[0] === '') {
-                  try {
-                    generateTags(circleName, circleDescription).then(
-                      (addedTagNames: string[]) => {
-                        handleCircleCreation(
-                          supabase,
-                          tabId,
-                          url,
-                          circleName,
-                          circleDescription,
-                          imageData,
-                          addedTagNames,
-                          isGenesisPost,
-                          type
-                        )
-                      }
-                    )
-                  } catch (err) {
-                    sendResponse({ error: err })
-                  }
-                } else {
-                  try {
-                    handleCircleCreation(
-                      supabase,
-                      tabId,
-                      url,
-                      circleName,
-                      circleDescription,
-                      imageData,
-                      tags,
-                      isGenesisPost,
-                      type
-                    )
-                  } catch (err) {
-                    sendResponse({ error: err })
-                  }
-                }
-              } catch (err) {
-                sendResponse({ error: err })
-              }
-              sendResponse(true)
-            } else {
-              circleGeneratedStatus = generationStatus
-              circleGeneratedStatus.manualCreatingCircle = {}
-              circleGeneratedStatus.directCreatingCircle = {}
-              setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
-              sendResponse({ error: 'something went wrong!' })
-            }
-          }
-        })
-      })
-    } else {
-      console.error('background.js: User not logged in when creating a circle')
-      sendResponse({ error: 'User not logged in' })
-    }
+    handleGenerateDirectCircle(request, sendResponse).catch((error) => {
+      console.error('Error handling direct circle generation:', error);
+      sendResponse({ error: 'Failed to process the request.' });
+    });
     return true;
   }
 })

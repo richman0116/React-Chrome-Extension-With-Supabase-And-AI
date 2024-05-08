@@ -786,7 +786,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       getFromStorage(tabId?.toString())
         .then((generationStatus: any) => {
           if (Object.keys(generationStatus).length === 0) {
-            console.log(generationStatus, "ssssssssssssss", tabId);
             generationStatus = circleGeneratedStatus;
           }
           console.log('Chrome localstorage data : ', generationStatus)

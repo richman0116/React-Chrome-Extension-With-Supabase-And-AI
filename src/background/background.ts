@@ -198,10 +198,17 @@ const getUserAvatarUrl = async () => {
     'background.js: Getting user avatar url with id: ',
     supabaseUser?.data?.user?.id
   )
-  return supabase
-    .from('users')
-    .select('avatar_url')
-    .eq('id', supabaseUser?.data?.user?.id)
+  try {
+    const response = await supabase
+      .from('users')
+      .select('avatar_url')
+      .eq('id', supabaseUser?.data?.user?.id);
+    console.log('background.js: Result of getUserAvatarUrl: ', response);
+    return response;
+  } catch (error) {
+    console.error('background.js: Error in getUserAvatarUrl: ', error);
+    throw new Error('Error getting user avatar url.');
+  }
 }
 
 // this function tries to get user if user already logged in
@@ -241,15 +248,21 @@ const getUser = async () => {
 }
 
 const showCircleCount = async (url: string) => {
-  if (url) {
-    supabase.rpc('circles_get_circles_by_url', { p_url: url }).then(async (result) => {
-      if (result.data?.length > 0) {
-        await chrome.action.setBadgeText({ text: result.data.length.toString() })
-      } else {
-        await chrome.action.setBadgeText({ text: '' })
-      }
-    })
-  }
+  return new Promise<void>((resolve, reject) => {
+    if (url) {
+      (supabase.rpc('circles_get_circles_by_url', { p_url: url }) as unknown as Promise<any> ).then(async (result) => {
+        if (result.data?.length > 0) {
+          await chrome.action.setBadgeText({ text: result.data.length.toString() }, resolve)
+        } else {
+          await chrome.action.setBadgeText({ text: '' }, resolve)
+        }
+      }).catch((error: any) => {
+        reject(error)
+      });
+    } else {
+      resolve();
+    }
+  })
 }
 
 const checkIfUserJoinedCircle = async (circleId: string) => {
@@ -318,13 +331,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })
     return true
   }
+
   if (request.action === BJActions.GET_USER_AVATAR_URL) {
     console.log('background.js: Getting user avatar url')
     getUserAvatarUrl()
       .then((result: any) => {
         console.log('background.js: Result of getUserAvatarUrl: ', result)
-        if (result.data) {
+        if (result.data && result.data.length > 0) {
           sendResponse(result.data[0])
+        } else {
+          sendResponse({error: 'No avatar URL found'})
         }
       })
       .catch((error) => {
@@ -333,6 +349,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
+  
   if (request.action === BJActions.GET_PAGE_CONTENT) {
     console.log('background.js: Getting page content')
     if (supabaseUser) {
@@ -677,30 +694,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const tabId = request.tabId
       getFromStorage(tabId?.toString())
         .then((generationStatus: any) => {
-          if (!generationStatus) generationStatus = circleGeneratedStatus;
-          else if (!generationStatus.hasOwnProperty('autoGeneratingCircles') && !generationStatus.hasOwnProperty('manualCreatingCircle') && !generationStatus.hasOwnProperty('directCreatingCircle')) {
-            generationStatus = circleGeneratedStatus
+          if (Object.keys(generationStatus).length === 0) {
+            console.log(generationStatus, "ssssssssssssss", tabId);
+            generationStatus = circleGeneratedStatus;
           }
-          else {
-            console.log('Chrome localstorage data : ', generationStatus)
-            let autoLength = 0, manualLength = 0, directLength = 0; 
-            if(generationStatus.autoGeneratingCircles) autoLength = Object.keys(generationStatus.autoGeneratingCircles).length;
-            if(generationStatus.manualCreatingCircle) manualLength = Object.keys(generationStatus.manualCreatingCircle).length;
-            if(generationStatus.directCreatingCircle) directLength = Object.keys(generationStatus.directCreatingCircle).length;
-            if (autoLength > 0 && manualLength === 0) {
-              sendResponse(generationStatus.autoGeneratingCircles)
-            }
-            if (manualLength > 0 && autoLength === 0) {
+          console.log('Chrome localstorage data : ', generationStatus)
+          let autoLength = 0, manualLength = 0, directLength = 0; 
+          if(generationStatus.autoGeneratingCircles) autoLength = Object.keys(generationStatus.autoGeneratingCircles).length;
+          if(generationStatus.manualCreatingCircle) manualLength = Object.keys(generationStatus.manualCreatingCircle).length;
+          if(generationStatus.directCreatingCircle) directLength = Object.keys(generationStatus.directCreatingCircle).length;
+          if (autoLength > 0 && manualLength === 0) {
+            sendResponse(generationStatus.autoGeneratingCircles)
+          }
+          if (manualLength > 0 && autoLength === 0) {
+            sendResponse(generationStatus.manualCreatingCircle)
+          }
+          if (generationStatus.directCreatingCircle.type === 'direct') {
+            sendResponse(generationStatus.directCreatingCircle)
+          }
+          if (autoLength === 0 && manualLength === 0 && directLength === 0) sendResponse({})
+          if (autoLength > 0 && manualLength > 0) {
+            if(generationStatus.autoGeneratingCircles.status === CircleGenerationStatus.SUCCEEDED && generationStatus.manualCreatingCircle.status === CircleGenerationStatus.INITIALIZED)
               sendResponse(generationStatus.manualCreatingCircle)
-            }
-            if (generationStatus.directCreatingCircle.type === 'direct') {
-              sendResponse(generationStatus.directCreatingCircle)
-            }
-            if (autoLength === 0 && manualLength === 0 && directLength === 0) sendResponse({})
-            if (autoLength > 0 && manualLength > 0) {
-              if(generationStatus.autoGeneratingCircles.status === CircleGenerationStatus.SUCCEEDED && generationStatus.manualCreatingCircle.status === CircleGenerationStatus.INITIALIZED)
-                sendResponse(generationStatus.manualCreatingCircle)
-            }
           }
         })
         .catch(() => {
@@ -771,9 +786,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     })
     return true
   }
+
   if (request.action === BJActions.SHOW_CIRCLE_COUNT) {
-    showCircleCount(request.url).then(() => {})
-    return true
+    showCircleCount(request.url).then(() => {
+      sendResponse({ message: "circle badge number has been updated" });
+    }).catch(error => {
+      console.error('Error updating badge:', error);
+      sendResponse({ error: 'Failed to update badge' });
+    });
+    return true;
   }
 
   if (request.action === BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES) {
@@ -796,11 +817,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === BJActions.GET_USER_CIRCLE_COUNT) {
     console.log("background.js: Getting user circle's count")
     if (supabaseUser) {
-      supabase
-        .rpc('circles_get_user_circles_count', { userid: supabaseUser.data?.user?.id })
-        .then((result) => {
+      (supabase.rpc('circles_get_user_circles_count', { userid: supabaseUser.data?.user?.id }) as unknown as Promise<any>)
+        .then((result: any) => {
           console.log('background.js: result of getting user circles count : ', result)
           sendResponse(result.data)
+        }).catch((error: any) => {
+          sendResponse({error: error.message || 'Error fetching circles count'})
         })
     } else {
       console.error('background.js: User not logged in when calling getUserCircles')

@@ -13,7 +13,8 @@ const PageCircleList = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0].url
       chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
-        console.log('circle badge number has been updated')
+        if (response.message) console.log(response.message)
+        else console.log(response.error)
       })
     })
   }, [])

@@ -13,7 +13,7 @@ import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
 import { BJActions } from '../background/actions'
 
 interface ICircleContext {
-  isCheckGenerationStatus: boolean
+  isCheckingGenerationStatus: boolean
   commentData: string
   circles: CircleInterface[]
   currentUrl: string
@@ -33,7 +33,7 @@ interface ICircleContext {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
   setIsGenesisPost: Dispatch<SetStateAction<boolean>>
   setCommentData: Dispatch<SetStateAction<string>>
-  setIsCheckGenerationStatus: Dispatch<SetStateAction<boolean>>
+  setIsCheckingGenerationStatus: Dispatch<SetStateAction<boolean>>
 }
 
 export const initialCircleData = {
@@ -45,7 +45,7 @@ export const initialCircleData = {
 }
 
 const CircleContext = createContext<ICircleContext>({
-  isCheckGenerationStatus: false,
+  isCheckingGenerationStatus: false,
   commentData: '',
   circles: [],
   currentUrl: '',
@@ -65,7 +65,7 @@ const CircleContext = createContext<ICircleContext>({
   setCircleData: () => { },
   setIsGenesisPost: () => { },
   setCommentData: () => { },
-  setIsCheckGenerationStatus: () => { }
+  setIsCheckingGenerationStatus: () => { }
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -86,7 +86,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
   const [isGenesisPost, setIsGenesisPost] = useState(false)
   const [commentData, setCommentData] = useState<string>('')
-  const [isCheckGenerationStatus, setIsCheckGenerationStatus] = useState<boolean>(false)
+  const [isCheckingGenerationStatus, setIsCheckingGenerationStatus] = useState<boolean>(false)
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -198,7 +198,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   return (
     <CircleContext.Provider
       value={{
-        isCheckGenerationStatus,
+        isCheckingGenerationStatus,
         commentData,
         circles,
         currentUrl,
@@ -218,7 +218,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         setCircleData,
         setIsGenesisPost,
         setCommentData,
-        setIsCheckGenerationStatus
+        setIsCheckingGenerationStatus
       }}
     >
       {children}

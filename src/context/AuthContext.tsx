@@ -68,11 +68,16 @@ export const AuthContextProvider = ({ children }: AuthContextProviderInterface) 
             action: BJActions.GET_USER_AVATAR_URL,
           },
           (res) => {
-            if (res) {
+            if (res && !res.error) {
               setAvatarUrl(res.avatar_url)
+            } else {
+              console.error('Failed to load avatar URL:', res?.error)
+              setAvatarUrl('');
             }
           }
         )
+      } else {
+        setAvatarUrl('')
       }
     }
 

@@ -97,7 +97,7 @@ const ShareThoughtBox = () => {
                 setErrorMessage(res.error)
                 setIsDirectPost(false)
               }
-              if (res === true) {
+              if (res.success) {
                 getCircleGenerationStatus();
               }
             })

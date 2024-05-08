@@ -21,7 +21,7 @@ const ShareThoughtBox = () => {
   const [statusMessage, setStatusMessage] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus } = useCircleContext()
+  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus, setIsCheckGenerationStatus } = useCircleContext()
 
   const commentBoxTitle = useMemo(() => {
     if (showCircles) {
@@ -52,6 +52,7 @@ const ShareThoughtBox = () => {
       )
       const name = currentTabTitle + " comments";
       setIsDirectPost(true)
+      setIsCheckGenerationStatus(true)
       setIsStatusMessage(true)
       setStatusMessage('Checking if circle exists ...')
       chrome.runtime.sendMessage(
@@ -73,6 +74,7 @@ const ShareThoughtBox = () => {
             setStatusMessage('Post was created in existed circle!')
             setComment('')
             setIsDirectPost(false)
+            setIsCheckGenerationStatus(false)
             setTimeout(() => {
               setIsStatusMessage(false);
             }, 3000);
@@ -107,10 +109,11 @@ const ShareThoughtBox = () => {
     } else {
       setErrorMessage('Please put your thought.')
     }
-  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircleGenerationStatus])
+  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircleGenerationStatus, setIsCheckGenerationStatus])
 
   useEffect(() => {
     if (circleGenerationStatus?.type === 'direct') {
+      setIsCheckGenerationStatus(true)
       setIsStatusMessage(true)
       setComment(commentData)
       setIsDirectPost(true);
@@ -129,11 +132,12 @@ const ShareThoughtBox = () => {
       chrome.runtime.sendMessage({
         action: BJActions.REMOVE_COMMENT_FROM_STORAGE,
       });
+      setIsCheckGenerationStatus(false)
       setTimeout(() => {
         setIsStatusMessage(false);
       }, 3000);
     }
-  }, [circleData.tags, circleGenerationStatus, commentData, currentTabId, currentTabTitle, currentUrl, getCircles, setCommentData])
+  }, [circleData.tags, circleGenerationStatus, commentData, currentTabId, currentTabTitle, currentUrl, getCircles, setCommentData, setIsCheckGenerationStatus])
 
   return (
     <div className="w-full rounded-2.5xl bg-branding pb-2">

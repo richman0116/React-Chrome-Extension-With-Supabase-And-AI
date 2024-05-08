@@ -113,8 +113,15 @@ const AddGeneratedCircles = ({ generatedCircles: circles, setGeneratedCircles: s
   }, [currentTabId, setCircleGenerationStatus, setPageStatus])
 
   const handleManualClick = useCallback(() => {
-    setPageStatus(circlePageStatus.ADD_MANUALLY)
-  }, [setPageStatus])
+    chrome.runtime.sendMessage(
+      {
+        action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+        tabId: currentTabId
+      }, (res) => {
+        setPageStatus(circlePageStatus.ADD_MANUALLY)
+      }
+    )
+  }, [currentTabId, setPageStatus])
 
   return (
     isLoading ? <div className="w-full border-gray-600 flex flex-col gap-y-4">

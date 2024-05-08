@@ -786,7 +786,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       getFromStorage(tabId?.toString())
         .then((generationStatus: any) => {
           if (Object.keys(generationStatus).length === 0) {
-            generationStatus = circleGeneratedStatus;
+            generationStatus = {
+              autoGeneratingCircles: {},
+              manualCreatingCircle: {},
+              directCreatingCircle: {},
+            };
           }
           console.log('Chrome localstorage data : ', generationStatus)
           let autoLength = 0, manualLength = 0, directLength = 0; 
@@ -836,6 +840,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           } else if (autoLength === 0 && manualLength > 0) {
             circleGeneratedStatus.manualCreatingCircle = {}
           } else if (manualLength === 0 && autoLength > 0) {
+            circleGeneratedStatus.autoGeneratingCircles = {}
+          } else if (autoLength > 0 && generationStatus.autoGeneratingCircles.status === CircleGenerationStatus.GENERATING) {
             circleGeneratedStatus.autoGeneratingCircles = {}
           }
           

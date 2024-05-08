@@ -62,7 +62,7 @@ export const AddManualCircle = () => {
     } else {
       setIsSaving(false)
     }
-  }, [circleGenerationStatus?.status])
+  }, [circleGenerationStatus?.status, currentTabId, setCircleData, setCircleGenerationStatus])
 
   useEffect(() => {
     const intervalId = setInterval(() => {

@@ -37,8 +37,12 @@ const Header = () => {
           action: BJActions.GET_USER_CIRCLE_COUNT,
         },
         (res: any) => {
-          if (!res.error) {
+          if (res && !res.error) {
             setCirclesCount(res)
+          } else if(res && res.error) {
+            console.log(res.error)
+          } else {
+            console.log('No response received.')
           }
         }
       )

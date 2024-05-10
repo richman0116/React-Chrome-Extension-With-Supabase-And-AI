@@ -7,17 +7,34 @@ import PageCircleList from './PageCirclesList'
 import Avatar from '../../../components/Avatar'
 import CircleCreateButton from '../../../components/CircleCreateButton'
 import ShareThoughtBox from '../../../components/ShareThoughtBox'
+import { CircleGenerationStatus } from '../../../utils/constants'
+import { initialCircleData } from "../../../context/CircleContext"
+import { BJActions } from '../../../background/actions'
+
 
 const CircleList = () => {
   const [showAvatar, setShowAvatar] = useState(false)
 
-  const { isLoading, circles, getCircles } = useCircleContext()
+  const { isLoading, circles, getCircles, circleGenerationStatus, setCircleData, currentTabId, setCircleGenerationStatus } = useCircleContext()
 
   const resultTextRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     getCircles()
   }, [getCircles])
+
+  useEffect(() => {
+    if (circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
+        setCircleData(initialCircleData)
+        chrome.runtime.sendMessage(
+          {
+            action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
+            tabId: currentTabId
+          }
+        )
+        setCircleGenerationStatus(null) 
+    } 
+  },[circleGenerationStatus?.status, currentTabId, setCircleData, setCircleGenerationStatus])
 
   const resultText = useMemo(() => {
     if (!isLoading) {

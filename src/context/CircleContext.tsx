@@ -65,7 +65,7 @@ const CircleContext = createContext<ICircleContext>({
   setCircleData: () => { },
   setIsGenesisPost: () => { },
   setCommentData: () => { },
-  setIsCheckingGenerationStatus: () => { }
+  setIsCheckingGenerationStatus: () => { },
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -218,7 +218,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         setCircleData,
         setIsGenesisPost,
         setCommentData,
-        setIsCheckingGenerationStatus
+        setIsCheckingGenerationStatus,
       }}
     >
       {children}

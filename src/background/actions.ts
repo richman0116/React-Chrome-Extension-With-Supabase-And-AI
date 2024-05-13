@@ -27,7 +27,9 @@ export enum BJActions {
   SAVE_COMMENT_TO_STORAGE = 'saveCommentToStorage',
   GET_COMMENT_FROM_SOTRAGE = 'getCommentFromStorage',
   REMOVE_COMMENT_FROM_STORAGE = 'removeCommentFromStorage',
-  GENERATE_DIRECT_CIRCLE = "generateDirectCircle"
+  GENERATE_DIRECT_CIRCLE = "generateDirectCircle",
+  SAVE_LINK_STATUS_TO_STORAGE = "saveLinkStatusToStorage",
+  REMOVE_DATA_FOR_LINK = "removeCirclesForLink",
 }
 
 export enum BJMessages {

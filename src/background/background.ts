@@ -627,6 +627,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (supabaseUser) {
       supabase
         .rpc('circles_claim_circle', {
+          context: request.context,
           p_url: request.url,
           circle_id: request.circleId,
         })
@@ -980,6 +981,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (request.action === BJActions.SAVE_LINK_STATUS_TO_STORAGE) {
+    console.log('background.js: Saving the link status to storage.')
+    if (supabaseUser) {
+      const { url, circleId, status } = request
+      setToStorage(circleId, JSON.stringify(status));
+      setToStorage('urlForLink', JSON.stringify(url));
+      setToStorage('circleIdForLink', JSON.stringify(circleId));
+      sendResponse(status)
+    } else {
+      sendResponse({error: 'Error is occured while saving the link status to storage.'})
+    }
+    return true
+  }
+
+  if (request.action === BJActions.REMOVE_DATA_FOR_LINK) {
+    console.log('background.js: Removing data for link')
+    if (supabaseUser) {
+      getFromStorage('circleIdForLink').then((result => {
+        removeItemFromStorage('urlForLink')
+        removeItemFromStorage('circleIdForLink')
+        removeItemFromStorage(result)
+      }))
+      sendResponse(true)
+    } else {
+      sendResponse({error: 'Error is occured while saving the link status to storage.'})
+    }
+    return true;
+  }
 })
 
 // whenever we update a tab, log the url
@@ -1017,3 +1047,49 @@ chrome.tabs.onActivated.addListener((actveInfo) => {
     }
   })
 })
+
+chrome.runtime.onConnect.addListener(function(port) {
+  if (port.name === "popup") {
+    port.onDisconnect.addListener(async function() {
+      if (!supabaseUser) {
+        console.error("Supabase user is not authenticated.");
+        return;
+      }
+      
+      try {
+        const urlForLink = await getFromStorage('urlForLink');
+        if (!urlForLink) {
+          console.error("Failed to retrieve 'urlForLink'.");
+          return;
+        }
+        removeItemFromStorage('urlForLink');
+
+        const circleIdForLink = await getFromStorage('circleIdForLink');
+        if (!circleIdForLink) {
+          console.error("Failed to retrieve 'circleIdForLink'.");
+          return;
+        }
+        removeItemFromStorage('circleIdForLink');
+
+        const result = await getFromStorage(circleIdForLink);
+        if (result !== "default") {
+          console.error(`Expected value 'default' but got ${result}.`);
+          return;
+        }
+
+        console.log('RPC function is about to be invoked.');
+        await supabase.rpc('circles_claim_circle', {
+          context: `I claimed ${urlForLink} for this circle`,
+          p_url: urlForLink,
+          circle_id: circleIdForLink
+        });
+        console.log('RPC function was successfully invoked!');
+
+        removeItemFromStorage(circleIdForLink);
+      } catch (error) {
+        console.error("An error occurred during the RPC call:", error);
+      }
+    });
+  }
+});
+

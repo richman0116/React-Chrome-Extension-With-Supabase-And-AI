@@ -6,12 +6,21 @@ import classNames from 'classnames'
 import LinkCircleItem from '../../../../components/LinkCircleItem'
 import { useCircleContext } from '../../../../context/CircleContext'
 import { BJActions } from '../../../../background/actions'
+import LinkCommentBox from '../../../../components/LinkCommentBox'
 
 const MyCircles = () => {
   const [userCircles, setUserCircles] = useState<CircleInterface[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { currentUrl: url, currentPageCircleIds } = useCircleContext()
+  const [activeIndex, setActiveIndex] = useState<number>(-1)
+  const [activeItem, setActiveItem] = useState<CircleInterface>({} as CircleInterface)
+  const [isCheckingIfSentComment, setIsCheckingIfSentComment] = useState<boolean>(false)
+  const [isShowingLinkCommentBox, setIsShowingLinkCommentBox] = useState<boolean>(false)
+
+  const {
+    currentUrl: url,
+    currentPageCircleIds,
+  } = useCircleContext()
 
   const getUserCircles = useCallback(async () => {
     if (url !== '') {
@@ -36,30 +45,65 @@ const MyCircles = () => {
     getUserCircles()
   }, [getUserCircles])
 
-  const claimAvailableCircles = useMemo(
-    () =>
-      userCircles.filter((userCircle) => !currentPageCircleIds.includes(userCircle.id)),
-    [currentPageCircleIds, userCircles]
-  )
+  const linkSectionItems = useMemo((): {
+    item: CircleInterface
+    index?: number
+    isLinkCommentBox: boolean
+  }[] => {
+    const circleItems = userCircles.filter(
+      (userCircle) => !currentPageCircleIds.includes(userCircle.id)
+    )
+    const circleSectionItem = circleItems.map((item, index) => ({
+      item: item,
+      index,
+      isLinkCommentBox: false,
+    }))
+
+    if (activeIndex >= 0) {
+      const insertIndex = activeIndex + (activeIndex % 2 === 0 ? 2 : 1)
+
+      const newSectionItems = []
+
+      newSectionItems.push(...circleSectionItem.slice(0, insertIndex))
+      newSectionItems.push({
+        item: activeItem,
+        isLinkCommentBox: true,
+      })
+      newSectionItems.push(...circleSectionItem.slice(insertIndex))
+
+      // console.log(newSectionItems, activeIndex, insertIndex, newSectionItems.length);
+      
+      return newSectionItems
+    } else {
+      return circleSectionItem
+    }
+  }, [activeIndex, activeItem, currentPageCircleIds, userCircles])
 
   const resultText = useMemo(() => {
-    if (!isLoading && claimAvailableCircles.length > 0) {
-      if (claimAvailableCircles.length > 0) {
+    if (!isLoading && linkSectionItems.length > 0) {
+      if (linkSectionItems.length > 0) {
         return 'Link ur Circles to this page'
       } else {
         return ''
       }
     }
-  }, [isLoading, claimAvailableCircles])
+  }, [isLoading, linkSectionItems])
+
+
+  useEffect(() => {
+    chrome.runtime.connect({name: "popup"})
+  },[])
 
   return (
     <div
       className={classNames('w-full flex flex-col justify-between mb-20', {
-        hidden: claimAvailableCircles.length === 0,
+        hidden: linkSectionItems.length === 0,
       })}
     >
       <div className="w-full">
-        {!isLoading && <p className="text-xl font-medium text-primary pb-3">{resultText}</p>}
+        {!isLoading && (
+          <p className="text-xl font-medium text-primary pb-3">{resultText}</p>
+        )}
       </div>
       {isLoading && (
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 transform self-center border-black py-4 ">
@@ -67,11 +111,28 @@ const MyCircles = () => {
         </div>
       )}
 
-      {!isLoading && claimAvailableCircles.length > 0 && (
+      {!isLoading && linkSectionItems.length > 0 && (
         <div className="w-full gap-2 grid grid-cols-2">
-          {claimAvailableCircles.map((userCircle, index) => (
-            <LinkCircleItem key={index} circle={userCircle} url={url} />
-          ))}
+          {linkSectionItems.map((item, index) => {
+            if (item.isLinkCommentBox && isShowingLinkCommentBox) {
+              return <div className='col-start-1 col-span-2'>
+                <LinkCommentBox circle={item.item as CircleInterface} isCheckingIfSentComment={isCheckingIfSentComment} setIsCheckingIfSentComment={setIsCheckingIfSentComment} setIsShowingLinkCommentBox={setIsShowingLinkCommentBox} setActiveIndex={setActiveIndex} />
+              </div>
+            }
+            return (
+              <div key={index}>
+                <LinkCircleItem
+                  circle={item.item as CircleInterface}
+                  linkCommentBoxIndex={item.index as number}
+                  setActiveIndex={setActiveIndex}
+                  setActiveItem={setActiveItem}
+                  isCheckingIfSentComment={isCheckingIfSentComment}
+                  setIsCheckingIfSentComment={setIsCheckingIfSentComment}
+                  setIsShowingLinkCommentBox={setIsShowingLinkCommentBox}
+                />
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

@@ -43,6 +43,13 @@ const LinkCommentBox = ({circle, isCheckingIfSentComment, setIsCheckingIfSentCom
                     else {
                       setComment('')
                       setStatusMessage('done!');
+                      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        const url = tabs[0].url
+                        chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
+                          if (response.message) console.log(response.message)
+                          else console.log(response.error)
+                        })
+                      })
                       setTimeout(() => {
                         getCircles()
                         setStatusMessage('');

@@ -65,7 +65,7 @@ const ShareCircleItem = ({ circle, comment, setComment, setShowCircles, setError
             {circle.name}
           </p>
           <span className="text-white hidden group-hover:block">
-            {isShared ? <CheckIcon /> : <Send />}
+            {isShared ? <CheckIcon color="white"/> : <Send />}
           </span>
         </div>}
     </button>

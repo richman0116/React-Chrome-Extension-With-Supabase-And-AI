@@ -1,32 +1,40 @@
-import { useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback } from 'react'
 
 import { CircleInterface } from '../../types/circle'
 import RoundedButton from '../Buttons/RoundedButton'
-import { useCircleContext } from '../../context/CircleContext'
-import { BJActions } from '../../background/actions'
 import { edenUrl } from '../../utils/constants'
+import { BJActions } from '../../background/actions'
+import { useCircleContext } from '../../context/CircleContext'
 
 interface ILinkCircleItem {
   circle: CircleInterface
-  url: string
+  linkCommentBoxIndex: number
+  setActiveIndex: Dispatch<SetStateAction<number>>
+  isCheckingIfSentComment: boolean
+  setIsCheckingIfSentComment: Dispatch<SetStateAction<boolean>>
+  setIsShowingLinkCommentBox: Dispatch<SetStateAction<boolean>>
 }
 
-const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
-  const [isLinking, setIsLinking] = useState<boolean>(false)
+const LinkCircleItem = ({ circle, linkCommentBoxIndex, setActiveIndex, isCheckingIfSentComment,setIsCheckingIfSentComment, setIsShowingLinkCommentBox }: ILinkCircleItem) => {
 
-  const { getCircles } = useCircleContext()
+  const { currentUrl } = useCircleContext()
 
   const handleClaim = useCallback(
-    (circleId: string) => {
-      setIsLinking(true)
-      chrome.runtime.sendMessage({ action: BJActions.CLAIM_CIRCLE, circleId, url }, (response) => {
-        if (response) {
-          getCircles()
+    () => {
+      chrome.runtime.sendMessage({ action: BJActions.SAVE_LINK_STATUS_TO_STORAGE, url: currentUrl, circleId: circle.id, status: 'default' }, (res) => {
+        if (res) {
+          if (res.error) {
+            console.log(res.error)
+          }
+          else {
+            setActiveIndex(linkCommentBoxIndex)
+            setIsCheckingIfSentComment(false)
+            setIsShowingLinkCommentBox(true)
+          }
         }
-        setIsLinking(false)
       })
     },
-    [getCircles, url]
+    [circle, currentUrl, linkCommentBoxIndex, setActiveIndex, setIsCheckingIfSentComment, setIsShowingLinkCommentBox]
   )
 
   return (
@@ -47,14 +55,13 @@ const LinkCircleItem = ({ circle, url }: ILinkCircleItem) => {
 
       <div className="hidden group-hover:block">
         <RoundedButton
-          disabled={isLinking}
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            handleClaim(circle.id)
+            handleClaim()
           }}
         >
-          {isLinking ? 'Linking' : 'Link'}
+          Link
         </RoundedButton>
       </div>
     </a>

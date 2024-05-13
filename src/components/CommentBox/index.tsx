@@ -24,7 +24,7 @@ const CommentBox = ({ circleImageUrl, onComment, onClose, isCommenting }: IComme
   }, [comment, onComment])
 
   return (
-    <div className="w-[333px] rounded-2xl bg-branding pb-5">
+    <div className="w-[333px] rounded-2.5xl bg-branding pb-5">
       <div className="pt-1 px-1">
         <input
           type="text"

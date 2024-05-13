@@ -1052,28 +1052,28 @@ chrome.runtime.onConnect.addListener(function(port) {
   if (port.name === "popup") {
     port.onDisconnect.addListener(async function() {
       if (!supabaseUser) {
-        console.error("Supabase user is not authenticated.");
+        console.log("Supabase user is not authenticated.");
         return;
       }
       
       try {
         const urlForLink = await getFromStorage('urlForLink');
         if (!urlForLink) {
-          console.error("Failed to retrieve 'urlForLink'.");
+          console.log("Failed to retrieve 'urlForLink'.");
           return;
         }
         removeItemFromStorage('urlForLink');
 
         const circleIdForLink = await getFromStorage('circleIdForLink');
         if (!circleIdForLink) {
-          console.error("Failed to retrieve 'circleIdForLink'.");
+          console.log("Failed to retrieve 'circleIdForLink'.");
           return;
         }
         removeItemFromStorage('circleIdForLink');
 
         const result = await getFromStorage(circleIdForLink);
         if (result !== "default") {
-          console.error(`Expected value 'default' but got ${result}.`);
+          console.log(`Expected value 'default' but got ${result}.`);
           return;
         }
 
@@ -1087,7 +1087,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 
         removeItemFromStorage(circleIdForLink);
       } catch (error) {
-        console.error("An error occurred during the RPC call:", error);
+        console.log("An error occurred during the RPC call:", error);
       }
     });
   }

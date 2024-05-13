@@ -13,7 +13,6 @@ const MyCircles = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [activeIndex, setActiveIndex] = useState<number>(-1)
-  const [activeItem, setActiveItem] = useState<CircleInterface>({} as CircleInterface)
   const [isCheckingIfSentComment, setIsCheckingIfSentComment] = useState<boolean>(false)
   const [isShowingLinkCommentBox, setIsShowingLinkCommentBox] = useState<boolean>(false)
 
@@ -66,7 +65,7 @@ const MyCircles = () => {
 
       newSectionItems.push(...circleSectionItem.slice(0, insertIndex))
       newSectionItems.push({
-        item: activeItem,
+        item: circleItems[activeIndex] as unknown as CircleInterface,
         isLinkCommentBox: true,
       })
       newSectionItems.push(...circleSectionItem.slice(insertIndex))
@@ -77,7 +76,7 @@ const MyCircles = () => {
     } else {
       return circleSectionItem
     }
-  }, [activeIndex, activeItem, currentPageCircleIds, userCircles])
+  }, [activeIndex, currentPageCircleIds, userCircles])
 
   const resultText = useMemo(() => {
     if (!isLoading && linkSectionItems.length > 0) {
@@ -125,7 +124,6 @@ const MyCircles = () => {
                   circle={item.item as CircleInterface}
                   linkCommentBoxIndex={item.index as number}
                   setActiveIndex={setActiveIndex}
-                  setActiveItem={setActiveItem}
                   isCheckingIfSentComment={isCheckingIfSentComment}
                   setIsCheckingIfSentComment={setIsCheckingIfSentComment}
                   setIsShowingLinkCommentBox={setIsShowingLinkCommentBox}
@@ -139,3 +137,4 @@ const MyCircles = () => {
   )
 }
 export default MyCircles
+

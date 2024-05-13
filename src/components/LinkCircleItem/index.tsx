@@ -10,13 +10,12 @@ interface ILinkCircleItem {
   circle: CircleInterface
   linkCommentBoxIndex: number
   setActiveIndex: Dispatch<SetStateAction<number>>
-  setActiveItem: Dispatch<SetStateAction<CircleInterface>>
   isCheckingIfSentComment: boolean
   setIsCheckingIfSentComment: Dispatch<SetStateAction<boolean>>
   setIsShowingLinkCommentBox: Dispatch<SetStateAction<boolean>>
 }
 
-const LinkCircleItem = ({ circle, linkCommentBoxIndex, setActiveIndex, setActiveItem, isCheckingIfSentComment,setIsCheckingIfSentComment, setIsShowingLinkCommentBox }: ILinkCircleItem) => {
+const LinkCircleItem = ({ circle, linkCommentBoxIndex, setActiveIndex, isCheckingIfSentComment,setIsCheckingIfSentComment, setIsShowingLinkCommentBox }: ILinkCircleItem) => {
 
   const { currentUrl } = useCircleContext()
 
@@ -29,14 +28,13 @@ const LinkCircleItem = ({ circle, linkCommentBoxIndex, setActiveIndex, setActive
           }
           else {
             setActiveIndex(linkCommentBoxIndex)
-            setActiveItem(circle)
             setIsCheckingIfSentComment(false)
             setIsShowingLinkCommentBox(true)
           }
         }
       })
     },
-    [circle, currentUrl, linkCommentBoxIndex, setActiveIndex, setActiveItem, setIsCheckingIfSentComment, setIsShowingLinkCommentBox]
+    [circle, currentUrl, linkCommentBoxIndex, setActiveIndex, setIsCheckingIfSentComment, setIsShowingLinkCommentBox]
   )
 
   return (

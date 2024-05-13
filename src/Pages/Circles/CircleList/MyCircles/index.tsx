@@ -65,7 +65,7 @@ const MyCircles = () => {
 
       newSectionItems.push(...circleSectionItem.slice(0, insertIndex))
       newSectionItems.push({
-        item: circleItems[activeIndex] as unknown as CircleInterface,
+        item: circleItems[activeIndex],
         isLinkCommentBox: true,
       })
       newSectionItems.push(...circleSectionItem.slice(insertIndex))

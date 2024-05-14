@@ -151,9 +151,9 @@ export const AddManualCircle = () => {
       (res) => {
         if (res) {
           let autoLength = 0, manualLength = 0, directLength = 0;
-          if(res.autoLength) autoLength = Object.keys(res.autoGeneratingCircles).length
-          if(res.manualLength) manualLength = Object.keys(res.manualCreatingCircle).length
-          if(res.directLength) directLength = Object.keys(res.directCreatingCircle).length
+          if(res.autoLength) autoLength = Object.keys(res.auto).length
+          if(res.manualLength) manualLength = Object.keys(res.manual).length
+          if(res.directLength) directLength = Object.keys(res.direct).length
           if (directLength === 0 && autoLength === 0 && manualLength === 0)
           {
             setCircleGenerationStatus(null)
@@ -162,7 +162,7 @@ export const AddManualCircle = () => {
           }
           else if (autoLength > 0 && manualLength === 0)
           {
-            setCircleGenerationStatus(res.autoGeneratingCircles)
+            setCircleGenerationStatus(res.auto)
             setPageStatus(circlePageStatus.ADD_AUTOMATICALLY)
             setCircleData(initialCircleData)
           }

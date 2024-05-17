@@ -48,15 +48,15 @@ const circleGenerationSuccessHandler = (
   tabId: number,
   circles: CircleInterface[]
 ) => {
-  getFromStorage(tabId?.toString()).then((generationStatus: any) => {
+  getFromStorage(tabId?.toString()).then((generationStatus = {}) => {
     if (
       generationStatus &&
-      generationStatus.autoGeneratingCircles &&
-      Object.keys(generationStatus.autoGeneratingCircles).length > 0 &&
-      generationStatus.autoGeneratingCircles.type === type
+      generationStatus.auto &&
+      Object.keys(generationStatus.auto).length > 0 &&
+      generationStatus.auto.type === type
     ) {
       let circleGeneratedStatus = generationStatus
-      circleGeneratedStatus.autoGeneratingCircles = {
+      circleGeneratedStatus.auto = {
         type,
         status: CircleGenerationStatus.SUCCEEDED,
         result: circles,
@@ -66,16 +66,16 @@ const circleGenerationSuccessHandler = (
   })
 }
 const circleGenerationFailedHandler = (type: 'auto' | 'manual', tabId: number) => {
-  getFromStorage(tabId?.toString()).then((generationStatus) => {
+  getFromStorage(tabId?.toString()).then((generationStatus = {}) => {
     const circleGeneratedStatus = generationStatus
     if (type === 'auto') {
-      circleGeneratedStatus.autoGeneratingCircles = {
+      circleGeneratedStatus.auto = {
         type,
         status: CircleGenerationStatus.FAILED,
         result: [],
       }
     } else if (type === 'manual') {
-      circleGeneratedStatus.manualCreatingCircle = {
+      circleGeneratedStatus.manual = {
         type,
         status: CircleGenerationStatus.FAILED,
         result: [],
@@ -191,7 +191,7 @@ export const handleCircleCreation = (
         }
 
         if (result) {
-          getFromStorage(tabId?.toString()).then((generationStatus) => {
+          getFromStorage(tabId?.toString()).then((generationStatus = {}) => {
             const circleGeneratedStatus = generationStatus
             const newCircle = {
               type,
@@ -199,8 +199,8 @@ export const handleCircleCreation = (
               result: [],
             }
             console.log('circle was created successfully')
-            circleGeneratedStatus[type === "manual" ? "manualCreatingCircle" : "directCreatingCircle"] = newCircle
-            circleGeneratedStatus.autoGeneratingCircles = {}
+            circleGeneratedStatus[type === "manual" ? "manual" : "direct"] = newCircle
+            circleGeneratedStatus.auto = {}
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
           })
         }

@@ -202,12 +202,12 @@ const getUserAvatarUrl = async () => {
     const response = await supabase
       .from('users')
       .select('avatar_url')
-      .eq('id', supabaseUser?.data?.user?.id);
-    console.log('background.js: Result of getUserAvatarUrl: ', response);
-    return response;
+      .eq('id', supabaseUser?.data?.user?.id)
+    console.log('background.js: Result of getUserAvatarUrl: ', response)
+    return response
   } catch (error) {
-    console.error('background.js: Error in getUserAvatarUrl: ', error);
-    throw new Error('Error getting user avatar url.');
+    console.error('background.js: Error in getUserAvatarUrl: ', error)
+    throw new Error('Error getting user avatar url.')
   }
 }
 
@@ -250,17 +250,26 @@ const getUser = async () => {
 const showCircleCount = async (url: string) => {
   return new Promise<void>((resolve, reject) => {
     if (url) {
-      (supabase.rpc('circles_get_circles_by_url', { p_url: url }) as unknown as Promise<any> ).then(async (result) => {
-        if (result.data?.length > 0) {
-          await chrome.action.setBadgeText({ text: result.data.length.toString() }, resolve)
-        } else {
-          await chrome.action.setBadgeText({ text: '' }, resolve)
-        }
-      }).catch((error: any) => {
-        reject(error)
-      });
+      ;(
+        supabase.rpc('circles_get_circles_by_url', {
+          p_url: url,
+        }) as unknown as Promise<any>
+      )
+        .then(async (result) => {
+          if (result.data?.length > 0) {
+            await chrome.action.setBadgeText(
+              { text: result.data.length.toString() },
+              resolve
+            )
+          } else {
+            await chrome.action.setBadgeText({ text: '' }, resolve)
+          }
+        })
+        .catch((error: any) => {
+          reject(error)
+        })
     } else {
-      resolve();
+      resolve()
     }
   })
 }
@@ -276,23 +285,23 @@ const checkIfUserJoinedCircle = async (circleId: string) => {
 }
 
 async function handleGenerateDirectCircle(request: any, sendResponse: any) {
-  const { tabId, name, description, tags } = request;
+  const { tabId, name, description, tags } = request
 
   if (!supabaseUser) {
-    console.error('User not logged in when creating a circle');
-    sendResponse({ error: 'User not logged in' });
-    return;
+    console.error('User not logged in when creating a circle')
+    sendResponse({ error: 'User not logged in' })
+    return
   }
 
   try {
     // Retrieve the generation status from storage
-    let generationStatus = await getFromStorage(tabId.toString());
+    let generationStatus = await getFromStorage(tabId.toString())
     if (!generationStatus) {
       generationStatus = {
         auto: {},
         manual: {},
-        direct: {}
-      };
+        direct: {},
+      }
     }
 
     // Initialize the circle generation object
@@ -307,27 +316,27 @@ async function handleGenerateDirectCircle(request: any, sendResponse: any) {
           tags,
         },
       ],
-    };
+    }
 
     // Update the storage status
-    generationStatus.direct = newCircle;
-    setToStorage(tabId.toString(), JSON.stringify(generationStatus));
+    generationStatus.direct = newCircle
+    setToStorage(tabId.toString(), JSON.stringify(generationStatus))
 
     // Call an asynchronous function to generate the circle image
-    const imageResult = await generateCircleImage(undefined, name, description);
+    const imageResult = await generateCircleImage(undefined, name, description)
     if (imageResult.error) {
       generationStatus.direct = {
         ...newCircle,
         status: CircleGenerationStatus.FAILED,
-      };
-      setToStorage(tabId.toString(), JSON.stringify(generationStatus));
-      sendResponse({ error: imageResult.error });
-      return;
+      }
+      setToStorage(tabId.toString(), JSON.stringify(generationStatus))
+      sendResponse({ error: imageResult.error })
+      return
     }
 
     // Proceed with further processing and update the storage status
-    const imageUrl = imageResult.url.replace(/"/g, '');
-    const imageData = await resizeAndConvertImageToBuffer(imageUrl, 'background');
+    const imageUrl = imageResult.url.replace(/"/g, '')
+    const imageData = await resizeAndConvertImageToBuffer(imageUrl, 'background')
 
     generationStatus.direct = {
       type: 'direct',
@@ -341,8 +350,8 @@ async function handleGenerateDirectCircle(request: any, sendResponse: any) {
           circle_logo_image: imageUrl,
         },
       ],
-    };
-    setToStorage(tabId.toString(), JSON.stringify(generationStatus));
+    }
+    setToStorage(tabId.toString(), JSON.stringify(generationStatus))
 
     // Add your logic for circle creation here
     // Replace `handleCircleCreation` with your specific circle creation logic
@@ -353,16 +362,18 @@ async function handleGenerateDirectCircle(request: any, sendResponse: any) {
       request.circleName,
       request.circleDescription,
       imageData,
-      tags.length ? tags : await generateTags(request.circleName, request.circleDescription),
+      tags.length
+        ? tags
+        : await generateTags(request.circleName, request.circleDescription),
       request.isGenesisPost,
       request.type
-    );
+    )
 
     // Final success response
-    sendResponse({ success: true });
+    sendResponse({ success: true })
   } catch (error) {
-    console.error('Error during direct circle generation:', error);
-    sendResponse({ error: 'Error during circle generation.' });
+    console.error('Error during direct circle generation:', error)
+    sendResponse({ error: 'Error during circle generation.' })
   }
 }
 
@@ -431,7 +442,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (result.data && result.data.length > 0) {
           sendResponse(result.data[0])
         } else {
-          sendResponse({error: 'No avatar URL found'})
+          sendResponse({ error: 'No avatar URL found' })
         }
       })
       .catch((error) => {
@@ -440,7 +451,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     return true
   }
-  
+
   if (request.action === BJActions.GET_PAGE_CONTENT) {
     console.log('background.js: Getting page content')
     if (supabaseUser) {
@@ -545,7 +556,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         imageData,
         tags,
         isGenesisPost,
-        type
+        type,
       } = request
       const generatingCircle: ICircleGenerationStatus = {
         type: type,
@@ -553,7 +564,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         result: [],
       }
 
-      circleGeneratedStatus[type === "manual" ? "manual" : "direct"] = generatingCircle
+      circleGeneratedStatus[type === 'manual' ? 'manual' : 'direct'] = generatingCircle
 
       setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
       try {
@@ -575,7 +586,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               }
             )
           } catch (err) {
-            sendResponse({error: err})
+            sendResponse({ error: err })
           }
         } else {
           try {
@@ -591,11 +602,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               type
             )
           } catch (err) {
-            sendResponse({error: err})
+            sendResponse({ error: err })
           }
         }
       } catch (err) {
-        sendResponse({error: err})
+        sendResponse({ error: err })
       }
       sendResponse(true)
     } else {
@@ -627,7 +638,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (supabaseUser) {
       supabase
         .rpc('circles_claim_circle', {
-          context: request.context,
+          context: `${request.context}\n ${request.url}`,
           p_url: request.url,
           circle_id: request.circleId,
         })
@@ -719,15 +730,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             tags,
           },
         ],
-      };
-      circleGeneratedStatus[type === "manual" ? "manual" : "direct"] = newCircle;
+      }
+      circleGeneratedStatus[type === 'manual' ? 'manual' : 'direct'] = newCircle
       setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
     })
 
     generateCircleImage(undefined, name, description).then((result) => {
       getFromStorage(tabId?.toString()).then((generationStatus = {}) => {
         circleGeneratedStatus = generationStatus
-        if ((circleGeneratedStatus.manual && Object.keys(circleGeneratedStatus.manual).length > 0) || (circleGeneratedStatus.direct && Object.keys(circleGeneratedStatus.direct).length > 0)) {
+        if (
+          (circleGeneratedStatus.manual &&
+            Object.keys(circleGeneratedStatus.manual).length > 0) ||
+          (circleGeneratedStatus.direct &&
+            Object.keys(circleGeneratedStatus.direct).length > 0)
+        ) {
           if (result.error) {
             const failedCircle = {
               type,
@@ -741,12 +757,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 },
               ],
             }
-            circleGeneratedStatus[type==="manual" ? "manual" : "direct"] = failedCircle
-            setToStorage(
-              tabId.toString(),
-              JSON.stringify(circleGeneratedStatus)
-            )
-            sendResponse({error: result.error})
+            circleGeneratedStatus[type === 'manual' ? 'manual' : 'direct'] = failedCircle
+            setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
+            sendResponse({ error: result.error })
           } else if (result.url) {
             const imageUrl = result?.url?.replaceAll('"', '')
             const newCircleGenerationStatus: ICircleGenerationStatus = {
@@ -763,10 +776,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               ],
             }
 
-            circleGeneratedStatus[type === "manual" ? "manual" : "direct"] = newCircleGenerationStatus
+            circleGeneratedStatus[type === 'manual' ? 'manual' : 'direct'] =
+              newCircleGenerationStatus
 
             setToStorage(tabId.toString(), JSON.stringify(circleGeneratedStatus))
-            sendResponse({imageUrl: imageUrl})
+            sendResponse({ imageUrl: imageUrl })
           }
         } else {
           circleGeneratedStatus = generationStatus
@@ -781,78 +795,86 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === BJActions.GET_CIRCLE_GENERATION_STATUS) {
-    console.log('background.js: Getting saved circles from storage');
-    const tabId = request.tabId?.toString();
+    console.log('background.js: Getting saved circles from storage')
+    const tabId = request.tabId?.toString()
 
     getFromStorage(tabId)
       .then((generationStatus = {}) => {
-        const { auto = {}, manual = {}, direct = {} } = generationStatus;
+        const { auto = {}, manual = {}, direct = {} } = generationStatus
 
-        console.log('Chrome local storage data:', { auto, manual, direct });
+        console.log('Chrome local storage data:', { auto, manual, direct })
 
-        const autoLength = Object.keys(auto).length;
-        const manualLength = Object.keys(manual).length;
-        const directLength = Object.keys(direct).length;
+        const autoLength = Object.keys(auto).length
+        const manualLength = Object.keys(manual).length
+        const directLength = Object.keys(direct).length
 
         if (direct.type === 'direct') {
-          sendResponse(direct);
+          sendResponse(direct)
         } else if (autoLength > 0 && manualLength === 0) {
-          sendResponse(auto);
+          sendResponse(auto)
         } else if (manualLength > 0 && autoLength === 0) {
-          sendResponse(manual);
-        } else if (autoLength > 0 && manualLength > 0 && auto.status === CircleGenerationStatus.SUCCEEDED && manual.status === CircleGenerationStatus.INITIALIZED) {
-          sendResponse(manual);
+          sendResponse(manual)
+        } else if (
+          autoLength > 0 &&
+          manualLength > 0 &&
+          auto.status === CircleGenerationStatus.SUCCEEDED &&
+          manual.status === CircleGenerationStatus.INITIALIZED
+        ) {
+          sendResponse(manual)
         } else {
-          sendResponse({});
+          sendResponse({})
         }
       })
       .catch(() => {
-        console.error('An error occurred while getting circle generation status.');
-        sendResponse(null);
-      });
+        console.error('An error occurred while getting circle generation status.')
+        sendResponse(null)
+      })
 
-    return true;
+    return true
   }
 
-if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
-  const tabId = request.tabId?.toString();
-  console.log('background.js: Removing circles from storage. TabId:', tabId);
+  if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
+    const tabId = request.tabId?.toString()
+    console.log('background.js: Removing circles from storage. TabId:', tabId)
 
-  getFromStorage(tabId)
-    .then((generationStatus = {}) => {
-      let circleGeneratedStatus = {
-        auto: { ...generationStatus.auto },
-        manual: { ...generationStatus.manual },
-        direct: { ...generationStatus.direct }
-      };
+    getFromStorage(tabId)
+      .then((generationStatus = {}) => {
+        let circleGeneratedStatus = {
+          auto: { ...generationStatus.auto },
+          manual: { ...generationStatus.manual },
+          direct: { ...generationStatus.direct },
+        }
 
-      if (Object.keys(circleGeneratedStatus.direct).length) {
-        circleGeneratedStatus.direct = {};
-      }
+        if (Object.keys(circleGeneratedStatus.direct).length) {
+          circleGeneratedStatus.direct = {}
+        }
 
-      const autoLength = Object.keys(circleGeneratedStatus.auto).length;
-      const manualLength = Object.keys(circleGeneratedStatus.manual).length;
+        const autoLength = Object.keys(circleGeneratedStatus.auto).length
+        const manualLength = Object.keys(circleGeneratedStatus.manual).length
 
-      if (autoLength > 0 && manualLength > 0) {
-        circleGeneratedStatus.manual = {};
-      } else if (autoLength === 0 && manualLength > 0) {
-        circleGeneratedStatus.manual = {};
-      } else if (manualLength === 0 && autoLength > 0) {
-        circleGeneratedStatus.auto = {};
-      } else if (autoLength > 0 && circleGeneratedStatus.auto.status === CircleGenerationStatus.GENERATING) {
-        circleGeneratedStatus.auto = {};
-      }
+        if (autoLength > 0 && manualLength > 0) {
+          circleGeneratedStatus.manual = {}
+        } else if (autoLength === 0 && manualLength > 0) {
+          circleGeneratedStatus.manual = {}
+        } else if (manualLength === 0 && autoLength > 0) {
+          circleGeneratedStatus.auto = {}
+        } else if (
+          autoLength > 0 &&
+          circleGeneratedStatus.auto.status === CircleGenerationStatus.GENERATING
+        ) {
+          circleGeneratedStatus.auto = {}
+        }
 
-      setToStorage(tabId, JSON.stringify(circleGeneratedStatus));
-      sendResponse(circleGeneratedStatus);
-    })
-    .catch(() => {
-      console.error('An error occurred while removing circles from storage.');
-      sendResponse(null);
-    });
+        setToStorage(tabId, JSON.stringify(circleGeneratedStatus))
+        sendResponse(circleGeneratedStatus)
+      })
+      .catch(() => {
+        console.error('An error occurred while removing circles from storage.')
+        sendResponse(null)
+      })
 
-  return true;
-}
+    return true
+  }
 
   if (request.action === BJActions.ADD_TAGS) {
     console.log('background.js: Adding tags')
@@ -880,13 +902,15 @@ if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
   }
 
   if (request.action === BJActions.SHOW_CIRCLE_COUNT) {
-    showCircleCount(request.url).then(() => {
-      sendResponse({ message: "circle badge number has been updated" });
-    }).catch(error => {
-      console.error('Error updating badge:', error);
-      sendResponse({ error: 'Failed to update badge' });
-    });
-    return true;
+    showCircleCount(request.url)
+      .then(() => {
+        sendResponse({ message: 'circle badge number has been updated' })
+      })
+      .catch((error) => {
+        console.error('Error updating badge:', error)
+        sendResponse({ error: 'Failed to update badge' })
+      })
+    return true
   }
 
   if (request.action === BJActions.GET_UNIQUE_USERS_COUNT_IN_USER_CIRCLES) {
@@ -909,12 +933,17 @@ if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
   if (request.action === BJActions.GET_USER_CIRCLE_COUNT) {
     console.log("background.js: Getting user circle's count")
     if (supabaseUser) {
-      (supabase.rpc('circles_get_user_circles_count', { userid: supabaseUser.data?.user?.id }) as unknown as Promise<any>)
+      ;(
+        supabase.rpc('circles_get_user_circles_count', {
+          userid: supabaseUser.data?.user?.id,
+        }) as unknown as Promise<any>
+      )
         .then((result: any) => {
           console.log('background.js: result of getting user circles count : ', result)
           sendResponse(result.data)
-        }).catch((error: any) => {
-          sendResponse({error: error.message || 'Error fetching circles count'})
+        })
+        .catch((error: any) => {
+          sendResponse({ error: error.message || 'Error fetching circles count' })
         })
     } else {
       console.error('background.js: User not logged in when calling getUserCircles')
@@ -951,8 +980,8 @@ if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
   if (request.action === BJActions.SAVE_COMMENT_TO_STORAGE) {
     console.log('background.js: Saving comment to storage.')
     const { comment } = request
-    setToStorage("comment", JSON.stringify(comment))
-    return true;
+    setToStorage('comment', JSON.stringify(comment))
+    return true
   }
 
   if (request.action === BJActions.GET_COMMENT_FROM_SOTRAGE) {
@@ -965,28 +994,28 @@ if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
 
   if (request.action === BJActions.REMOVE_COMMENT_FROM_STORAGE) {
     console.log('background.js: Removing comment from storage.')
-    removeItemFromStorage('comment');
+    removeItemFromStorage('comment')
   }
 
   if (request.action === BJActions.GENERATE_DIRECT_CIRCLE) {
     console.log('background.js: Generating direct circle.')
     handleGenerateDirectCircle(request, sendResponse).catch((error) => {
-      console.error('Error handling direct circle generation:', error);
-      sendResponse({ error: 'Failed to process the request.' });
-    });
-    return true;
+      console.error('Error handling direct circle generation:', error)
+      sendResponse({ error: 'Failed to process the request.' })
+    })
+    return true
   }
 
   if (request.action === BJActions.SAVE_LINK_STATUS_TO_STORAGE) {
     console.log('background.js: Saving the link status to storage.')
     if (supabaseUser) {
       const { url, circleId, status } = request
-      setToStorage(circleId, JSON.stringify(status));
-      setToStorage('urlForLink', JSON.stringify(url));
-      setToStorage('circleIdForLink', JSON.stringify(circleId));
+      setToStorage(circleId, JSON.stringify(status))
+      setToStorage('urlForLink', JSON.stringify(url))
+      setToStorage('circleIdForLink', JSON.stringify(circleId))
       sendResponse(status)
     } else {
-      sendResponse({error: 'Error is occured while saving the link status to storage.'})
+      sendResponse({ error: 'Error is occured while saving the link status to storage.' })
     }
     return true
   }
@@ -994,16 +1023,16 @@ if (request.action === BJActions.REMOVE_CIRCLES_FROM_STORAGE) {
   if (request.action === BJActions.REMOVE_DATA_FOR_LINK) {
     console.log('background.js: Removing data for link')
     if (supabaseUser) {
-      getFromStorage('circleIdForLink').then((result => {
+      getFromStorage('circleIdForLink').then((result) => {
         removeItemFromStorage('urlForLink')
         removeItemFromStorage('circleIdForLink')
         removeItemFromStorage(result)
-      }))
+      })
       sendResponse(true)
     } else {
-      sendResponse({error: 'Error is occured while saving the link status to storage.'})
+      sendResponse({ error: 'Error is occured while saving the link status to storage.' })
     }
-    return true;
+    return true
   }
 })
 
@@ -1043,48 +1072,47 @@ chrome.tabs.onActivated.addListener((actveInfo) => {
   })
 })
 
-chrome.runtime.onConnect.addListener(function(port) {
-  if (port.name === "popup") {
-    port.onDisconnect.addListener(async function() {
+chrome.runtime.onConnect.addListener(function (port) {
+  if (port.name === 'popup') {
+    port.onDisconnect.addListener(async function () {
       if (!supabaseUser) {
-        console.log("Supabase user is not authenticated.");
-        return;
+        console.log('Supabase user is not authenticated.')
+        return
       }
-      
+
       try {
-        const urlForLink = await getFromStorage('urlForLink');
+        const urlForLink = await getFromStorage('urlForLink')
         if (!urlForLink) {
-          console.log("Failed to retrieve 'urlForLink'.");
-          return;
+          console.log("Failed to retrieve 'urlForLink'.")
+          return
         }
-        removeItemFromStorage('urlForLink');
+        removeItemFromStorage('urlForLink')
 
-        const circleIdForLink = await getFromStorage('circleIdForLink');
+        const circleIdForLink = await getFromStorage('circleIdForLink')
         if (!circleIdForLink) {
-          console.log("Failed to retrieve 'circleIdForLink'.");
-          return;
+          console.log("Failed to retrieve 'circleIdForLink'.")
+          return
         }
-        removeItemFromStorage('circleIdForLink');
+        removeItemFromStorage('circleIdForLink')
 
-        const result = await getFromStorage(circleIdForLink);
-        if (result !== "default") {
-          console.log(`Expected value 'default' but got ${result}.`);
-          return;
+        const result = await getFromStorage(circleIdForLink)
+        if (result !== 'default') {
+          console.log(`Expected value 'default' but got ${result}.`)
+          return
         }
 
-        console.log('RPC function is about to be invoked.');
+        console.log('RPC function is about to be invoked.')
         await supabase.rpc('circles_claim_circle', {
           context: `I claimed ${urlForLink} for this circle`,
           p_url: urlForLink,
-          circle_id: circleIdForLink
-        });
-        console.log('RPC function was successfully invoked!');
+          circle_id: circleIdForLink,
+        })
+        console.log('RPC function was successfully invoked!')
 
-        removeItemFromStorage(circleIdForLink);
+        removeItemFromStorage(circleIdForLink)
       } catch (error) {
-        console.log("An error occurred during the RPC call:", error);
+        console.log('An error occurred during the RPC call:', error)
       }
-    });
+    })
   }
-});
-
+})

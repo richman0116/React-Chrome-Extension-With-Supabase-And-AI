@@ -13,9 +13,9 @@ import { CircleGenerationStatus } from "../../utils/constants"
 
 const ShareThoughtBox = () => {
 
-  const [comment, setComment] = useState<string>('')
-  const [showCircles, setShowCircles] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [comment, setComment] = useState('')
+  const [showCircles, setShowCircles] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus, setIsOneClickCommenting, setOneClickStatusMessage } = useCircleContext()
 

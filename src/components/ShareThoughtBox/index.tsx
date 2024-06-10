@@ -7,21 +7,17 @@ import XIcon from "../SVGIcons/XIcon"
 import Chevron from '../SVGIcons/Chevron'
 import CircleIcon from "../SVGIcons/CircleIcon"
 import { useCircleContext } from "../../context/CircleContext"
-import LoadingSpinner from "../LoadingSpinner"
 import { BJActions } from "../../background/actions"
 import classNames from "classnames"
 import { CircleGenerationStatus } from "../../utils/constants"
 
 const ShareThoughtBox = () => {
 
-  const [comment, setComment] = useState<string>('')
-  const [showCircles, setShowCircles] = useState<boolean>(false)
-  const [isDirectPost, setIsDirectPost] = useState<boolean>(false)
-  const [isStatusMessage, setIsStatusMessage] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<string>('')
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [comment, setComment] = useState('')
+  const [showCircles, setShowCircles] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus, setIsCheckingGenerationStatus } = useCircleContext()
+  const { circles, currentTabId, currentTabTitle, currentUrl, circleData, getCircles, circleGenerationStatus, commentData, setCommentData, getCircleGenerationStatus, setIsOneClickCommenting, setOneClickStatusMessage } = useCircleContext()
 
   const commentBoxTitle = useMemo(() => {
     if (showCircles) {
@@ -44,17 +40,27 @@ const ShareThoughtBox = () => {
 
   const handleSendIconClick = useCallback(() => {
     if (comment.length > 0) {
+      setIsOneClickCommenting(true);
+
       chrome.runtime.sendMessage(
         {
           action: BJActions.SAVE_COMMENT_TO_STORAGE,
           comment: comment
         }
       )
+
+      chrome.runtime.sendMessage(
+        { action: BJActions.GET_COMMENT_FROM_STORAGE }, (res) => {
+          if (res) {
+            setCommentData(res);
+          }
+        }               
+      )
+
       const name = currentTabTitle + " comments";
-      setIsDirectPost(true)
-      setIsCheckingGenerationStatus(true)
-      setIsStatusMessage(true)
-      setStatusMessage('Checking if circle exists ...')
+      
+      setOneClickStatusMessage('Checking if circle exists ...')
+      
       chrome.runtime.sendMessage(
         {
           action: BJActions.CHECK_IF_CIRCLE_EXIST,
@@ -63,7 +69,9 @@ const ShareThoughtBox = () => {
         async (res) => {
           if (res) {
             const circleId = res;
-            setStatusMessage('Posting comment in existed circle ...')
+            
+            setOneClickStatusMessage('Posting comment in existed circle ...')
+            
             chrome.runtime.sendMessage(
               {
                 action: BJActions.CREATE_POST,
@@ -71,16 +79,21 @@ const ShareThoughtBox = () => {
                 circleId
               }
             )
-            setStatusMessage('Post was created in existed circle!')
+
+            setOneClickStatusMessage('Post was created in existed circle!')
+
+            chrome.runtime.sendMessage({
+              action: BJActions.REMOVE_COMMENT_FROM_STORAGE,
+            });
+            setCommentData('');
+
             setComment('')
-            setIsDirectPost(false)
-            setIsCheckingGenerationStatus(false)
-            setTimeout(() => {
-              setIsStatusMessage(false);
-            }, 3000);
+
+            setIsOneClickCommenting(false)
           }
           else {
-            setStatusMessage('Creating Circle...')
+            setOneClickStatusMessage('Creating Circle...')
+
             chrome.runtime.sendMessage({
               action: BJActions.GENERATE_DIRECT_CIRCLE,
               tabId: currentTabId,
@@ -95,9 +108,8 @@ const ShareThoughtBox = () => {
             },
             (res) => {
               if (res.error) {
-                setStatusMessage('');
+                setOneClickStatusMessage('');
                 setErrorMessage(res.error)
-                setIsDirectPost(false)
               }
               if (res.success) {
                 getCircleGenerationStatus();
@@ -109,21 +121,14 @@ const ShareThoughtBox = () => {
     } else {
       setErrorMessage('Please put your thought.')
     }
-  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircleGenerationStatus, setIsCheckingGenerationStatus])
+  }, [circleData?.tags, comment, currentTabId, currentTabTitle, currentUrl, getCircleGenerationStatus, setCommentData, setIsOneClickCommenting, setOneClickStatusMessage])
 
   useEffect(() => {
     if (circleGenerationStatus?.type === 'direct') {
-      setIsCheckingGenerationStatus(true)
-      setIsStatusMessage(true)
       setComment(commentData)
-      setIsDirectPost(true);
-      setStatusMessage('Creating Circle...')
+      setOneClickStatusMessage('Creating Circle...')
     }
     if (circleGenerationStatus?.type === 'direct' && circleGenerationStatus?.status === CircleGenerationStatus.SUCCEEDED) {
-      setComment("");
-      setIsDirectPost(false);
-      setStatusMessage('Done!');
-      setCommentData('');
       getCircles();
       chrome.runtime.sendMessage({
         action: BJActions.REMOVE_CIRCLES_FROM_STORAGE,
@@ -132,12 +137,20 @@ const ShareThoughtBox = () => {
       chrome.runtime.sendMessage({
         action: BJActions.REMOVE_COMMENT_FROM_STORAGE,
       });
-      setIsCheckingGenerationStatus(false)
-      setTimeout(() => {
-        setIsStatusMessage(false);
-      }, 3000);
+      setCommentData('');
+      
+      setComment("");
+      
+      setOneClickStatusMessage('Done!');
+      
+      getCircles();
+      // setTimeout(() => {
+      //   setIsStatusMessage(false);
+      // }, 3000);
+      
+      setIsOneClickCommenting(false);
     }
-  }, [circleData.tags, circleGenerationStatus, commentData, currentTabId, currentTabTitle, currentUrl, getCircles, setCommentData, setIsCheckingGenerationStatus])
+  }, [circleGenerationStatus?.status, circleGenerationStatus?.type, commentData, currentTabId, getCircles, setCommentData, setIsOneClickCommenting, setOneClickStatusMessage])
 
   return (
     <div className="w-full rounded-2.5xl bg-branding pb-2">
@@ -151,7 +164,7 @@ const ShareThoughtBox = () => {
         />
       </div>
       {errorMessage && <p className="text-alert text-xs leading-5 font-medium px-3">{errorMessage}</p>}
-      {isStatusMessage && <p className="text-brand text-xs leading-5 font-medium px-3">{statusMessage}</p>}
+      {/* {isStatusMessage && <p className="text-brand text-xs leading-5 font-medium px-3">{statusMessage}</p>} */}
       <div className="w-full flex flex-col gap-y-4">
         <div className="w-full px-2 pt-2 flex justify-between items-center">
           <div className={classNames("flex flex-row gap-2 px-3 items-center py-2 hover:bg-brand/10 hover:rounded-2xl transition-all duration-300", {
@@ -159,7 +172,7 @@ const ShareThoughtBox = () => {
             'cursor-pointer': !showCircles
           })} onClick={showCircles ? undefined : handleSendIconClick}>
             <p className="text-base leading-5 font-semibold text-brand">{commentBoxTitle}</p>
-            { !showCircles && (isDirectPost ? <LoadingSpinner size={20} /> : <div className="text-brand"><Send className='w-5 h-5' /></div>) }
+            {!showCircles && <div className="text-brand"><Send className='w-5 h-5' /></div>}
           </div>
           <div className="flex px-3 py-2 rounded-2xl items-center justify-center gap-2 bg-brand/10" onClick={handleDropDownClick}>
             <div className="cursor-pointer text-brand">

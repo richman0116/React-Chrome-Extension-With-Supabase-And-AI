@@ -13,7 +13,8 @@ import { CircleGenerationStatus, circlePageStatus } from '../utils/constants'
 import { BJActions } from '../background/actions'
 
 interface ICircleContext {
-  isCheckingGenerationStatus: boolean
+  oneClickStatusMessage: string
+  isOneClickCommenting: boolean
   commentData: string
   circles: CircleInterface[]
   currentUrl: string
@@ -33,7 +34,8 @@ interface ICircleContext {
   setCircleData: Dispatch<SetStateAction<CircleInterface>>
   setIsGenesisPost: Dispatch<SetStateAction<boolean>>
   setCommentData: Dispatch<SetStateAction<string>>
-  setIsCheckingGenerationStatus: Dispatch<SetStateAction<boolean>>
+  setIsOneClickCommenting: Dispatch<SetStateAction<boolean>>
+  setOneClickStatusMessage: Dispatch<SetStateAction<string>>
 }
 
 export const initialCircleData = {
@@ -45,7 +47,8 @@ export const initialCircleData = {
 }
 
 const CircleContext = createContext<ICircleContext>({
-  isCheckingGenerationStatus: false,
+  oneClickStatusMessage: '',
+  isOneClickCommenting: false,
   commentData: '',
   circles: [],
   currentUrl: '',
@@ -65,7 +68,8 @@ const CircleContext = createContext<ICircleContext>({
   setCircleData: () => { },
   setIsGenesisPost: () => { },
   setCommentData: () => { },
-  setIsCheckingGenerationStatus: () => { },
+  setIsOneClickCommenting: () => { },
+  setOneClickStatusMessage: () => { },
 })
 
 export const useCircleContext = () => useContext(CircleContext)
@@ -76,17 +80,18 @@ interface ICircleContextProvider {
 
 export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circles, setCircles] = useState<CircleInterface[]>([])
-  const [currentUrl, setCurrentUrl] = useState<string>('')
+  const [currentUrl, setCurrentUrl] = useState('')
   const [currentTabId, setCurrentTabId] = useState<number>(NaN)
-  const [currentTabTitle, setCurrentTabTitle] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [currentTabTitle, setCurrentTabTitle] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
   const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
   const [isGenesisPost, setIsGenesisPost] = useState(false)
-  const [commentData, setCommentData] = useState<string>('')
-  const [isCheckingGenerationStatus, setIsCheckingGenerationStatus] = useState<boolean>(false)
+  const [commentData, setCommentData] = useState('')
+  const [isOneClickCommenting, setIsOneClickCommenting] = useState(false)
+  const [oneClickStatusMessage, setOneClickStatusMessage] = useState('')
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),
@@ -164,7 +169,7 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
             } else if (type === "direct") {
               if (status === CircleGenerationStatus.INITIALIZED) {
                 chrome.runtime.sendMessage(
-                  { action: BJActions.GET_COMMENT_FROM_SOTRAGE }, (res) => {
+                  { action: BJActions.GET_COMMENT_FROM_STORAGE }, (res) => {
                     if (res) {
                       setCommentData(res);
                     }
@@ -198,7 +203,8 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   return (
     <CircleContext.Provider
       value={{
-        isCheckingGenerationStatus,
+        oneClickStatusMessage,
+        isOneClickCommenting,
         commentData,
         circles,
         currentUrl,
@@ -218,7 +224,8 @@ export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
         setCircleData,
         setIsGenesisPost,
         setCommentData,
-        setIsCheckingGenerationStatus,
+        setIsOneClickCommenting,
+        setOneClickStatusMessage
       }}
     >
       {children}

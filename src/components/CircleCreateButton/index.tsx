@@ -5,10 +5,9 @@ import { useCircleContext } from "../../context/CircleContext"
 import { circlePageStatus } from "../../utils/constants"
 import { BJActions } from "../../background/actions"
 import { initialCircleData } from "../../context/CircleContext"
-import LoadingSpinner from "../LoadingSpinner"
 
 const CircleCreateButton = () => {
-  const { setPageStatus, currentTabId, setCircleData, setCircleGenerationStatus, isCheckingGenerationStatus } = useCircleContext()
+  const { setPageStatus, currentTabId, setCircleData, setCircleGenerationStatus } = useCircleContext()
 
   const handleAddGeneratedCircles = useCallback(() => {
     setCircleData(initialCircleData)
@@ -27,9 +26,9 @@ const CircleCreateButton = () => {
   }, [setPageStatus])
 
   return (
-    <div className={`relative inline-block group ${isCheckingGenerationStatus ? 'pointer-events-none cursor-wait opacity-90' : ''}`}>
+    <div className={"relative inline-block group"}>
       <Button>
-        { isCheckingGenerationStatus ? <LoadingSpinner size={24}/> : <Plus /> }
+        <Plus />
       </Button>
       <div className="hidden group-hover:flex absolute left-1/2 -translate-x-1/2 -top-[85px] z-10 w-44 bg-white border border-stroke rounded-lg flex-col cursor-pointer divide-y divide-solid divide-stroke" >
         <button onClick={handleAddGeneratedCircles} className="w-full hover:bg-gray-100 p-2.5 text-black font-medium text-sm leading-normal">AI generated circles</button>

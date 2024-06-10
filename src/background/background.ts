@@ -984,7 +984,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true
   }
 
-  if (request.action === BJActions.GET_COMMENT_FROM_SOTRAGE) {
+  if (request.action === BJActions.GET_COMMENT_FROM_STORAGE) {
     console.log('background.js: Getting comment from storage.')
     getFromStorage('comment').then((result) => {
       sendResponse(result)

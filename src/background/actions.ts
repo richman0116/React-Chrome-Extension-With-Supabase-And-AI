@@ -25,7 +25,7 @@ export enum BJActions {
   CREATE_POST = 'createPost',
   CHECK_IF_CIRCLE_EXIST = 'checkIfCircleExist',
   SAVE_COMMENT_TO_STORAGE = 'saveCommentToStorage',
-  GET_COMMENT_FROM_SOTRAGE = 'getCommentFromStorage',
+  GET_COMMENT_FROM_STORAGE = 'getCommentFromStorage',
   REMOVE_COMMENT_FROM_STORAGE = 'removeCommentFromStorage',
   GENERATE_DIRECT_CIRCLE = "generateDirectCircle",
   SAVE_LINK_STATUS_TO_STORAGE = "saveLinkStatusToStorage",

@@ -80,18 +80,18 @@ interface ICircleContextProvider {
 
 export const CircleContextProvider = ({ children }: ICircleContextProvider) => {
   const [circles, setCircles] = useState<CircleInterface[]>([])
-  const [currentUrl, setCurrentUrl] = useState<string>('')
+  const [currentUrl, setCurrentUrl] = useState('')
   const [currentTabId, setCurrentTabId] = useState<number>(NaN)
-  const [currentTabTitle, setCurrentTabTitle] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [currentTabTitle, setCurrentTabTitle] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const [pageStatus, setPageStatus] = useState(circlePageStatus.CIRCLE_LIST)
   const [circleGenerationStatus, setCircleGenerationStatus] = useState<ICircleGenerationStatus | null>(null)
   const [isLoadingCGenerationStatus, setIsLoadingCGenerationStatus] = useState(true)
   const [circleData, setCircleData] = useState(initialCircleData) // circle information for manual circle creation
   const [isGenesisPost, setIsGenesisPost] = useState(false)
-  const [commentData, setCommentData] = useState<string>('')
-  const [isOneClickCommenting, setIsOneClickCommenting] = useState<boolean>(false)
-  const [oneClickStatusMessage, setOneClickStatusMessage] = useState<string>('')
+  const [commentData, setCommentData] = useState('')
+  const [isOneClickCommenting, setIsOneClickCommenting] = useState(false)
+  const [oneClickStatusMessage, setOneClickStatusMessage] = useState('')
 
   const currentPageCircleIds = useMemo(
     () => circles.map((circle) => circle.id),

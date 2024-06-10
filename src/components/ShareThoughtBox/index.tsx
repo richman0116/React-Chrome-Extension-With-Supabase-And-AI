@@ -125,7 +125,6 @@ const ShareThoughtBox = () => {
 
   useEffect(() => {
     if (circleGenerationStatus?.type === 'direct') {
-      console.log('sssssssssss abc')
       setComment(commentData)
       setOneClickStatusMessage('Creating Circle...')
     }

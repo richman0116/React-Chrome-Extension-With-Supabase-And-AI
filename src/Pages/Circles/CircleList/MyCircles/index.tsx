@@ -88,10 +88,10 @@ const MyCircles = () => {
     }
   }, [isLoading, linkSectionItems])
 
-
-  useEffect(() => {
-    chrome.runtime.connect({name: "popup"})
-  },[])
+  // it's not needed right now but maybe later we will need to look at the content
+  // useEffect(() => {
+  //   chrome.runtime.connect({name: "popup"})
+  // },[])
 
   return (
     <div

@@ -636,7 +636,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === BJActions.CLAIM_CIRCLE) {
     if (supabaseUser) {
-      const contextMessage = request.context.length === 0 ? `I claimed ${request.url} for this circle` : `${request.context}\n${request.url}`;
+      const contextMessage = request.context ? `${request.context}\n${request.url}` : `I claimed ${request.url} for this circle`;
 
       supabase
         .rpc('circles_claim_circle', {

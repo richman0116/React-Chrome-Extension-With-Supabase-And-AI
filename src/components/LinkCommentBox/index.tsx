@@ -32,6 +32,7 @@ const LinkCommentBox = ({circle, isCheckingIfSentComment, setIsCheckingIfSentCom
           chrome.runtime.sendMessage({ action: BJActions.SAVE_LINK_STATUS_TO_STORAGE, url: currentUrl, circleId: circle.id, status: 'post' }, (res) => {
             if (res) {
               if (res.error) {
+                setErrorMessage(res.error)
                 console.log(res.error)
               }
               else {

@@ -636,9 +636,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === BJActions.CLAIM_CIRCLE) {
     if (supabaseUser) {
+      const contextMessage = request.context.length === 0 ? `I claimed ${request.url} for this circle` : `${request.context}\n${request.url}`;
+
       supabase
         .rpc('circles_claim_circle', {
-          context: `${request.context}\n ${request.url}`,
+          context: contextMessage,
           p_url: request.url,
           circle_id: request.circleId,
         })
@@ -806,7 +808,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const autoLength = Object.keys(auto).length
         const manualLength = Object.keys(manual).length
-        const directLength = Object.keys(direct).length
+        // const directLength = Object.keys(direct).length
 
         if (direct.type === 'direct') {
           sendResponse(direct)
@@ -1072,47 +1074,48 @@ chrome.tabs.onActivated.addListener((actveInfo) => {
   })
 })
 
-chrome.runtime.onConnect.addListener(function (port) {
-  if (port.name === 'popup') {
-    port.onDisconnect.addListener(async function () {
-      if (!supabaseUser) {
-        console.log('Supabase user is not authenticated.')
-        return
-      }
+// it's not needed right now but maybe later we will need to look at the content
+// chrome.runtime.onConnect.addListener(function (port) {
+//   if (port.name === 'popup') {
+//     port.onDisconnect.addListener(async function () {
+//       if (!supabaseUser) {
+//         console.log('Supabase user is not authenticated.')
+//         return
+//       }
 
-      try {
-        const urlForLink = await getFromStorage('urlForLink')
-        if (!urlForLink) {
-          console.log("Failed to retrieve 'urlForLink'.")
-          return
-        }
-        removeItemFromStorage('urlForLink')
+//       try {
+//         const urlForLink = await getFromStorage('urlForLink')
+//         if (!urlForLink) {
+//           console.log("Failed to retrieve 'urlForLink'.")
+//           return
+//         }
+//         removeItemFromStorage('urlForLink')
 
-        const circleIdForLink = await getFromStorage('circleIdForLink')
-        if (!circleIdForLink) {
-          console.log("Failed to retrieve 'circleIdForLink'.")
-          return
-        }
-        removeItemFromStorage('circleIdForLink')
+//         const circleIdForLink = await getFromStorage('circleIdForLink')
+//         if (!circleIdForLink) {
+//           console.log("Failed to retrieve 'circleIdForLink'.")
+//           return
+//         }
+//         removeItemFromStorage('circleIdForLink')
 
-        const result = await getFromStorage(circleIdForLink)
-        if (result !== 'default') {
-          console.log(`Expected value 'default' but got ${result}.`)
-          return
-        }
+//         const result = await getFromStorage(circleIdForLink)
+//         if (result !== 'default') {
+//           console.log(`Expected value 'default' but got ${result}.`)
+//           return
+//         }
 
-        console.log('RPC function is about to be invoked.')
-        await supabase.rpc('circles_claim_circle', {
-          context: `I claimed ${urlForLink} for this circle`,
-          p_url: urlForLink,
-          circle_id: circleIdForLink,
-        })
-        console.log('RPC function was successfully invoked!')
+//         console.log('RPC function is about to be invoked.')
+//         await supabase.rpc('circles_claim_circle', {
+//           context: `I claimed ${urlForLink} for this circle`,
+//           p_url: urlForLink,
+//           circle_id: circleIdForLink,
+//         })
+//         console.log('RPC function was successfully invoked!')
 
-        removeItemFromStorage(circleIdForLink)
-      } catch (error) {
-        console.log('An error occurred during the RPC call:', error)
-      }
-    })
-  }
-})
+//         removeItemFromStorage(circleIdForLink)
+//       } catch (error) {
+//         console.log('An error occurred during the RPC call:', error)
+//       }
+//     })
+//   }
+// })

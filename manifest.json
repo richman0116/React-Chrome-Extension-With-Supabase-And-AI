@@ -5,7 +5,7 @@
   "description": "Chrome extension for Eden",
   "action": {
     "default_popup": "js/index.html",
-    "default_title": "React Chrome Extension"
+    "default_title": "Eden AI Extension"
   },
   "icons": {
     "128": "icon-128.png",

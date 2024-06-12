@@ -22,52 +22,47 @@ const LinkCommentBox = ({circle, isCheckingIfSentComment, setIsCheckingIfSentCom
   const { getCircles, currentUrl } = useCircleContext()
 
   const handleSendIconClick = useCallback(() => {
-    if (comment.length > 0) {
-      setIsCheckingIfSentComment(true)
-      chrome.runtime.sendMessage({ action: BJActions.CLAIM_CIRCLE, context: comment, circleId: circle.id, url: currentUrl }, (response) => {
-        if (response) {
-          if (response.error) {
-            setErrorMessage(response.error)
-          }
-          else {
-            chrome.runtime.sendMessage({ action: BJActions.SAVE_LINK_STATUS_TO_STORAGE, url: currentUrl, circleId: circle.id, status: 'post' }, (res) => {
-              if (res) {
-                if (res.error) {
-                  console.log(res.error)
-                }
-                else {
-                  chrome.runtime.sendMessage({ action: BJActions.REMOVE_DATA_FOR_LINK }, (res) => {
-                    if (res.error) {
-                      console.log(res.error)                      
-                    }
-                    else {
-                      setComment('')
-                      setStatusMessage('done!');
-                      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                        const url = tabs[0].url
-                        chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
-                          if (response.message) console.log(response.message)
-                          else console.log(response.error)
-                        })
-                      })
-                      setTimeout(() => {
-                        getCircles()
-                        setStatusMessage('');
-                        setIsShowingLinkCommentBox(false)
-                        setActiveIndex(-1);
-                      }, 1500);
-                    }
-                  })
-                }
-              }
-            })
-          }
+    setIsCheckingIfSentComment(true)
+    chrome.runtime.sendMessage({ action: BJActions.CLAIM_CIRCLE, context: comment, circleId: circle.id, url: currentUrl }, (response) => {
+      if (response) {
+        if (response.error) {
+          setErrorMessage(response.error)
         }
-      })
-    }
-    else {
-      setErrorMessage('Please input your thought.')
-    } 
+        else {
+          chrome.runtime.sendMessage({ action: BJActions.SAVE_LINK_STATUS_TO_STORAGE, url: currentUrl, circleId: circle.id, status: 'post' }, (res) => {
+            if (res) {
+              if (res.error) {
+                console.log(res.error)
+              }
+              else {
+                chrome.runtime.sendMessage({ action: BJActions.REMOVE_DATA_FOR_LINK }, (res) => {
+                  if (res.error) {
+                    console.log(res.error)                      
+                  }
+                  else {
+                    setComment('')
+                    setStatusMessage('done!');
+                    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                      const url = tabs[0].url
+                      chrome.runtime.sendMessage({ action: BJActions.SHOW_CIRCLE_COUNT, url }, (response) => {
+                        if (response.message) console.log(response.message)
+                        else console.log(response.error)
+                      })
+                    })
+                    setTimeout(() => {
+                      getCircles()
+                      setStatusMessage('');
+                      setIsShowingLinkCommentBox(false)
+                      setActiveIndex(-1);
+                    }, 1500);
+                  }
+                })
+              }
+            }
+          })
+        }
+      }
+    })
   },[circle.id, comment, currentUrl, getCircles, setActiveIndex, setIsCheckingIfSentComment, setIsShowingLinkCommentBox])
 
   const onClose = useCallback(() => {
